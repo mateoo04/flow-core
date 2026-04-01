@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "bash": "mkdir -p .github/hooks && INPUT=$(cat) && printf '%s\n' \"$INPUT\" >> .github/hooks/agent_log.jsonl",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "mkdir -p .github/hooks && INPUT=$(cat) && printf '%s\n' \"$INPUT\" >> .github/hooks/agent_log.jsonl",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

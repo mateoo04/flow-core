@@ -1,0 +1,38 @@
+## Build
+bin/
+obj/
+/packages/
+out/
+
+## .NET / MSBuild
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.rsuser
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Visual Studio / VS Code
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+## Rider / IntelliJ
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+riderModule.iml
+/_ReSharper.Caches/
+
+## macOS / OS
+.DS_Store
+
+## Cursor (local agent / editor state)
+.cursor/
