@@ -33,6 +33,3 @@ riderModule.iml
 
 ## macOS / OS
 .DS_Store
-
-## Cursor (local agent / editor state)
-.cursor/
