@@ -2,27 +2,22 @@
 @{
     ViewData["Title"] = "Comments";
 }
-<h1 class="text-2xl font-bold text-gray-900">Comments</h1>
-<table class="mt-4 w-full border-collapse border border-gray-200 text-left text-sm">
-    <thead class="bg-gray-50">
-    <tr>
-        <th class="border-b border-gray-200 px-3 py-2">When</th>
-        <th class="border-b border-gray-200 px-3 py-2">Author task</th>
-        <th class="border-b border-gray-200 px-3 py-2">Preview</th>
-    </tr>
-    </thead>
-    <tbody>
+<h1 class="text-3xl font-bold tracking-tight text-fg">Comments</h1>
+<p class="mt-2 text-fg-secondary">Activity feed (read-only).</p>
+
+<div class="mt-8 flex flex-col gap-4">
     @foreach (var row in Model)
     {
-        <tr class="border-b border-gray-100">
-            <td class="px-3 py-2">@row.CreatedAt.ToString("u")</td>
-            <td class="px-3 py-2">
-                <a class="text-indigo-600 hover:underline" asp-controller="Comments" asp-action="Details" asp-route-id="@row.Id">@row.AuthorName</a>
-                <span class="text-gray-500"> · </span>
-                <a class="text-indigo-600 hover:underline" asp-controller="Tasks" asp-action="Details" asp-route-id="@row.TaskItemId">Task</a>
-            </td>
-            <td class="px-3 py-2 max-w-md">@row.BodyPreview</td>
-        </tr>
+        <article class="rounded-xl border border-fg-muted/10 bg-card p-4 shadow-card">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-fg-muted">
+                <span class="font-medium text-fg-secondary">@row.AuthorName</span>
+                <time datetime="@row.CreatedAt.ToString("O")">@row.CreatedAt.ToString("g")</time>
+            </div>
+            <p class="mt-2 text-sm text-fg-secondary">@row.BodyPreview</p>
+            <div class="mt-3 flex flex-wrap gap-3 text-xs">
+                <a class="text-brand hover:text-fg" asp-controller="Comments" asp-action="Details" asp-route-id="@row.Id">Open</a>
+                <a class="text-brand hover:text-fg" asp-controller="Tasks" asp-action="Details" asp-route-id="@row.TaskItemId">Task</a>
+            </div>
+        </article>
     }
-    </tbody>
-</table>
+</div>

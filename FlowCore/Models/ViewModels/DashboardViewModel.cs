@@ -9,6 +9,7 @@ public sealed class DashboardViewModel
     public int TagCount { get; init; }
     public int HotTaskCount { get; init; }
     public IReadOnlyList<(string StatusName, int Count)> TasksByStatus { get; init; } = Array.Empty<(string, int)>();
-    public IReadOnlyList<(string WorkspaceName, string ProjectKey, string ProjectName, int TaskCount)> TopProjectsByTasks { get; init; } =
-        Array.Empty<(string, string, string, int)>();
+    public IReadOnlyList<(Guid ProjectId, string WorkspaceName, string ProjectKey, string ProjectName, int TaskCount)>
+        TopProjectsByTasks { get; init; } =
+        Array.Empty<(Guid, string, string, string, int)>();
 }

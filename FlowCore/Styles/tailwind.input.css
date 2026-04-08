@@ -1,2 +1,25 @@
 @import "tailwindcss";
 @source "../Views/**/*.cshtml";
+
+/* Semantic tokens (FlowCore UX agent) — utilities: bg-app, bg-card, text-fg, text-brand, … */
+@theme {
+  --color-app: #0f172a;
+  --color-card: #111827;
+  --color-raised: #1f2937;
+  --color-fg: #e5e7eb;
+  --color-fg-secondary: #9ca3af;
+  --color-fg-muted: #6b7280;
+  --color-brand: #6366f1;
+  --color-brand-success: #22c55e;
+  --color-brand-warn: #f59e0b;
+  --color-danger: #ef4444;
+  --color-success: #10b981;
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.35);
+  --shadow-soft: 0 4px 24px -4px rgb(0 0 0 / 0.45);
+}
+
+@layer base {
+  body {
+    @apply bg-app text-fg antialiased;
+  }
+}

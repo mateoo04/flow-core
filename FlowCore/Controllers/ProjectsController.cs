@@ -25,12 +25,16 @@ public class ProjectsController : BaseController
             .Select(p => new ProjectListRow(p.Id, p.Key, p.Name, p.WorkspaceId, p.Status))
             .ToList();
         ViewBag.FilterWorkspaceId = workspaceId;
+        if (workspaceId is { } w)
+            SetNav(w);
         return View(rows);
     }
 
     public IActionResult Details(Guid id)
     {
         var entity = _projects.GetById(id);
+        if (entity is not null)
+            SetNav(entity.WorkspaceId, entity.Id);
         return ViewDetails(entity, _breadcrumbs.ForProject);
     }
 }

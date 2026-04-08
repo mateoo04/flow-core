@@ -15,67 +15,44 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="892450da-da18-4736-82e4-454a8c8bedf3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.cursor/logs/agent_log.jsonl" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.cursor/logs/agent_log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/logs/agent_log.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.cursor/logs/hook-events.jsonl" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/logs/hook-events.jsonl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.FlowCore/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.FlowCore/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/BaseController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/BaseController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/BoardColumnsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/BoardColumnsController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/BoardsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/BoardsController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/HomeController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/HomeController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Data/DemoDataBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Data/DemoDataBuilder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/ProjectsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/ProjectsController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/TaskStatusDefinitionsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/TaskStatusDefinitionsController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/TasksController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/TasksController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/WorkspacesController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/WorkspacesController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Data/DemoDataLinqExamples.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Data/DemoDataLinqExamples.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Models/ViewModels/DashboardViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Models/ViewModels/DashboardViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Styles/tailwind.input.css" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Styles/tailwind.input.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/BoardColumns/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/BoardColumns/Details.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/BoardColumns/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/BoardColumns/Index.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Boards/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Boards/Details.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Boards/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Boards/Index.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Comments/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Comments/Details.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Comments/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Comments/Index.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Home/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Home/Index.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Home/Privacy.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Home/Privacy.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Projects/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Projects/Details.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Projects/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Projects/Index.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Shared/Error.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Shared/Error.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Shared/_Breadcrumbs.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Shared/_Breadcrumbs.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Shared/_Layout.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Shared/_Layout.cshtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Shared/_Layout.cshtml.css" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Shared/_Layout.cshtml.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Views/_ViewImports.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/_ViewImports.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Tags/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Tags/Details.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Tags/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Tags/Index.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/TaskStatusDefinitions/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/TaskStatusDefinitions/Details.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/TaskStatusDefinitions/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/TaskStatusDefinitions/Index.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Tasks/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Tasks/Details.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Tasks/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Tasks/Index.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Users/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Users/Details.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Users/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Users/Index.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Workspaces/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Workspaces/Details.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Workspaces/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Workspaces/Index.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/css/site.css" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/wwwroot/css/site.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.min.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.min.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.min.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap.min.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.min.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.min.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.min.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.min.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/lib/bootstrap/dist/js/bootstrap.min.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/css/tailwind.css" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/wwwroot/css/tailwind.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -169,7 +146,7 @@
       <workItem from="1774980944211" duration="3834000" />
       <workItem from="1775053911619" duration="2225000" />
       <workItem from="1775217772140" duration="7952000" />
-      <workItem from="1775668205267" duration="559000" />
+      <workItem from="1775668205267" duration="1286000" />
     </task>
     <servers />
   </component>

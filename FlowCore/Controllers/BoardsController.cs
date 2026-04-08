@@ -27,6 +27,8 @@ public class BoardsController : BaseController
     public IActionResult Details(Guid id)
     {
         var entity = _boards.GetById(id);
+        if (entity?.Project is not null)
+            SetNav(entity.Project.WorkspaceId, entity.ProjectId);
         return ViewDetails(entity, _breadcrumbs.ForBoard);
     }
 }

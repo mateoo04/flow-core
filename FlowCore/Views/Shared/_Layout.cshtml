@@ -1,3 +1,15 @@
+@using FlowCore.Repositories
+@inject IWorkspaceRepository WorkspaceRepo
+@inject IProjectRepository ProjectRepo
+@{
+    var workspaces = WorkspaceRepo.GetAll().ToList();
+    var allProjects = ProjectRepo.GetAll().ToList();
+    var activeWs = ViewData["ActiveWorkspaceId"] as Guid?;
+    var activeProject = ViewData["ActiveProjectId"] as Guid?;
+    var sidebarProjects = activeWs is { } w
+        ? allProjects.Where(p => p.WorkspaceId == w).OrderBy(p => p.Key).Take(12).ToList()
+        : allProjects.OrderBy(p => p.Key).Take(8).ToList();
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,63 +20,82 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/FlowCore.styles.css" asp-append-version="true"/>
 </head>
-<body class="flex min-h-screen flex-col bg-white text-gray-900 antialiased">
-<header class="border-b border-gray-200 bg-white">
-    <nav class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-3">
-        <a class="text-lg font-semibold tracking-tight text-gray-900 no-underline hover:text-gray-600"
-           asp-area="" asp-controller="Home" asp-action="Index">FlowCore</a>
-        <ul class="m-0 flex list-none flex-wrap items-center gap-4 p-0 text-sm">
-            <li>
-                <a class="text-gray-600 no-underline hover:text-gray-900" asp-controller="Home" asp-action="Index">Dashboard</a>
-            </li>
-            <li>
-                <a class="text-gray-600 no-underline hover:text-gray-900" asp-controller="Workspaces" asp-action="Index">Workspaces</a>
-            </li>
-            <li>
-                <a class="text-gray-600 no-underline hover:text-gray-900" asp-controller="Projects" asp-action="Index">Projects</a>
-            </li>
-            <li>
-                <a class="text-gray-600 no-underline hover:text-gray-900" asp-controller="Tasks" asp-action="Index">Tasks</a>
-            </li>
-            <li>
-                <a class="text-gray-600 no-underline hover:text-gray-900" asp-controller="Users" asp-action="Index">Users</a>
-            </li>
-            <li>
-                <a class="text-gray-600 no-underline hover:text-gray-900" asp-controller="Tags" asp-action="Index">Tags</a>
-            </li>
-            <li>
-                <a class="text-gray-600 no-underline hover:text-gray-900" asp-controller="Boards" asp-action="Index">Boards</a>
-            </li>
-            <li>
-                <a class="text-gray-600 no-underline hover:text-gray-900" asp-controller="BoardColumns" asp-action="Index">Columns</a>
-            </li>
-            <li>
-                <a class="text-gray-600 no-underline hover:text-gray-900" asp-controller="TaskStatusDefinitions" asp-action="Index">Statuses</a>
-            </li>
-            <li>
-                <a class="text-gray-600 no-underline hover:text-gray-900" asp-controller="Comments" asp-action="Index">Comments</a>
-            </li>
-            <li>
-                <a class="text-gray-600 no-underline hover:text-gray-900" asp-controller="Home" asp-action="Privacy">Privacy</a>
-            </li>
-        </ul>
-    </nav>
-</header>
+<body class="flex min-h-screen flex-col bg-app text-fg antialiased">
+<div class="flex min-h-screen flex-1">
+    <aside class="flex w-64 shrink-0 flex-col border-r border-fg-muted/15 bg-card shadow-soft">
+        <div class="border-b border-fg-muted/15 p-4">
+            <a class="text-lg font-semibold tracking-tight text-fg no-underline transition-colors hover:text-brand"
+               asp-controller="Home" asp-action="Index">FlowCore</a>
+            <p class="mt-1 text-xs text-fg-muted">Project workspace</p>
+        </div>
 
-<main class="flex flex-1 flex-col">
-    <div class="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
-        <partial name="_Breadcrumbs"/>
-        @RenderBody()
-    </div>
-</main>
+        <nav class="flex flex-1 flex-col gap-1 overflow-y-auto p-3 text-sm" aria-label="Main">
+            <a class="rounded-lg px-3 py-2 font-medium text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "bg-raised text-fg" : "")"
+               asp-controller="Home" asp-action="Index">Dashboard</a>
 
-<footer class="border-t border-gray-200 py-6 text-sm text-gray-500">
-    <div class="mx-auto max-w-5xl px-4">
-        &copy; 2026 - FlowCore —
-        <a class="text-gray-600 underline decoration-gray-300 underline-offset-2 hover:text-gray-900"
-           asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <p class="mt-3 px-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">Workspaces</p>
+            @foreach (var ws in workspaces)
+            {
+                var wsActive = activeWs == ws.Id;
+                <a class="block rounded-lg border-l-2 py-2 pl-3 pr-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(wsActive ? "border-brand bg-raised text-fg" : "border-transparent")"
+                   asp-controller="Workspaces" asp-action="Details" asp-route-id="@ws.Id">@ws.Name</a>
+            }
+            <a class="mt-1 rounded-lg px-3 py-2 text-xs text-fg-muted transition-colors hover:bg-raised hover:text-fg-secondary"
+               asp-controller="Workspaces" asp-action="Index">All workspaces…</a>
+
+            <p class="mt-4 px-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">Projects</p>
+            <a class="rounded-lg px-3 py-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "bg-raised text-fg" : "")"
+               asp-controller="Projects" asp-action="Index">All projects</a>
+            @foreach (var p in sidebarProjects)
+            {
+                var pActive = activeProject == p.Id;
+                <a class="block truncate rounded-lg border-l-2 py-1.5 pl-3 pr-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(pActive ? "border-brand bg-raised text-fg" : "border-transparent")"
+                   asp-controller="Projects" asp-action="Details" asp-route-id="@p.Id"
+                   title="@p.Name">@p.Key</a>
+            }
+
+            <p class="mt-4 px-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">Core</p>
+            <a class="rounded-lg px-3 py-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tasks" ? "bg-raised text-fg" : "")"
+               asp-controller="Tasks" asp-action="Index">Tasks</a>
+            <a class="rounded-lg px-3 py-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Comments" ? "bg-raised text-fg" : "")"
+               asp-controller="Comments" asp-action="Index">Comments</a>
+
+            <details class="mt-4 rounded-lg border border-fg-muted/20 bg-app/50 open:bg-raised/30">
+                <summary class="cursor-pointer list-none px-3 py-2 text-xs font-semibold uppercase tracking-wide text-fg-muted marker:content-none [&::-webkit-details-marker]:hidden">
+                    <span class="text-fg-secondary">More</span>
+                </summary>
+                <div class="flex flex-col gap-0.5 border-t border-fg-muted/15 p-2">
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary"
+                       asp-controller="Boards" asp-action="Index">Boards</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary"
+                       asp-controller="BoardColumns" asp-action="Index">Columns</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary"
+                       asp-controller="TaskStatusDefinitions" asp-action="Index">Statuses</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary"
+                       asp-controller="Users" asp-action="Index">Users</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary"
+                       asp-controller="Tags" asp-action="Index">Tags</a>
+                </div>
+            </details>
+        </nav>
+
+        <div class="mt-auto border-t border-fg-muted/15 p-3 text-xs text-fg-muted">
+            <a class="text-fg-secondary underline decoration-fg-muted/50 underline-offset-2 transition-colors hover:text-brand"
+               asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <span class="text-fg-muted"> · </span>
+            <span>&copy; 2026</span>
+        </div>
+    </aside>
+
+    <div class="flex min-w-0 flex-1 flex-col">
+        <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-6xl">
+                <partial name="_Breadcrumbs"/>
+                @RenderBody()
+            </div>
+        </main>
     </div>
-</footer>
+</div>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)

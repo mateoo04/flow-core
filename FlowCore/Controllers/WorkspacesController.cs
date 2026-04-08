@@ -27,6 +27,8 @@ public class WorkspacesController : BaseController
     public IActionResult Details(Guid id)
     {
         var entity = _workspaces.GetById(id);
+        if (entity is not null)
+            SetNav(entity.Id);
         return ViewDetails(entity, _breadcrumbs.ForWorkspace);
     }
 }

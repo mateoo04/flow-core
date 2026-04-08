@@ -32,6 +32,8 @@ public class TaskStatusDefinitionsController : BaseController
     public IActionResult Details(Guid id)
     {
         var entity = _statuses.GetById(id);
+        if (entity?.Project is not null)
+            SetNav(entity.Project.WorkspaceId, entity.ProjectId);
         return ViewDetails(entity, _breadcrumbs.ForTaskStatusDefinition);
     }
 }

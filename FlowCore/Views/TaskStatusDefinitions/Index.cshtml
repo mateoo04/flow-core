@@ -1,30 +1,44 @@
 @model IReadOnlyList<TaskStatusDefinitionListRow>
+@inject FlowCore.Repositories.IProjectRepository ProjectRepo
 @{
     ViewData["Title"] = "Task statuses";
 }
-<h1 class="text-2xl font-bold text-gray-900">Task statuses</h1>
-<table class="mt-4 w-full border-collapse border border-gray-200 text-left text-sm">
-    <thead class="bg-gray-50">
-    <tr>
-        <th class="border-b border-gray-200 px-3 py-2">Name</th>
-        <th class="border-b border-gray-200 px-3 py-2">Position</th>
-        <th class="border-b border-gray-200 px-3 py-2">Done</th>
-        <th class="border-b border-gray-200 px-3 py-2">Project</th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var row in Model)
+<h1 class="text-3xl font-bold tracking-tight text-fg">Task statuses</h1>
+<p class="mt-2 text-fg-secondary">Per-project workflow columns (definitions).</p>
+
+<div class="mt-8 space-y-10">
+    @foreach (var group in Model.GroupBy(r => r.ProjectId).OrderBy(g => ProjectRepo.GetById(g.Key)?.Key ?? ""))
     {
-        <tr class="border-b border-gray-100">
-            <td class="px-3 py-2">
-                <a class="text-indigo-600 hover:underline" asp-controller="TaskStatusDefinitions" asp-action="Details" asp-route-id="@row.Id">@row.Name</a>
-            </td>
-            <td class="px-3 py-2">@row.Position</td>
-            <td class="px-3 py-2">@row.IsDoneState</td>
-            <td class="px-3 py-2">
-                <a class="text-indigo-600 hover:underline" asp-controller="Projects" asp-action="Details" asp-route-id="@row.ProjectId">Project</a>
-            </td>
-        </tr>
+        var proj = ProjectRepo.GetById(group.Key);
+        <section>
+            <h2 class="flex flex-wrap items-center gap-2 text-lg font-semibold text-fg">
+                @if (proj is not null)
+                {
+                    <a class="text-brand hover:text-fg" asp-controller="Projects" asp-action="Details" asp-route-id="@proj.Id">@proj.Key</a>
+                    <span class="text-fg-muted font-normal">— @proj.Name</span>
+                }
+                else
+                {
+                    <span class="font-mono text-sm text-fg-muted">@group.Key</span>
+                }
+            </h2>
+            <div class="mt-4 flex flex-col gap-2">
+                @foreach (var row in group.OrderBy(r => r.Position))
+                {
+                    <a asp-controller="TaskStatusDefinitions" asp-action="Details" asp-route-id="@row.Id"
+                       class="flex items-center gap-3 rounded-xl border border-fg-muted/10 bg-card px-4 py-3 shadow-card transition-colors duration-150 hover:border-brand/30 hover:bg-raised">
+                        <span class="h-3 w-3 shrink-0 rounded-full border border-fg-muted/30" style="background-color: @row.ColorHex"></span>
+                        <div class="flex-1">
+                            <span class="font-medium text-fg">@row.Name</span>
+                            <span class="ml-2 text-xs text-fg-muted">pos @row.Position</span>
+                        </div>
+                        @if (row.IsDoneState)
+                        {
+                            <span class="rounded bg-success/15 px-2 py-0.5 text-xs text-success">Done</span>
+                        }
+                    </a>
+                }
+            </div>
+        </section>
     }
-    </tbody>
-</table>
+</div>

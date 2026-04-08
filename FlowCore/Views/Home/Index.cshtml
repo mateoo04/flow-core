@@ -1,59 +1,74 @@
 @model DashboardViewModel
 @{
     ViewData["Title"] = "Dashboard";
+    var maxStatus = Model.TasksByStatus.Count > 0 ? Model.TasksByStatus.Max(x => x.Count) : 1;
 }
-<h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-<p class="mt-2 text-sm text-gray-600">Mock data overview — browse entities via the nav.</p>
+<h1 class="text-3xl font-bold tracking-tight text-fg">Dashboard</h1>
+<p class="mt-2 max-w-2xl text-fg-secondary">Mock workspace overview — pick a workspace or project from the sidebar, or open a busy project below.</p>
 
-<section class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    <div class="rounded-lg border border-gray-200 p-4">
-        <div class="text-2xl font-semibold text-gray-900">@Model.WorkspaceCount</div>
-        <div class="text-sm text-gray-500"><a class="text-indigo-600 hover:underline" asp-controller="Workspaces" asp-action="Index">Workspaces</a></div>
-    </div>
-    <div class="rounded-lg border border-gray-200 p-4">
-        <div class="text-2xl font-semibold text-gray-900">@Model.ProjectCount</div>
-        <div class="text-sm text-gray-500"><a class="text-indigo-600 hover:underline" asp-controller="Projects" asp-action="Index">Projects</a></div>
-    </div>
-    <div class="rounded-lg border border-gray-200 p-4">
-        <div class="text-2xl font-semibold text-gray-900">@Model.TaskCount</div>
-        <div class="text-sm text-gray-500"><a class="text-indigo-600 hover:underline" asp-controller="Tasks" asp-action="Index">Tasks</a></div>
-    </div>
-    <div class="rounded-lg border border-gray-200 p-4">
-        <div class="text-2xl font-semibold text-gray-900">@Model.HotTaskCount</div>
-        <div class="text-sm text-gray-500">Hot tasks (High / Urgent)</div>
+<section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <a asp-controller="Workspaces" asp-action="Index"
+       class="rounded-xl bg-card p-5 shadow-card transition-colors duration-150 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+        <div class="text-3xl font-semibold tabular-nums text-fg">@Model.WorkspaceCount</div>
+        <div class="mt-1 text-sm text-fg-muted">Workspaces</div>
+    </a>
+    <a asp-controller="Projects" asp-action="Index"
+       class="rounded-xl bg-card p-5 shadow-card transition-colors duration-150 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+        <div class="text-3xl font-semibold tabular-nums text-fg">@Model.ProjectCount</div>
+        <div class="mt-1 text-sm text-fg-muted">Projects</div>
+    </a>
+    <a asp-controller="Tasks" asp-action="Index"
+       class="rounded-xl bg-card p-5 shadow-card transition-colors duration-150 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+        <div class="text-3xl font-semibold tabular-nums text-fg">@Model.TaskCount</div>
+        <div class="mt-1 text-sm text-fg-muted">Tasks</div>
+    </a>
+    <div class="rounded-xl bg-card p-5 shadow-card">
+        <div class="text-3xl font-semibold tabular-nums text-brand-warn">@Model.HotTaskCount</div>
+        <div class="mt-1 text-sm text-fg-muted">Hot tasks (High / Urgent)</div>
     </div>
 </section>
 
-<section class="mt-8">
-    <h2 class="text-lg font-semibold text-gray-900">Tasks by status</h2>
-    <ul class="mt-2 list-inside list-disc text-sm text-gray-700">
+<section class="mt-10">
+    <h2 class="text-lg font-semibold text-fg">Tasks by status</h2>
+    <div class="mt-4 flex flex-col gap-3">
         @foreach (var row in Model.TasksByStatus)
         {
-            <li>@row.StatusName: @row.Count</li>
+            var pct = maxStatus > 0 ? (int)Math.Round(100.0 * row.Count / maxStatus) : 0;
+            <div class="rounded-xl bg-card px-4 py-3 shadow-card">
+                <div class="flex items-center justify-between gap-4 text-sm">
+                    <span class="font-medium text-fg">@row.StatusName</span>
+                    <span class="tabular-nums text-fg-secondary">@row.Count</span>
+                </div>
+                <div class="mt-2 h-2 overflow-hidden rounded-full bg-raised">
+                    <div class="h-full rounded-full bg-brand transition-all" style="width: @(pct)%"></div>
+                </div>
+            </div>
         }
-    </ul>
+    </div>
 </section>
 
-<section class="mt-8">
-    <h2 class="text-lg font-semibold text-gray-900">Busiest projects</h2>
-    <ol class="mt-2 list-inside list-decimal text-sm text-gray-700">
+<section class="mt-10">
+    <h2 class="text-lg font-semibold text-fg">Busiest projects</h2>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
         @foreach (var row in Model.TopProjectsByTasks)
         {
-            <li>@row.WorkspaceName / <span class="font-mono">@row.ProjectKey</span> — @row.ProjectName (@row.TaskCount tasks)</li>
+            <a asp-controller="Projects" asp-action="Details" asp-route-id="@row.ProjectId"
+               class="group rounded-xl border border-fg-muted/10 bg-card p-4 shadow-card transition-colors duration-150 hover:border-brand/40 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+                <div class="font-mono text-xs text-brand">@row.ProjectKey</div>
+                <div class="mt-1 font-medium text-fg">@row.ProjectName</div>
+                <div class="mt-2 text-sm text-fg-muted">@row.WorkspaceName</div>
+                <div class="mt-3 text-sm text-fg-secondary">@row.TaskCount tasks</div>
+            </a>
         }
-    </ol>
+    </div>
 </section>
 
-<section class="mt-8 flex flex-wrap gap-4 text-sm">
-    <a class="text-indigo-600 hover:underline" asp-controller="Users" asp-action="Index">Users</a>
-    <span class="text-gray-300">|</span>
-    <a class="text-indigo-600 hover:underline" asp-controller="Tags" asp-action="Index">Tags</a>
-    <span class="text-gray-300">|</span>
-    <a class="text-indigo-600 hover:underline" asp-controller="Boards" asp-action="Index">Boards</a>
-    <span class="text-gray-300">|</span>
-    <a class="text-indigo-600 hover:underline" asp-controller="BoardColumns" asp-action="Index">Columns</a>
-    <span class="text-gray-300">|</span>
-    <a class="text-indigo-600 hover:underline" asp-controller="TaskStatusDefinitions" asp-action="Index">Statuses</a>
-    <span class="text-gray-300">|</span>
-    <a class="text-indigo-600 hover:underline" asp-controller="Comments" asp-action="Index">Comments</a>
+<section class="mt-10 flex flex-wrap gap-x-4 gap-y-2 text-sm text-fg-muted">
+    <span class="text-fg-secondary">More:</span>
+    <a class="text-brand transition-colors hover:text-fg" asp-controller="Users" asp-action="Index">Users</a>
+    <a class="text-brand transition-colors hover:text-fg" asp-controller="Tags" asp-action="Index">Tags</a>
+    <a class="text-brand transition-colors hover:text-fg" asp-controller="Boards" asp-action="Index">Boards</a>
+    <a class="text-brand transition-colors hover:text-fg" asp-controller="BoardColumns" asp-action="Index">Columns</a>
+    <a class="text-brand transition-colors hover:text-fg" asp-controller="TaskStatusDefinitions" asp-action="Index">Statuses</a>
+    <a class="text-brand transition-colors hover:text-fg" asp-controller="Comments" asp-action="Index">Comments</a>
 </section>

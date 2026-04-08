@@ -1,9 +1,9 @@
-/* Small app-level tweaks; layout and utilities live in Tailwind. */
+/* App tweaks; semantic colors come from Tailwind @theme. */
 html {
   font-size: 16px;
 }
 
 a:focus-visible {
-  outline: 2px solid currentColor;
+  outline: 2px solid #6366f1;
   outline-offset: 2px;
 }

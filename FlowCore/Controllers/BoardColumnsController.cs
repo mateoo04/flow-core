@@ -29,6 +29,9 @@ public class BoardColumnsController : BaseController
     public IActionResult Details(Guid id)
     {
         var entity = _columns.GetById(id);
+        var project = entity?.Board?.Project;
+        if (project is not null)
+            SetNav(project.WorkspaceId, project.Id);
         return ViewDetails(entity, _breadcrumbs.ForBoardColumn);
     }
 }

@@ -1,20 +1,23 @@
-@model BoardColumn
+@model FlowCore.Models.BoardColumn
 @{
     ViewData["Title"] = Model.Name;
 }
-<h1 class="text-2xl font-bold text-gray-900">@Model.Name</h1>
-<dl class="mt-4 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
-    <dt class="text-gray-500">Board</dt>
+<h1 class="text-2xl font-bold text-fg">@Model.Name</h1>
+<dl class="mt-6 grid gap-3 text-sm sm:grid-cols-[8rem_1fr]">
+    <dt class="text-fg-muted">Board</dt>
     <dd>
-        <a class="text-indigo-600 hover:underline" asp-controller="Boards" asp-action="Details" asp-route-id="@Model.BoardId">Open board</a>
+        <a class="text-brand hover:text-fg" asp-controller="Boards" asp-action="Details" asp-route-id="@Model.BoardId">Open board</a>
     </dd>
-    <dt class="text-gray-500">WIP limit</dt><dd>@Model.WipLimit</dd>
-    <dt class="text-gray-500">Tasks</dt>
+    <dt class="text-fg-muted">WIP limit</dt><dd class="text-fg-secondary">@Model.WipLimit</dd>
+    <dt class="text-fg-muted">Tasks</dt>
     <dd>
-        <ul class="m-0 list-disc ps-5">
+        <ul class="m-0 list-none space-y-2 p-0">
             @foreach (var t in Model.Tasks.OrderBy(x => x.Title))
             {
-                <li><a class="text-indigo-600 hover:underline" asp-controller="Tasks" asp-action="Details" asp-route-id="@t.Id">@t.Title</a></li>
+                <li>
+                    <a class="block rounded-lg border border-fg-muted/15 px-3 py-2 text-brand transition-colors hover:border-brand/40 hover:bg-raised"
+                       asp-controller="Tasks" asp-action="Details" asp-route-id="@t.Id">@t.Title</a>
+                </li>
             }
         </ul>
     </dd>
