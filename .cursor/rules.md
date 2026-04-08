@@ -1,0 +1,1 @@
+Do not build or run the FlowCore .NET project; the user runs it in Rider

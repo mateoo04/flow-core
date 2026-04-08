@@ -1,0 +1,15 @@
+@model Workspace
+@{
+    ViewData["Title"] = Model.Name;
+}
+<h1 class="text-2xl font-bold text-gray-900">@Model.Name</h1>
+<dl class="mt-4 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
+    <dt class="text-gray-500">Id</dt><dd class="font-mono text-xs">@Model.Id</dd>
+    <dt class="text-gray-500">Description</dt><dd>@Model.Description</dd>
+    <dt class="text-gray-500">Visibility</dt><dd>@Model.Visibility</dd>
+    <dt class="text-gray-500">Created</dt><dd>@Model.CreatedAt.ToString("u")</dd>
+    <dt class="text-gray-500">Projects</dt>
+    <dd>
+        <a class="text-indigo-600 hover:underline" asp-controller="Projects" asp-action="Index" asp-route-workspaceId="@Model.Id">List (@Model.Projects.Count)</a>
+    </dd>
+</dl>

@@ -1,0 +1,13 @@
+@model TaskStatusDefinition
+@{
+    ViewData["Title"] = Model.Name;
+}
+<h1 class="text-2xl font-bold text-gray-900">@Model.Name</h1>
+<dl class="mt-4 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
+    <dt class="text-gray-500">Color</dt><dd class="font-mono">@Model.ColorHex</dd>
+    <dt class="text-gray-500">Project</dt>
+    <dd>
+        <a class="text-indigo-600 hover:underline" asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">Open project</a>
+    </dd>
+    <dt class="text-gray-500">Tasks using status</dt><dd>@Model.TaskItems.Count</dd>
+</dl>

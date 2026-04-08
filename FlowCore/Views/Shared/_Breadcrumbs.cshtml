@@ -1,0 +1,29 @@
+@using FlowCore.Models.ViewModels
+@{
+    var crumbs = ViewBag.Breadcrumbs as IReadOnlyList<BreadcrumbItem>;
+}
+@if (crumbs is { Count: > 0 })
+{
+    <nav aria-label="Breadcrumb" class="mb-6 text-sm text-gray-600">
+        <ol class="m-0 flex list-none flex-wrap items-center gap-2 p-0">
+            @for (var i = 0; i < crumbs.Count; i++)
+            {
+                var c = crumbs[i];
+                <li class="flex items-center gap-2">
+                    @if (i > 0)
+                    {
+                        <span class="select-none text-gray-300">/</span>
+                    }
+                    @if (c.Url is { } url)
+                    {
+                        <a class="text-indigo-600 no-underline hover:underline" href="@url">@c.Text</a>
+                    }
+                    else
+                    {
+                        <span class="font-medium text-gray-900">@c.Text</span>
+                    }
+                </li>
+            }
+        </ol>
+    </nav>
+}

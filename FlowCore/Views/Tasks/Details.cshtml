@@ -1,0 +1,45 @@
+@model TaskItem
+@{
+    ViewData["Title"] = Model.Title;
+}
+<h1 class="text-2xl font-bold text-gray-900">@Model.Title</h1>
+<dl class="mt-4 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
+    <dt class="text-gray-500">Column</dt>
+    <dd>
+        <a class="text-indigo-600 hover:underline" asp-controller="BoardColumns" asp-action="Details" asp-route-id="@Model.BoardColumnId">Open column</a>
+    </dd>
+    <dt class="text-gray-500">Status</dt><dd>@Model.TaskStatusDefinition?.Name</dd>
+    <dt class="text-gray-500">Priority</dt><dd>@Model.Priority</dd>
+    <dt class="text-gray-500">Story points</dt><dd>@Model.StoryPoints</dd>
+    <dt class="text-gray-500">Description</dt><dd class="whitespace-pre-wrap">@Model.Description</dd>
+    @if (Model.ParentTaskItemId is { } pp)
+    {
+        <dt class="text-gray-500">Parent task</dt>
+        <dd><a class="text-indigo-600 hover:underline" asp-controller="Tasks" asp-action="Details" asp-route-id="@pp">Open parent</a></dd>
+    }
+    @if (Model.Subtasks.Count > 0)
+    {
+        <dt class="text-gray-500">Subtasks</dt>
+        <dd>
+            <ul class="m-0 list-disc ps-5">
+                @foreach (var s in Model.Subtasks)
+                {
+                    <li><a class="text-indigo-600 hover:underline" asp-controller="Tasks" asp-action="Details" asp-route-id="@s.Id">@s.Title</a></li>
+                }
+            </ul>
+        </dd>
+    }
+    @if (Model.Comments.Count > 0)
+    {
+        <dt class="text-gray-500">Comments</dt>
+        <dd>
+            <ul class="m-0 list-disc ps-5">
+                @foreach (var c in Model.Comments.OrderBy(x => x.CreatedAt))
+                {
+                    var preview = c.Body.Length <= 48 ? c.Body : string.Concat(c.Body.AsSpan(0, 48), "…");
+                    <li><a class="text-indigo-600 hover:underline" asp-controller="Comments" asp-action="Details" asp-route-id="@c.Id">@preview</a></li>
+                }
+            </ul>
+        </dd>
+    }
+</dl>

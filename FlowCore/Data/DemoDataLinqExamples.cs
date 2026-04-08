@@ -55,7 +55,7 @@ public static class DemoDataLinqExamples
     public static IEnumerable<(string TaskTitle, string AssigneeName)> TaskTitlesWithAssignees(
         IEnumerable<Workspace> workspaces,
         IEnumerable<User> users) =>
-        from task in AllTasks(workspaces)
+        from task in AllTasks(workspaces) 
         from assignment in task.TaskAssignments
         join user in users on assignment.UserId equals user.Id
         where assignment.Role == TaskRole.Assignee

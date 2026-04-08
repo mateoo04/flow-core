@@ -1,0 +1,11 @@
+@model User
+@{
+    ViewData["Title"] = Model.FullName;
+}
+<h1 class="text-2xl font-bold text-gray-900">@Model.FullName</h1>
+<dl class="mt-4 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
+    <dt class="text-gray-500">Email</dt><dd>@Model.Email</dd>
+    <dt class="text-gray-500">Joined</dt><dd>@Model.JoinedAt.ToString("u")</dd>
+    <dt class="text-gray-500">Assignments</dt>
+    <dd>@Model.TaskAssignments.Count</dd>
+</dl>

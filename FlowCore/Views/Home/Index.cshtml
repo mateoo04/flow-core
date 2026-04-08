@@ -1,8 +1,59 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
 }
+<h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+<p class="mt-2 text-sm text-gray-600">Mock data overview — browse entities via the nav.</p>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="rounded-lg border border-gray-200 p-4">
+        <div class="text-2xl font-semibold text-gray-900">@Model.WorkspaceCount</div>
+        <div class="text-sm text-gray-500"><a class="text-indigo-600 hover:underline" asp-controller="Workspaces" asp-action="Index">Workspaces</a></div>
+    </div>
+    <div class="rounded-lg border border-gray-200 p-4">
+        <div class="text-2xl font-semibold text-gray-900">@Model.ProjectCount</div>
+        <div class="text-sm text-gray-500"><a class="text-indigo-600 hover:underline" asp-controller="Projects" asp-action="Index">Projects</a></div>
+    </div>
+    <div class="rounded-lg border border-gray-200 p-4">
+        <div class="text-2xl font-semibold text-gray-900">@Model.TaskCount</div>
+        <div class="text-sm text-gray-500"><a class="text-indigo-600 hover:underline" asp-controller="Tasks" asp-action="Index">Tasks</a></div>
+    </div>
+    <div class="rounded-lg border border-gray-200 p-4">
+        <div class="text-2xl font-semibold text-gray-900">@Model.HotTaskCount</div>
+        <div class="text-sm text-gray-500">Hot tasks (High / Urgent)</div>
+    </div>
+</section>
+
+<section class="mt-8">
+    <h2 class="text-lg font-semibold text-gray-900">Tasks by status</h2>
+    <ul class="mt-2 list-inside list-disc text-sm text-gray-700">
+        @foreach (var row in Model.TasksByStatus)
+        {
+            <li>@row.StatusName: @row.Count</li>
+        }
+    </ul>
+</section>
+
+<section class="mt-8">
+    <h2 class="text-lg font-semibold text-gray-900">Busiest projects</h2>
+    <ol class="mt-2 list-inside list-decimal text-sm text-gray-700">
+        @foreach (var row in Model.TopProjectsByTasks)
+        {
+            <li>@row.WorkspaceName / <span class="font-mono">@row.ProjectKey</span> — @row.ProjectName (@row.TaskCount tasks)</li>
+        }
+    </ol>
+</section>
+
+<section class="mt-8 flex flex-wrap gap-4 text-sm">
+    <a class="text-indigo-600 hover:underline" asp-controller="Users" asp-action="Index">Users</a>
+    <span class="text-gray-300">|</span>
+    <a class="text-indigo-600 hover:underline" asp-controller="Tags" asp-action="Index">Tags</a>
+    <span class="text-gray-300">|</span>
+    <a class="text-indigo-600 hover:underline" asp-controller="Boards" asp-action="Index">Boards</a>
+    <span class="text-gray-300">|</span>
+    <a class="text-indigo-600 hover:underline" asp-controller="BoardColumns" asp-action="Index">Columns</a>
+    <span class="text-gray-300">|</span>
+    <a class="text-indigo-600 hover:underline" asp-controller="TaskStatusDefinitions" asp-action="Index">Statuses</a>
+    <span class="text-gray-300">|</span>
+    <a class="text-indigo-600 hover:underline" asp-controller="Comments" asp-action="Index">Comments</a>
+</section>
