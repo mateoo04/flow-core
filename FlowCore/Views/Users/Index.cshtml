@@ -9,9 +9,9 @@
     <table class="w-full border-collapse text-left text-sm">
         <thead class="bg-raised/60 text-xs font-semibold uppercase tracking-wide text-fg-muted">
         <tr>
-            <th class="px-4 py-3">Name</th>
-            <th class="px-4 py-3">Email</th>
-            <th class="px-4 py-3">Active</th>
+            <th class="px-4 py-3" scope="col">Name</th>
+            <th class="px-4 py-3" scope="col">Email</th>
+            <th class="px-4 py-3" scope="col">Active</th>
         </tr>
         </thead>
         <tbody class="divide-y divide-fg-muted/10 bg-card">
@@ -19,7 +19,7 @@
         {
             <tr class="transition-colors duration-150 hover:bg-raised/40">
                 <td class="px-4 py-3">
-                    <a class="font-medium text-brand hover:text-fg" asp-controller="Users" asp-action="Details" asp-route-id="@row.Id">@row.FullName</a>
+                    <a class="rounded font-medium text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card" asp-controller="Users" asp-action="Details" asp-route-id="@row.Id">@row.FullName</a>
                 </td>
                 <td class="px-4 py-3 text-fg-secondary">@row.Email</td>
                 <td class="px-4 py-3 text-fg-muted">@(row.IsActive ? "Yes" : "No")</td>

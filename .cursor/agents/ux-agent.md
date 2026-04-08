@@ -87,27 +87,35 @@ Your goal is to create a clean, user-friendly, and realistic interface that prio
 
 ## Color System (Tailwind-style naming)
 
-Use the following semantic color tokens. These will be defined later in Tailwind config.
+Use the following semantic color tokens. Each token has a **light** and **dark** value; implement with CSS variables and/or Tailwind `dark:` variants.
 
 ### Base Colors
-- `bg-base` → #0f172a        (main background)
-- `bg-surface` → #111827     (cards / panels)
-- `bg-elevated` → #1f2937    (hover / elevated elements)
+| Token | Light (default) | Dark |
+|-------|-----------------|------|
+| `bg-base` | #f8fafc (main background) | #0f172a |
+| `bg-surface` | #ffffff (cards / panels) | #111827 |
+| `bg-elevated` | #f1f5f9 (hover / elevated) | #1f2937 |
 
 ### Content Colors
-- `text-primary` → #e5e7eb   (main text)
-- `text-secondary` → #9ca3af (secondary text)
-- `text-muted` → #6b7280     (less important text)
+| Token | Light | Dark |
+|-------|-------|------|
+| `text-primary` | #0f172a | #e5e7eb |
+| `text-secondary` | #475569 | #9ca3af |
+| `text-muted` | #64748b | #6b7280 |
 
 ### Brand Colors
-- `brand-primary` → #6366f1  (main accent, actions)
-- `brand-secondary` → #22c55e (success / positive)
-- `brand-accent` → #f59e0b   (highlights / attention)
+| Token | Light | Dark |
+|-------|-------|------|
+| `brand-primary` | #4f46e5 | #6366f1 |
+| `brand-secondary` | #16a34a | #22c55e |
+| `brand-accent` | #d97706 | #f59e0b |
 
 ### State Colors
-- `state-danger` → #ef4444
-- `state-warning` → #f59e0b
-- `state-success` → #10b981
+| Token | Light | Dark |
+|-------|-------|------|
+| `state-danger` | #dc2626 | #ef4444 |
+| `state-warning` | #d97706 | #f59e0b |
+| `state-success` | #059669 | #10b981 |
 
 ---
 

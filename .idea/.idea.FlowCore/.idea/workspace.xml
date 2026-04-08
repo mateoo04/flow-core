@@ -17,16 +17,7 @@
     <list default="true" id="892450da-da18-4736-82e4-454a8c8bedf3" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.cursor/logs/agent_log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/logs/agent_log.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.cursor/logs/hook-events.jsonl" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/logs/hook-events.jsonl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/BaseController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/BaseController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/BoardColumnsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/BoardColumnsController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/BoardsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/BoardsController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/HomeController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/HomeController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/ProjectsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/ProjectsController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/TaskStatusDefinitionsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/TaskStatusDefinitionsController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/TasksController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/TasksController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Controllers/WorkspacesController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Controllers/WorkspacesController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Data/DemoDataLinqExamples.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Data/DemoDataLinqExamples.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Models/ViewModels/DashboardViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Models/ViewModels/DashboardViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.FlowCore/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.FlowCore/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Styles/tailwind.input.css" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Styles/tailwind.input.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/BoardColumns/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/BoardColumns/Details.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/BoardColumns/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/BoardColumns/Index.cshtml" afterDir="false" />
@@ -35,10 +26,8 @@
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Comments/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Comments/Details.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Comments/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Comments/Index.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Home/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Home/Index.cshtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Home/Privacy.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Home/Privacy.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Projects/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Projects/Details.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Projects/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Projects/Index.cshtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Shared/Error.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Shared/Error.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Shared/_Breadcrumbs.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Shared/_Breadcrumbs.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Shared/_Layout.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Shared/_Layout.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Tags/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Tags/Details.cshtml" afterDir="false" />
@@ -47,12 +36,11 @@
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/TaskStatusDefinitions/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/TaskStatusDefinitions/Index.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Tasks/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Tasks/Details.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Tasks/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Tasks/Index.cshtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Users/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Users/Details.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Users/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Users/Index.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/Views/Workspaces/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Workspaces/Details.cshtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Workspaces/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Workspaces/Index.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/css/site.css" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/wwwroot/css/site.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/css/tailwind.css" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/wwwroot/css/tailwind.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/js/site.js" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/wwwroot/js/site.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -146,7 +134,7 @@
       <workItem from="1774980944211" duration="3834000" />
       <workItem from="1775053911619" duration="2225000" />
       <workItem from="1775217772140" duration="7952000" />
-      <workItem from="1775668205267" duration="1286000" />
+      <workItem from="1775668205267" duration="1916000" />
     </task>
     <servers />
   </component>

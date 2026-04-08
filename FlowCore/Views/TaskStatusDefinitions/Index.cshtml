@@ -14,7 +14,7 @@
             <h2 class="flex flex-wrap items-center gap-2 text-lg font-semibold text-fg">
                 @if (proj is not null)
                 {
-                    <a class="text-brand hover:text-fg" asp-controller="Projects" asp-action="Details" asp-route-id="@proj.Id">@proj.Key</a>
+                    <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Projects" asp-action="Details" asp-route-id="@proj.Id">@proj.Key</a>
                     <span class="text-fg-muted font-normal">— @proj.Name</span>
                 }
                 else
@@ -26,8 +26,8 @@
                 @foreach (var row in group.OrderBy(r => r.Position))
                 {
                     <a asp-controller="TaskStatusDefinitions" asp-action="Details" asp-route-id="@row.Id"
-                       class="flex items-center gap-3 rounded-xl border border-fg-muted/10 bg-card px-4 py-3 shadow-card transition-colors duration-150 hover:border-brand/30 hover:bg-raised">
-                        <span class="h-3 w-3 shrink-0 rounded-full border border-fg-muted/30" style="background-color: @row.ColorHex"></span>
+                       class="flex items-center gap-3 rounded-xl border border-fg-muted/10 bg-card px-4 py-3 shadow-card outline-none transition-colors duration-150 hover:border-brand/30 hover:bg-raised focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app">
+                        <span class="h-3 w-3 shrink-0 rounded-full border border-fg-muted/30" style="background-color: @row.ColorHex" aria-hidden="true"></span>
                         <div class="flex-1">
                             <span class="font-medium text-fg">@row.Name</span>
                             <span class="ml-2 text-xs text-fg-muted">pos @row.Position</span>

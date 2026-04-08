@@ -9,8 +9,8 @@
     @foreach (var row in Model)
     {
         <a asp-controller="Tags" asp-action="Details" asp-route-id="@row.Id"
-           class="inline-flex items-center gap-2 rounded-xl border border-fg-muted/15 bg-card px-4 py-3 shadow-card transition-colors duration-150 hover:border-brand/35 hover:bg-raised">
-            <span class="h-3 w-3 rounded-full border border-fg-muted/30" style="background-color: @row.ColorHex"></span>
+           class="inline-flex items-center gap-2 rounded-xl border border-fg-muted/15 bg-card px-4 py-3 shadow-card outline-none transition-colors duration-150 hover:border-brand/35 hover:bg-raised focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app">
+            <span class="h-3 w-3 rounded-full border border-fg-muted/30" style="background-color: @row.ColorHex" aria-hidden="true"></span>
             <span class="font-medium text-fg">@row.Name</span>
         </a>
     }

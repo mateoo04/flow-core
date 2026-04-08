@@ -6,12 +6,12 @@
 <dl class="mt-6 grid gap-3 text-sm sm:grid-cols-[8rem_1fr]">
     <dt class="text-fg-muted">Color</dt>
     <dd class="flex items-center gap-2">
-        <span class="inline-block h-4 w-4 rounded border border-fg-muted/30" style="background-color: @Model.ColorHex"></span>
+        <span class="inline-block h-4 w-4 rounded border border-fg-muted/30" style="background-color: @Model.ColorHex" aria-hidden="true"></span>
         <span class="font-mono text-fg">@Model.ColorHex</span>
     </dd>
     <dt class="text-fg-muted">Project</dt>
     <dd>
-        <a class="text-brand hover:text-fg" asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">Open project</a>
+        <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">Open project</a>
     </dd>
     <dt class="text-fg-muted">Tasks</dt><dd class="text-fg-secondary tabular-nums">@Model.TaskItems.Count</dd>
 </dl>

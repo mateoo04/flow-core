@@ -29,7 +29,7 @@
             @if (Model.ParentTaskItemId is { } pp)
             {
                 <p class="text-sm">
-                    <a class="rounded-lg border border-brand/30 px-3 py-2 font-medium text-brand transition-colors hover:bg-brand/10"
+                    <a class="rounded-lg border border-brand/30 px-3 py-2 font-medium text-brand outline-none transition-colors hover:bg-brand/10 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app"
                        asp-controller="Tasks" asp-action="Details" asp-route-id="@pp">Open parent task</a>
                 </p>
             }
@@ -43,9 +43,9 @@
                         {
                             <li>
                                 <a asp-controller="Tasks" asp-action="Details" asp-route-id="@s.Id"
-                                   class="flex items-center justify-between rounded-xl border border-fg-muted/10 bg-card px-4 py-3 text-sm transition-colors duration-150 hover:border-brand/30 hover:bg-raised">
+                                   class="flex items-center justify-between rounded-xl border border-fg-muted/10 bg-card px-4 py-3 text-sm outline-none transition-colors duration-150 hover:border-brand/30 hover:bg-raised focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app">
                                     <span class="font-medium text-fg">@s.Title</span>
-                                    <span class="text-fg-muted">→</span>
+                                    <span class="text-fg-muted" aria-hidden="true">→</span>
                                 </a>
                             </li>
                         }
@@ -63,14 +63,14 @@
                             var author = UserRepo.GetById(c.AuthorUserId)?.FullName ?? "User";
                             var initial = author.Length > 0 ? author[0] : '?';
                             <li class="relative">
-                                <div class="absolute -left-[21px] top-1 flex h-6 w-6 items-center justify-center rounded-full bg-raised text-xs font-semibold text-fg-secondary">@initial</div>
+                                <div class="absolute -left-[21px] top-1 flex h-6 w-6 items-center justify-center rounded-full bg-raised text-xs font-semibold text-fg-secondary" aria-hidden="true">@initial</div>
                                 <div class="rounded-xl bg-card p-4 shadow-card">
                                     <div class="flex flex-wrap items-baseline justify-between gap-2 text-xs text-fg-muted">
                                         <span class="font-medium text-fg-secondary">@author</span>
                                         <time datetime="@c.CreatedAt.ToString("O")">@c.CreatedAt.ToString("g")</time>
                                     </div>
                                     <p class="mt-2 whitespace-pre-wrap text-sm text-fg-secondary">@c.Body</p>
-                                    <a class="mt-2 inline-block text-xs text-brand hover:text-fg" asp-controller="Comments" asp-action="Details" asp-route-id="@c.Id">Permalink</a>
+                                    <a class="mt-2 inline-block rounded text-xs text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card" asp-controller="Comments" asp-action="Details" asp-route-id="@c.Id">Permalink to comment</a>
                                 </div>
                             </li>
                         }
@@ -82,8 +82,8 @@
         @if (board is not null)
         {
             <p class="mt-10">
-                <a class="inline-flex items-center rounded-xl border-2 border-brand px-4 py-2 text-sm font-semibold text-brand transition-colors hover:bg-brand/10"
-                   asp-controller="Boards" asp-action="Details" asp-route-id="@board.Id">← Back to board</a>
+                <a class="inline-flex items-center rounded-xl border-2 border-brand px-4 py-2 text-sm font-semibold text-brand outline-none transition-colors hover:bg-brand/10 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app"
+                   asp-controller="Boards" asp-action="Details" asp-route-id="@board.Id"><span aria-hidden="true">← </span>Back to board</a>
             </p>
         }
     </article>
@@ -116,7 +116,7 @@
                     <div>
                         <dt class="text-fg-muted">Column</dt>
                         <dd class="mt-0.5">
-                            <a class="text-brand hover:text-fg" asp-controller="BoardColumns" asp-action="Details" asp-route-id="@column.Id">@column.Name</a>
+                            <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card" asp-controller="BoardColumns" asp-action="Details" asp-route-id="@column.Id">@column.Name</a>
                         </dd>
                     </div>
                 }
@@ -125,7 +125,7 @@
                     <div>
                         <dt class="text-fg-muted">Project</dt>
                         <dd class="mt-0.5">
-                            <a class="text-brand hover:text-fg" asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">@project.Key</a>
+                            <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card" asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">@project.Key</a>
                         </dd>
                     </div>
                 }
@@ -137,7 +137,7 @@
                             @foreach (var tt in Model.TaskTags.OrderBy(x => x.Tag?.Name))
                             {
                                 <a asp-controller="Tags" asp-action="Details" asp-route-id="@tt.TagId"
-                                   class="rounded-full border border-fg-muted/20 bg-raised/80 px-2.5 py-0.5 text-xs font-medium text-brand transition-colors hover:border-brand/50">#@(tt.Tag?.Name ?? "tag")</a>
+                                   class="rounded-full border border-fg-muted/20 bg-raised/80 px-2.5 py-0.5 text-xs font-medium text-brand outline-none transition-colors hover:border-brand/50 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card">#@(tt.Tag?.Name ?? "tag")</a>
                             }
                         </dd>
                     </div>

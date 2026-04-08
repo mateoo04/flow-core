@@ -9,10 +9,10 @@
     <table class="w-full border-collapse text-left text-sm">
         <thead class="bg-raised/60 text-xs font-semibold uppercase tracking-wide text-fg-muted">
         <tr>
-            <th class="px-4 py-3">Name</th>
-            <th class="px-4 py-3">Default</th>
-            <th class="px-4 py-3">Columns</th>
-            <th class="px-4 py-3">Project</th>
+            <th class="px-4 py-3" scope="col">Name</th>
+            <th class="px-4 py-3" scope="col">Default</th>
+            <th class="px-4 py-3" scope="col">Columns</th>
+            <th class="px-4 py-3" scope="col">Project</th>
         </tr>
         </thead>
         <tbody class="divide-y divide-fg-muted/10 bg-card">
@@ -20,12 +20,14 @@
         {
             <tr class="transition-colors duration-150 hover:bg-raised/40">
                 <td class="px-4 py-3">
-                    <a class="font-medium text-brand hover:text-fg" asp-controller="Boards" asp-action="Details" asp-route-id="@row.Id">@row.Name</a>
+                    <a class="rounded font-medium text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card" asp-controller="Boards" asp-action="Details" asp-route-id="@row.Id">@row.Name</a>
                 </td>
                 <td class="px-4 py-3 text-fg-muted">@(row.IsDefault ? "Yes" : "")</td>
                 <td class="px-4 py-3 tabular-nums text-fg-secondary">@row.ColumnCount</td>
                 <td class="px-4 py-3">
-                    <a class="text-brand hover:text-fg" asp-controller="Projects" asp-action="Details" asp-route-id="@row.ProjectId">Open</a>
+                    <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+                       asp-controller="Projects" asp-action="Details" asp-route-id="@row.ProjectId"
+                       aria-label="Open project linked to board @row.Name">Open project</a>
                 </td>
             </tr>
         }
