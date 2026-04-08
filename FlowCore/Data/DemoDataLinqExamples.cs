@@ -49,6 +49,19 @@ public static class DemoDataLinqExamples
                 TaskCount: x.Project.Boards.SelectMany(b => b.Columns).SelectMany(c => c.Tasks).Count()))
             .OrderByDescending(x => x.TaskCount);
 
+    /// <summary>Same as <see cref="ProjectsByTaskVolume"/> but includes project id for dashboard links.</summary>
+    public static IEnumerable<(Guid ProjectId, string WorkspaceName, string ProjectKey, string ProjectName, int TaskCount)>
+        ProjectsByTaskVolumeWithIds(IEnumerable<Workspace> workspaces) =>
+        workspaces
+            .SelectMany(w => w.Projects.Select(p => (Workspace: w, Project: p)))
+            .Select(x => (
+                x.Project.Id,
+                x.Workspace.Name,
+                x.Project.Key,
+                x.Project.Name,
+                TaskCount: x.Project.Boards.SelectMany(b => b.Columns).SelectMany(c => c.Tasks).Count()))
+            .OrderByDescending(x => x.TaskCount);
+
     /// <summary>
     /// Assignee name per task — nested <c>from</c> / <c>Join</c> on user id (pattern you will reuse for “my tasks” screens).
     /// </summary>

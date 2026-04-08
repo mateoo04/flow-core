@@ -1,13 +1,17 @@
-@model TaskStatusDefinition
+@model FlowCore.Models.TaskStatusDefinition
 @{
     ViewData["Title"] = Model.Name;
 }
-<h1 class="text-2xl font-bold text-gray-900">@Model.Name</h1>
-<dl class="mt-4 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
-    <dt class="text-gray-500">Color</dt><dd class="font-mono">@Model.ColorHex</dd>
-    <dt class="text-gray-500">Project</dt>
-    <dd>
-        <a class="text-indigo-600 hover:underline" asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">Open project</a>
+<h1 class="text-2xl font-bold text-fg">@Model.Name</h1>
+<dl class="mt-6 grid gap-3 text-sm sm:grid-cols-[8rem_1fr]">
+    <dt class="text-fg-muted">Color</dt>
+    <dd class="flex items-center gap-2">
+        <span class="inline-block h-4 w-4 rounded border border-fg-muted/30" style="background-color: @Model.ColorHex"></span>
+        <span class="font-mono text-fg">@Model.ColorHex</span>
     </dd>
-    <dt class="text-gray-500">Tasks using status</dt><dd>@Model.TaskItems.Count</dd>
+    <dt class="text-fg-muted">Project</dt>
+    <dd>
+        <a class="text-brand hover:text-fg" asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">Open project</a>
+    </dd>
+    <dt class="text-fg-muted">Tasks</dt><dd class="text-fg-secondary tabular-nums">@Model.TaskItems.Count</dd>
 </dl>

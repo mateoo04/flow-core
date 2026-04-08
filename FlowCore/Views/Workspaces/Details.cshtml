@@ -2,14 +2,37 @@
 @{
     ViewData["Title"] = Model.Name;
 }
-<h1 class="text-2xl font-bold text-gray-900">@Model.Name</h1>
-<dl class="mt-4 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
-    <dt class="text-gray-500">Id</dt><dd class="font-mono text-xs">@Model.Id</dd>
-    <dt class="text-gray-500">Description</dt><dd>@Model.Description</dd>
-    <dt class="text-gray-500">Visibility</dt><dd>@Model.Visibility</dd>
-    <dt class="text-gray-500">Created</dt><dd>@Model.CreatedAt.ToString("u")</dd>
-    <dt class="text-gray-500">Projects</dt>
-    <dd>
-        <a class="text-indigo-600 hover:underline" asp-controller="Projects" asp-action="Index" asp-route-workspaceId="@Model.Id">List (@Model.Projects.Count)</a>
-    </dd>
+<h1 class="text-3xl font-bold tracking-tight text-fg">@Model.Name</h1>
+<p class="mt-2 max-w-3xl text-fg-secondary">@Model.Description</p>
+
+<dl class="mt-6 grid gap-3 text-sm sm:grid-cols-[8rem_1fr]">
+    <dt class="text-fg-muted">Visibility</dt>
+    <dd class="text-fg">@Model.Visibility</dd>
+    <dt class="text-fg-muted">Created</dt>
+    <dd class="text-fg-secondary">@Model.CreatedAt.ToString("u")</dd>
 </dl>
+
+<section class="mt-10">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <h2 class="text-lg font-semibold text-fg">Projects</h2>
+        <a class="rounded-lg border border-brand/40 px-4 py-2 text-sm font-medium text-brand transition-colors hover:bg-brand/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+           asp-controller="Projects" asp-action="Index" asp-route-workspaceId="@Model.Id">View filtered list</a>
+    </div>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        @foreach (var p in Model.Projects.OrderBy(x => x.Key))
+        {
+            <a asp-controller="Projects" asp-action="Details" asp-route-id="@p.Id"
+               class="rounded-xl border border-fg-muted/10 bg-card p-4 shadow-card transition-colors duration-150 hover:border-brand/30 hover:bg-raised">
+                <div class="font-mono text-xs text-brand">@p.Key</div>
+                <div class="mt-1 font-medium text-fg">@p.Name</div>
+                <div class="mt-2 flex gap-2 text-xs text-fg-muted">
+                    <span class="rounded-md bg-raised px-2 py-0.5">@p.Status</span>
+                    @if (p.DueDate is { } due)
+                    {
+                        <span>Due @due.ToString("d")</span>
+                    }
+                </div>
+            </a>
+        }
+    </div>
+</section>

@@ -1,17 +1,18 @@
-@model Tag
+@model FlowCore.Models.Tag
 @{
     ViewData["Title"] = Model.Name;
 }
-<h1 class="text-2xl font-bold text-gray-900">#@Model.Name</h1>
-<dl class="mt-4 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
-    <dt class="text-gray-500">Color</dt><dd class="font-mono">@Model.ColorHex</dd>
-    <dt class="text-gray-500">Linked tasks</dt>
+<h1 class="text-3xl font-bold tracking-tight text-fg"><span class="text-fg-muted">#</span>@Model.Name</h1>
+<dl class="mt-6 grid gap-3 text-sm sm:grid-cols-[8rem_1fr]">
+    <dt class="text-fg-muted">Color</dt><dd class="font-mono text-fg">@Model.ColorHex</dd>
+    <dt class="text-fg-muted">Linked tasks</dt>
     <dd>
-        <ul class="m-0 list-disc ps-5">
+        <ul class="m-0 list-none space-y-2 p-0">
             @foreach (var link in Model.TaskTags)
             {
                 <li>
-                    <a class="text-indigo-600 hover:underline" asp-controller="Tasks" asp-action="Details" asp-route-id="@link.TaskItemId">@(link.TaskItem?.Title ?? link.TaskItemId.ToString())</a>
+                    <a class="rounded-lg border border-fg-muted/15 px-3 py-2 text-brand transition-colors hover:border-brand/40 hover:bg-raised"
+                       asp-controller="Tasks" asp-action="Details" asp-route-id="@link.TaskItemId">@(link.TaskItem?.Title ?? link.TaskItemId.ToString())</a>
                 </li>
             }
         </ul>

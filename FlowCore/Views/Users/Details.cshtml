@@ -1,11 +1,10 @@
-@model User
+@model FlowCore.Models.User
 @{
     ViewData["Title"] = Model.FullName;
 }
-<h1 class="text-2xl font-bold text-gray-900">@Model.FullName</h1>
-<dl class="mt-4 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
-    <dt class="text-gray-500">Email</dt><dd>@Model.Email</dd>
-    <dt class="text-gray-500">Joined</dt><dd>@Model.JoinedAt.ToString("u")</dd>
-    <dt class="text-gray-500">Assignments</dt>
-    <dd>@Model.TaskAssignments.Count</dd>
+<h1 class="text-3xl font-bold tracking-tight text-fg">@Model.FullName</h1>
+<dl class="mt-6 grid gap-3 text-sm sm:grid-cols-[8rem_1fr]">
+    <dt class="text-fg-muted">Email</dt><dd class="text-fg">@Model.Email</dd>
+    <dt class="text-fg-muted">Joined</dt><dd class="text-fg-secondary">@Model.JoinedAt.ToString("u")</dd>
+    <dt class="text-fg-muted">Assignments</dt><dd class="text-fg-secondary">@Model.TaskAssignments.Count</dd>
 </dl>

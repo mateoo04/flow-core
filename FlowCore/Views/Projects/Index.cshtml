@@ -3,34 +3,30 @@
     ViewData["Title"] = "Projects";
     var filterWs = ViewBag.FilterWorkspaceId as Guid?;
 }
-<h1 class="text-2xl font-bold text-gray-900">Projects</h1>
+<h1 class="text-3xl font-bold tracking-tight text-fg">Projects</h1>
 @if (filterWs is { } wsId)
 {
-    <p class="mt-2 text-sm text-gray-600">Filtered by workspace <span class="font-mono">@wsId</span> —
-        <a class="text-indigo-600 hover:underline" asp-action="Index">Show all</a></p>
+    <div class="mt-3 inline-flex items-center gap-2 rounded-full bg-raised px-3 py-1 text-sm text-fg-secondary">
+        <span>Workspace filter</span>
+        <span class="font-mono text-xs text-fg-muted">@wsId</span>
+        <a class="ml-2 text-brand hover:text-fg" asp-action="Index">Clear</a>
+    </div>
 }
-<table class="mt-4 w-full border-collapse border border-gray-200 text-left text-sm">
-    <thead class="bg-gray-50">
-    <tr>
-        <th class="border-b border-gray-200 px-3 py-2">Key</th>
-        <th class="border-b border-gray-200 px-3 py-2">Name</th>
-        <th class="border-b border-gray-200 px-3 py-2">Status</th>
-        <th class="border-b border-gray-200 px-3 py-2">Workspace</th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var row in Model)
+<p class="mt-2 text-fg-secondary">Open a project to see the board and work breakdown.</p>
+
+<div class="mt-8 flex flex-col gap-3">
+    @foreach (var row in Model.OrderBy(r => r.Key))
     {
-        <tr class="border-b border-gray-100">
-            <td class="px-3 py-2">
-                <a class="text-indigo-600 hover:underline" asp-controller="Projects" asp-action="Details" asp-route-id="@row.Id">@row.Key</a>
-            </td>
-            <td class="px-3 py-2">@row.Name</td>
-            <td class="px-3 py-2">@row.Status</td>
-            <td class="px-3 py-2">
-                <a class="text-indigo-600 hover:underline" asp-controller="Workspaces" asp-action="Details" asp-route-id="@row.WorkspaceId">Workspace</a>
-            </td>
-        </tr>
+        <a asp-controller="Projects" asp-action="Details" asp-route-id="@row.Id"
+           class="group flex items-center justify-between gap-4 rounded-xl border border-fg-muted/10 bg-card px-4 py-4 shadow-card transition-colors duration-150 hover:border-brand/30 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+            <div class="min-w-0">
+                <div class="font-mono text-sm text-brand">@row.Key</div>
+                <div class="mt-0.5 truncate font-medium text-fg">@row.Name</div>
+            </div>
+            <div class="flex shrink-0 items-center gap-3">
+                <span class="rounded-md bg-raised px-2 py-1 text-xs text-fg-secondary">@row.Status</span>
+                <span class="text-fg-muted transition-transform group-hover:translate-x-0.5" aria-hidden="true">→</span>
+            </div>
+        </a>
     }
-    </tbody>
-</table>
+</div>

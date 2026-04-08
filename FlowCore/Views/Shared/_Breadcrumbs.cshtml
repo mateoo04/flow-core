@@ -4,7 +4,7 @@
 }
 @if (crumbs is { Count: > 0 })
 {
-    <nav aria-label="Breadcrumb" class="mb-6 text-sm text-gray-600">
+    <nav aria-label="Breadcrumb" class="mb-6 text-sm text-fg-muted">
         <ol class="m-0 flex list-none flex-wrap items-center gap-2 p-0">
             @for (var i = 0; i < crumbs.Count; i++)
             {
@@ -12,15 +12,16 @@
                 <li class="flex items-center gap-2">
                     @if (i > 0)
                     {
-                        <span class="select-none text-gray-300">/</span>
+                        <span class="select-none text-fg-muted/40">/</span>
                     }
                     @if (c.Url is { } url)
                     {
-                        <a class="text-indigo-600 no-underline hover:underline" href="@url">@c.Text</a>
+                        <a class="text-brand no-underline transition-colors hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                           href="@url">@c.Text</a>
                     }
                     else
                     {
-                        <span class="font-medium text-gray-900">@c.Text</span>
+                        <span class="font-medium text-fg-secondary">@c.Text</span>
                     }
                 </li>
             }

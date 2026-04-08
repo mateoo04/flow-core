@@ -2,31 +2,35 @@
 @{
     ViewData["Title"] = "Board columns";
 }
-<h1 class="text-2xl font-bold text-gray-900">Board columns</h1>
-<table class="mt-4 w-full border-collapse border border-gray-200 text-left text-sm">
-    <thead class="bg-gray-50">
-    <tr>
-        <th class="border-b border-gray-200 px-3 py-2">Name</th>
-        <th class="border-b border-gray-200 px-3 py-2">Position</th>
-        <th class="border-b border-gray-200 px-3 py-2">Tasks</th>
-        <th class="border-b border-gray-200 px-3 py-2">Done col</th>
-        <th class="border-b border-gray-200 px-3 py-2">Board</th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var row in Model)
-    {
-        <tr class="border-b border-gray-100">
-            <td class="px-3 py-2">
-                <a class="text-indigo-600 hover:underline" asp-controller="BoardColumns" asp-action="Details" asp-route-id="@row.Id">@row.Name</a>
-            </td>
-            <td class="px-3 py-2">@row.Position</td>
-            <td class="px-3 py-2">@row.TaskCount</td>
-            <td class="px-3 py-2">@row.IsDoneColumn</td>
-            <td class="px-3 py-2">
-                <a class="text-indigo-600 hover:underline" asp-controller="Boards" asp-action="Details" asp-route-id="@row.BoardId">Board</a>
-            </td>
+<h1 class="text-3xl font-bold tracking-tight text-fg">Board columns</h1>
+<p class="mt-2 text-fg-secondary">Columns on all boards.</p>
+
+<div class="mt-6 overflow-hidden rounded-xl border border-fg-muted/15 shadow-card">
+    <table class="w-full border-collapse text-left text-sm">
+        <thead class="bg-raised/60 text-xs font-semibold uppercase tracking-wide text-fg-muted">
+        <tr>
+            <th class="px-4 py-3">Name</th>
+            <th class="px-4 py-3">Pos</th>
+            <th class="px-4 py-3">Tasks</th>
+            <th class="px-4 py-3">Done</th>
+            <th class="px-4 py-3">Board</th>
         </tr>
-    }
-    </tbody>
-</table>
+        </thead>
+        <tbody class="divide-y divide-fg-muted/10 bg-card">
+        @foreach (var row in Model)
+        {
+            <tr class="transition-colors duration-150 hover:bg-raised/40">
+                <td class="px-4 py-3">
+                    <a class="font-medium text-brand hover:text-fg" asp-controller="BoardColumns" asp-action="Details" asp-route-id="@row.Id">@row.Name</a>
+                </td>
+                <td class="px-4 py-3 tabular-nums text-fg-muted">@row.Position</td>
+                <td class="px-4 py-3 tabular-nums text-fg-secondary">@row.TaskCount</td>
+                <td class="px-4 py-3 text-fg-muted">@(row.IsDoneColumn ? "Yes" : "")</td>
+                <td class="px-4 py-3">
+                    <a class="text-brand hover:text-fg" asp-controller="Boards" asp-action="Details" asp-route-id="@row.BoardId">Board</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

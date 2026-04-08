@@ -27,7 +27,7 @@ public class HomeController : Controller
             TagCount = _graph.Tags.Count,
             HotTaskCount = DemoDataLinqExamples.HotTasks(workspaces).Count(),
             TasksByStatus = DemoDataLinqExamples.TaskCountByStatus(workspaces).ToList(),
-            TopProjectsByTasks = DemoDataLinqExamples.ProjectsByTaskVolume(workspaces).Take(8).ToList()
+            TopProjectsByTasks = DemoDataLinqExamples.ProjectsByTaskVolumeWithIds(workspaces).Take(8).ToList()
         };
         return View(vm);
     }

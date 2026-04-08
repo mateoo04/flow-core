@@ -28,6 +28,9 @@ public class TasksController : BaseController
     public IActionResult Details(Guid id)
     {
         var entity = _tasks.GetById(id);
+        var project = entity?.BoardColumn?.Board?.Project;
+        if (project is not null)
+            SetNav(project.WorkspaceId, project.Id);
         return ViewDetails(entity, _breadcrumbs.ForTask);
     }
 }
