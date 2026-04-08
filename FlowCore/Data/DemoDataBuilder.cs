@@ -18,7 +18,7 @@ public static class DemoDataBuilder
 
         var ownerAlex = new User
         {
-            Id = Ng(),
+            Id = DemoSeedIds.UserAlex,
             FullName = "Alex Owner",
             Email = "alex@flowcore.demo",
             JoinedAt = now.AddMonths(-6),
@@ -27,7 +27,7 @@ public static class DemoDataBuilder
 
         var memberSam = new User
         {
-            Id = Ng(),
+            Id = DemoSeedIds.UserSam,
             FullName = "Sam Member",
             Email = "sam@flowcore.demo",
             JoinedAt = now.AddMonths(-3),
@@ -36,18 +36,22 @@ public static class DemoDataBuilder
 
         var users = new List<User> { ownerAlex, memberSam };
 
-        var tagUi = new Tag { Id = Ng(), Name = "ui", ColorHex = "#6366F1" };
-        var tagBug = new Tag { Id = Ng(), Name = "bug", ColorHex = "#EF4444" };
+        var tagUi = new Tag { Id = DemoSeedIds.TagUi, Name = "ui", ColorHex = "#6366F1" };
+        var tagBug = new Tag { Id = DemoSeedIds.TagBug, Name = "bug", ColorHex = "#EF4444" };
         var tags = new List<Tag> { tagUi, tagBug };
 
         var workspaces = new List<Workspace>();
         var workspaceNames = new[] { "North Division", "South Division", "Platform Guild" };
+        var workspaceIds = new[]
+        {
+            DemoSeedIds.WorkspaceNorth, DemoSeedIds.WorkspaceSouth, DemoSeedIds.WorkspacePlatform
+        };
 
         for (var w = 0; w < 3; w++)
         {
             var workspace = new Workspace
             {
-                Id = Ng(),
+                Id = workspaceIds[w],
                 Name = workspaceNames[w],
                 Description = $"Workspace #{w + 1} — multi-project delivery.",
                 CreatedAt = now.AddDays(-30 * (w + 1)),

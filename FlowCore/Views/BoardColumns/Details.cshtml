@@ -1,0 +1,21 @@
+@model BoardColumn
+@{
+    ViewData["Title"] = Model.Name;
+}
+<h1 class="text-2xl font-bold text-gray-900">@Model.Name</h1>
+<dl class="mt-4 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
+    <dt class="text-gray-500">Board</dt>
+    <dd>
+        <a class="text-indigo-600 hover:underline" asp-controller="Boards" asp-action="Details" asp-route-id="@Model.BoardId">Open board</a>
+    </dd>
+    <dt class="text-gray-500">WIP limit</dt><dd>@Model.WipLimit</dd>
+    <dt class="text-gray-500">Tasks</dt>
+    <dd>
+        <ul class="m-0 list-disc ps-5">
+            @foreach (var t in Model.Tasks.OrderBy(x => x.Title))
+            {
+                <li><a class="text-indigo-600 hover:underline" asp-controller="Tasks" asp-action="Details" asp-route-id="@t.Id">@t.Title</a></li>
+            }
+        </ul>
+    </dd>
+</dl>

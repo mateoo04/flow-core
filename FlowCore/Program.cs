@@ -1,17 +1,31 @@
 using FlowCore.Data;
+using FlowCore.Repositories;
+using FlowCore.Repositories.InMemory;
+using FlowCore.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddSingleton<DemoDataGraph>(_ => DemoDataBuilder.CreateSampleGraph());
+builder.Services.AddSingleton<IWorkspaceRepository, InMemoryWorkspaceRepository>();
+builder.Services.AddSingleton<IProjectRepository, InMemoryProjectRepository>();
+builder.Services.AddSingleton<ITaskRepository, InMemoryTaskRepository>();
+builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
+builder.Services.AddSingleton<ITagRepository, InMemoryTagRepository>();
+builder.Services.AddSingleton<IBoardRepository, InMemoryBoardRepository>();
+builder.Services.AddSingleton<IBoardColumnRepository, InMemoryBoardColumnRepository>();
+builder.Services.AddSingleton<ITaskStatusDefinitionRepository, InMemoryTaskStatusDefinitionRepository>();
+builder.Services.AddSingleton<ICommentRepository, InMemoryCommentRepository>();
+builder.Services.AddSingleton<IBreadcrumbTrailBuilder, BreadcrumbTrailBuilder>();
+
 var app = builder.Build();
 Console.WriteLine("Starting application... is development: " + app.Environment.IsDevelopment());
 if (app.Environment.IsDevelopment())
 {
-    var demo = DemoDataBuilder.CreateSampleGraph();
+    var demo = app.Services.GetRequiredService<DemoDataGraph>();
 
-    // Summary counts (same SelectMany chain you will reuse for reports).
     var projectCount = demo.Workspaces.Sum(w => w.Projects.Count);
     var taskCount = DemoDataLinqExamples.AllTasks(demo.Workspaces).Count();
 
@@ -19,7 +33,6 @@ if (app.Environment.IsDevelopment())
         $"[DemoData] Workspaces={demo.Workspaces.Count}, Projects={projectCount}, " +
         $"TaskItems={taskCount}, Users={demo.Users.Count}, Tags={demo.Tags.Count}");
 
-    // Smislene LINQ upite nad istim grafom — kasnije IQueryable/EF Core umjesto IEnumerable.
     DemoDataLinqExamples.WriteDevelopmentQuerySample(demo);
 }
 
@@ -27,7 +40,6 @@ if (app.Environment.IsDevelopment())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

@@ -1,0 +1,36 @@
+@model IReadOnlyList<ProjectListRow>
+@{
+    ViewData["Title"] = "Projects";
+    var filterWs = ViewBag.FilterWorkspaceId as Guid?;
+}
+<h1 class="text-2xl font-bold text-gray-900">Projects</h1>
+@if (filterWs is { } wsId)
+{
+    <p class="mt-2 text-sm text-gray-600">Filtered by workspace <span class="font-mono">@wsId</span> —
+        <a class="text-indigo-600 hover:underline" asp-action="Index">Show all</a></p>
+}
+<table class="mt-4 w-full border-collapse border border-gray-200 text-left text-sm">
+    <thead class="bg-gray-50">
+    <tr>
+        <th class="border-b border-gray-200 px-3 py-2">Key</th>
+        <th class="border-b border-gray-200 px-3 py-2">Name</th>
+        <th class="border-b border-gray-200 px-3 py-2">Status</th>
+        <th class="border-b border-gray-200 px-3 py-2">Workspace</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var row in Model)
+    {
+        <tr class="border-b border-gray-100">
+            <td class="px-3 py-2">
+                <a class="text-indigo-600 hover:underline" asp-controller="Projects" asp-action="Details" asp-route-id="@row.Id">@row.Key</a>
+            </td>
+            <td class="px-3 py-2">@row.Name</td>
+            <td class="px-3 py-2">@row.Status</td>
+            <td class="px-3 py-2">
+                <a class="text-indigo-600 hover:underline" asp-controller="Workspaces" asp-action="Details" asp-route-id="@row.WorkspaceId">Workspace</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

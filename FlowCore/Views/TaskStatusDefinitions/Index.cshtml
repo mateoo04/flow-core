@@ -1,0 +1,30 @@
+@model IReadOnlyList<TaskStatusDefinitionListRow>
+@{
+    ViewData["Title"] = "Task statuses";
+}
+<h1 class="text-2xl font-bold text-gray-900">Task statuses</h1>
+<table class="mt-4 w-full border-collapse border border-gray-200 text-left text-sm">
+    <thead class="bg-gray-50">
+    <tr>
+        <th class="border-b border-gray-200 px-3 py-2">Name</th>
+        <th class="border-b border-gray-200 px-3 py-2">Position</th>
+        <th class="border-b border-gray-200 px-3 py-2">Done</th>
+        <th class="border-b border-gray-200 px-3 py-2">Project</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var row in Model)
+    {
+        <tr class="border-b border-gray-100">
+            <td class="px-3 py-2">
+                <a class="text-indigo-600 hover:underline" asp-controller="TaskStatusDefinitions" asp-action="Details" asp-route-id="@row.Id">@row.Name</a>
+            </td>
+            <td class="px-3 py-2">@row.Position</td>
+            <td class="px-3 py-2">@row.IsDoneState</td>
+            <td class="px-3 py-2">
+                <a class="text-indigo-600 hover:underline" asp-controller="Projects" asp-action="Details" asp-route-id="@row.ProjectId">Project</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

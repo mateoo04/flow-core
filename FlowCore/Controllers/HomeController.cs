@@ -1,14 +1,35 @@
 using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+using FlowCore.Data;
 using FlowCore.Models;
+using FlowCore.Models.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FlowCore.Controllers;
 
 public class HomeController : Controller
 {
+    private readonly DemoDataGraph _graph;
+
+    public HomeController(DemoDataGraph graph)
+    {
+        _graph = graph;
+    }
+
     public IActionResult Index()
     {
-        return View();
+        var workspaces = _graph.Workspaces;
+        var vm = new DashboardViewModel
+        {
+            WorkspaceCount = workspaces.Count,
+            ProjectCount = workspaces.Sum(w => w.Projects.Count),
+            TaskCount = DemoDataLinqExamples.AllTasks(workspaces).Count(),
+            UserCount = _graph.Users.Count,
+            TagCount = _graph.Tags.Count,
+            HotTaskCount = DemoDataLinqExamples.HotTasks(workspaces).Count(),
+            TasksByStatus = DemoDataLinqExamples.TaskCountByStatus(workspaces).ToList(),
+            TopProjectsByTasks = DemoDataLinqExamples.ProjectsByTaskVolume(workspaces).Take(8).ToList()
+        };
+        return View(vm);
     }
 
     public IActionResult Privacy()

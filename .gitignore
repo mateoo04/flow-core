@@ -33,3 +33,5 @@ riderModule.iml
 
 ## macOS / OS
 .DS_Store
+
+node_modules/

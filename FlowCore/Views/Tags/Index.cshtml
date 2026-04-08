@@ -1,0 +1,24 @@
+@model IReadOnlyList<TagListRow>
+@{
+    ViewData["Title"] = "Tags";
+}
+<h1 class="text-2xl font-bold text-gray-900">Tags</h1>
+<table class="mt-4 w-full border-collapse border border-gray-200 text-left text-sm">
+    <thead class="bg-gray-50">
+    <tr>
+        <th class="border-b border-gray-200 px-3 py-2">Name</th>
+        <th class="border-b border-gray-200 px-3 py-2">Color</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var row in Model)
+    {
+        <tr class="border-b border-gray-100">
+            <td class="px-3 py-2">
+                <a class="text-indigo-600 hover:underline" asp-controller="Tags" asp-action="Details" asp-route-id="@row.Id">@row.Name</a>
+            </td>
+            <td class="px-3 py-2"><span class="font-mono">@row.ColorHex</span></td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,21 @@
+@model Project
+@{
+    ViewData["Title"] = Model.Key;
+}
+<h1 class="text-2xl font-bold text-gray-900">@Model.Key — @Model.Name</h1>
+<dl class="mt-4 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
+    <dt class="text-gray-500">Workspace</dt>
+    <dd>
+        <a class="text-indigo-600 hover:underline" asp-controller="Workspaces" asp-action="Details" asp-route-id="@Model.WorkspaceId">Open workspace</a>
+    </dd>
+    <dt class="text-gray-500">Description</dt><dd>@Model.Description</dd>
+    <dt class="text-gray-500">Status</dt><dd>@Model.Status</dd>
+    <dt class="text-gray-500">Priority</dt><dd>@Model.Priority</dt>
+    <dt class="text-gray-500">Boards</dt>
+    <dd>
+        @foreach (var b in Model.Boards)
+        {
+            <a class="me-3 text-indigo-600 hover:underline" asp-controller="Boards" asp-action="Details" asp-route-id="@b.Id">@b.Name</a>
+        }
+    </dd>
+</dl>
