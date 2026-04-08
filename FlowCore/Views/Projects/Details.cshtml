@@ -23,7 +23,7 @@
         }
     </div>
     <div class="mt-4 text-sm">
-        <a class="text-brand transition-colors hover:text-fg" asp-controller="Workspaces" asp-action="Details" asp-route-id="@Model.WorkspaceId">← Workspace</a>
+        <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Workspaces" asp-action="Details" asp-route-id="@Model.WorkspaceId"><span aria-hidden="true">← </span>Workspace</a>
     </div>
 </header>
 
@@ -42,7 +42,7 @@ else
         @foreach (var b in Model.Boards)
         {
             <li>
-                <a class="rounded-lg border border-fg-muted/20 px-3 py-2 text-sm text-brand transition-colors hover:border-brand/40 hover:bg-raised"
+                <a class="rounded-lg border border-fg-muted/20 px-3 py-2 text-sm text-brand outline-none transition-colors hover:border-brand/40 hover:bg-raised focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app"
                    asp-controller="Boards" asp-action="Details" asp-route-id="@b.Id">@b.Name</a>
             </li>
         }

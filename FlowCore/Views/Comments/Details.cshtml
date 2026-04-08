@@ -6,7 +6,7 @@
 <dl class="mt-6 grid gap-3 text-sm sm:grid-cols-[8rem_1fr]">
     <dt class="text-fg-muted">Task</dt>
     <dd>
-        <a class="text-brand hover:text-fg" asp-controller="Tasks" asp-action="Details" asp-route-id="@Model.TaskItemId">Open task</a>
+        <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Tasks" asp-action="Details" asp-route-id="@Model.TaskItemId">Open task</a>
     </dd>
     <dt class="text-fg-muted">Created</dt><dd class="text-fg-secondary">@Model.CreatedAt.ToString("u")</dd>
     <dt class="text-fg-muted">Body</dt><dd class="whitespace-pre-wrap text-fg-secondary">@Model.Body</dd>

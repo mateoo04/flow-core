@@ -6,21 +6,30 @@
     <div>
         <h1 class="text-2xl font-bold tracking-tight text-fg">@Model.Name</h1>
         <p class="mt-1 text-sm text-fg-muted">
-            <a class="text-brand hover:text-fg" asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">Project</a>
+            @if (Model.Project is { } proj)
+            {
+                <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app"
+                   asp-controller="Projects" asp-action="Details" asp-route-id="@proj.Id">Project @proj.Key — @proj.Name</a>
+            }
+            else
+            {
+                <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app"
+                   asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">Open project</a>
+            }
         </p>
     </div>
 </div>
 
 <p class="mt-4 text-sm text-fg-secondary">Scroll horizontally on small screens. Each card opens the task.</p>
 
-<div class="mt-6 flex gap-4 overflow-x-auto pb-4">
+<div class="mt-6 flex gap-4 overflow-x-auto pb-4" role="region" aria-label="Board columns and tasks">
     @foreach (var col in Model.Columns.OrderBy(c => c.Position))
     {
         <div class="flex w-72 shrink-0 flex-col rounded-xl bg-card shadow-card">
             <div class="border-b border-fg-muted/10 px-3 py-3">
                 <div class="flex items-center justify-between gap-2">
                     <h2 class="font-semibold text-fg">@col.Name</h2>
-                    <span class="tabular-nums text-xs text-fg-muted">@col.Tasks.Count</span>
+                    <span class="tabular-nums text-xs text-fg-muted" aria-label="@col.Tasks.Count tasks in this column">@col.Tasks.Count</span>
                 </div>
                 @if (col.WipLimit > 0)
                 {
@@ -40,6 +49,10 @@
                         <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id"
                            class="block rounded-lg border border-fg-muted/10 bg-app/80 p-3 text-left transition-colors duration-150 hover:border-brand/40 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                            style="border-left: 3px solid @stripe">
+                            @if (task.TaskStatusDefinition is { } st)
+                            {
+                                <span class="sr-only">Status: @st.Name.</span>
+                            }
                             <div class="line-clamp-2 text-sm font-medium text-fg">@task.Title</div>
                             <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-fg-muted">
                                 <span>@task.Priority</span>

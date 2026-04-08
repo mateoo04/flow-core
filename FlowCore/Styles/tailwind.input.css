@@ -1,25 +1,60 @@
 @import "tailwindcss";
 @source "../Views/**/*.cshtml";
 
-/* Semantic tokens (FlowCore UX agent) — utilities: bg-app, bg-card, text-fg, text-brand, … */
+/* Class on `html` drives dark UI; enables `dark:*` utilities (e.g. theme toggle icons). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Semantic tokens — FlowCore UX agent (light = default, dark = html.dark).
+ * Utilities: bg-app, bg-card, text-fg, text-brand, …
+ */
 @theme {
-  --color-app: #0f172a;
-  --color-card: #111827;
-  --color-raised: #1f2937;
-  --color-fg: #e5e7eb;
-  --color-fg-secondary: #9ca3af;
-  --color-fg-muted: #6b7280;
-  --color-brand: #6366f1;
-  --color-brand-success: #22c55e;
-  --color-brand-warn: #f59e0b;
-  --color-danger: #ef4444;
-  --color-success: #10b981;
-  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.35);
-  --shadow-soft: 0 4px 24px -4px rgb(0 0 0 / 0.45);
+  --color-app: #f8fafc;
+  --color-card: #ffffff;
+  --color-raised: #f1f5f9;
+  --color-fg: #0f172a;
+  --color-fg-secondary: #475569;
+  --color-fg-muted: #64748b;
+  --color-brand: #4f46e5;
+  /* Medium-priority task dot — indigo family (distinct from brand-warn amber). */
+  --color-brand-accent: #6366f1;
+  --color-brand-success: #16a34a;
+  --color-brand-warn: #d97706;
+  --color-danger: #dc2626;
+  --color-success: #059669;
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.08);
+  --shadow-soft: 0 4px 24px -4px rgb(0 0 0 / 0.12);
 }
 
 @layer base {
+  html.dark {
+    --color-app: #0f172a;
+    --color-card: #111827;
+    --color-raised: #1f2937;
+    --color-fg: #e5e7eb;
+    --color-fg-secondary: #9ca3af;
+    --color-fg-muted: #6b7280;
+    --color-brand: #6366f1;
+    --color-brand-accent: #818cf8;
+    --color-brand-success: #22c55e;
+    --color-brand-warn: #f59e0b;
+    --color-danger: #ef4444;
+    --color-success: #10b981;
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.35);
+    --shadow-soft: 0 4px 24px -4px rgb(0 0 0 / 0.45);
+  }
+
   body {
     @apply bg-app text-fg antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

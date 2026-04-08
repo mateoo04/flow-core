@@ -6,30 +6,31 @@
 <h1 class="text-3xl font-bold tracking-tight text-fg">Tasks</h1>
 <p class="mt-2 text-fg-secondary">All tasks across boards. Subtasks are labeled.</p>
 
-<div class="mt-8 flex flex-col gap-2">
+<ul class="m-0 mt-8 flex list-none flex-col gap-2 p-0">
     @foreach (var row in Model)
     {
-        <a asp-controller="Tasks" asp-action="Details" asp-route-id="@row.Id"
-           class="flex items-start gap-4 rounded-xl border border-fg-muted/10 bg-card px-4 py-3 shadow-card transition-colors duration-150 hover:border-brand/30 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-            <div class="mt-1.5 h-2 w-2 shrink-0 rounded-full @(row.Priority switch { TaskPriority.Urgent => "bg-danger", TaskPriority.High => "bg-brand-warn", TaskPriority.Medium => "bg-brand-accent", _ => "bg-fg-muted" })"></div>
-            <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="font-medium text-fg">@row.Title</span>
-                    @if (row.ParentTaskItemId is not null)
-                    {
-                        <span class="rounded bg-brand/10 px-2 py-0.5 text-xs text-brand">Subtask</span>
-                    }
+        <li class="rounded-xl border border-fg-muted/10 bg-card shadow-card transition-colors duration-150 hover:border-brand/30 hover:bg-raised">
+            <div class="flex items-start gap-4 px-4 py-3">
+                <span class="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full @(row.Priority switch { TaskPriority.Urgent => "bg-danger", TaskPriority.High => "bg-brand-warn", TaskPriority.Medium => "bg-brand-accent", _ => "bg-fg-muted" })"
+                      aria-hidden="true"></span>
+                <div class="min-w-0 flex-1">
+                    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@row.Id"
+                       class="block rounded-md font-medium text-fg outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card">
+                        @row.Title
+                    </a>
+                    <div class="mt-1 flex flex-wrap gap-3 text-xs text-fg-muted">
+                        <span>@row.Priority</span>
+                        <a class="rounded text-brand underline-offset-2 outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+                           asp-controller="BoardColumns" asp-action="Details" asp-route-id="@row.BoardColumnId">Open column</a>
+                        @if (row.ParentTaskItemId is { } pid)
+                        {
+                            <a class="rounded text-brand underline-offset-2 outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+                               asp-controller="Tasks" asp-action="Details" asp-route-id="@pid">Open parent task</a>
+                        }
+                    </div>
                 </div>
-                <div class="mt-1 flex flex-wrap gap-3 text-xs text-fg-muted">
-                    <span>@row.Priority</span>
-                    <a class="text-brand hover:text-fg" asp-controller="BoardColumns" asp-action="Details" asp-route-id="@row.BoardColumnId">Column</a>
-                    @if (row.ParentTaskItemId is { } pid)
-                    {
-                        <a class="text-brand hover:text-fg" asp-controller="Tasks" asp-action="Details" asp-route-id="@pid">Parent</a>
-                    }
-                </div>
+                <span class="text-fg-muted" aria-hidden="true">→</span>
             </div>
-            <span class="text-fg-muted" aria-hidden="true">→</span>
-        </a>
+        </li>
     }
-</div>
+</ul>

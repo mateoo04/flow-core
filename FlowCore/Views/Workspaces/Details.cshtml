@@ -22,7 +22,7 @@
         @foreach (var p in Model.Projects.OrderBy(x => x.Key))
         {
             <a asp-controller="Projects" asp-action="Details" asp-route-id="@p.Id"
-               class="rounded-xl border border-fg-muted/10 bg-card p-4 shadow-card transition-colors duration-150 hover:border-brand/30 hover:bg-raised">
+               class="rounded-xl border border-fg-muted/10 bg-card p-4 shadow-card outline-none transition-colors duration-150 hover:border-brand/30 hover:bg-raised focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app">
                 <div class="font-mono text-xs text-brand">@p.Key</div>
                 <div class="mt-1 font-medium text-fg">@p.Name</div>
                 <div class="mt-2 flex gap-2 text-xs text-fg-muted">

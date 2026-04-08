@@ -6,7 +6,7 @@
 <h1 class="text-3xl font-bold tracking-tight text-fg">Dashboard</h1>
 <p class="mt-2 max-w-2xl text-fg-secondary">Mock workspace overview — pick a workspace or project from the sidebar, or open a busy project below.</p>
 
-<section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+<section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Overview metrics">
     <a asp-controller="Workspaces" asp-action="Index"
        class="rounded-xl bg-card p-5 shadow-card transition-colors duration-150 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
         <div class="text-3xl font-semibold tabular-nums text-fg">@Model.WorkspaceCount</div>
@@ -25,6 +25,7 @@
     <div class="rounded-xl bg-card p-5 shadow-card">
         <div class="text-3xl font-semibold tabular-nums text-brand-warn">@Model.HotTaskCount</div>
         <div class="mt-1 text-sm text-fg-muted">Hot tasks (High / Urgent)</div>
+        <span class="sr-only">Summary only — not a link.</span>
     </div>
 </section>
 
@@ -39,7 +40,7 @@
                     <span class="font-medium text-fg">@row.StatusName</span>
                     <span class="tabular-nums text-fg-secondary">@row.Count</span>
                 </div>
-                <div class="mt-2 h-2 overflow-hidden rounded-full bg-raised">
+                <div class="mt-2 h-2 overflow-hidden rounded-full bg-raised" aria-hidden="true">
                     <div class="h-full rounded-full bg-brand transition-all" style="width: @(pct)%"></div>
                 </div>
             </div>
@@ -63,12 +64,12 @@
     </div>
 </section>
 
-<section class="mt-10 flex flex-wrap gap-x-4 gap-y-2 text-sm text-fg-muted">
+<section class="mt-10 flex flex-wrap gap-x-4 gap-y-2 text-sm text-fg-muted" aria-label="Additional directory links">
     <span class="text-fg-secondary">More:</span>
-    <a class="text-brand transition-colors hover:text-fg" asp-controller="Users" asp-action="Index">Users</a>
-    <a class="text-brand transition-colors hover:text-fg" asp-controller="Tags" asp-action="Index">Tags</a>
-    <a class="text-brand transition-colors hover:text-fg" asp-controller="Boards" asp-action="Index">Boards</a>
-    <a class="text-brand transition-colors hover:text-fg" asp-controller="BoardColumns" asp-action="Index">Columns</a>
-    <a class="text-brand transition-colors hover:text-fg" asp-controller="TaskStatusDefinitions" asp-action="Index">Statuses</a>
-    <a class="text-brand transition-colors hover:text-fg" asp-controller="Comments" asp-action="Index">Comments</a>
+    <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Users" asp-action="Index">Users</a>
+    <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Tags" asp-action="Index">Tags</a>
+    <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Boards" asp-action="Index">Boards</a>
+    <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="BoardColumns" asp-action="Index">Columns</a>
+    <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="TaskStatusDefinitions" asp-action="Index">Statuses</a>
+    <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Comments" asp-action="Index">Comments</a>
 </section>
