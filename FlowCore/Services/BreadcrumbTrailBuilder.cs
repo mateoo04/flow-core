@@ -34,17 +34,17 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
     public IReadOnlyList<BreadcrumbItem> ForWorkspace(Workspace w) =>
     [
         Home(),
-        new("Workspaces", "/Workspaces/Index"),
+        new("Organizations", "/Workspaces/Index"),
         new(w.Name, null)
     ];
 
     public IReadOnlyList<BreadcrumbItem> ForProject(Project p)
     {
-        var wsName = p.Workspace?.Name ?? "Workspace";
+        var wsName = p.Workspace?.Name ?? "Organization";
         return
         [
             Home(),
-            new("Workspaces", "/Workspaces/Index"),
+            new("Organizations", "/Workspaces/Index"),
             new(wsName, $"/Workspaces/Details/{p.WorkspaceId:D}"),
             new("Projects", "/Projects/Index"),
             new($"{p.Key} — {p.Name}", null)
@@ -61,7 +61,7 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
         return
         [
             Home(),
-            new("Workspaces", "/Workspaces/Index"),
+            new("Organizations", "/Workspaces/Index"),
             new(ws.Name, $"/Workspaces/Details/{ws.Id:D}"),
             new("Projects", "/Projects/Index"),
             new(project.Key, $"/Projects/Details/{project.Id:D}"),
@@ -81,7 +81,7 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
         return
         [
             Home(),
-            new("Workspaces", "/Workspaces/Index"),
+            new("Organizations", "/Workspaces/Index"),
             new(ws.Name, $"/Workspaces/Details/{ws.Id:D}"),
             new("Projects", "/Projects/Index"),
             new(project.Key, $"/Projects/Details/{project.Id:D}"),
@@ -105,7 +105,7 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
         return
         [
             Home(),
-            new("Workspaces", "/Workspaces/Index"),
+            new("Organizations", "/Workspaces/Index"),
             new(ws.Name, $"/Workspaces/Details/{ws.Id:D}"),
             new("Projects", "/Projects/Index"),
             new(project.Key, $"/Projects/Details/{project.Id:D}"),
@@ -128,7 +128,7 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
         return
         [
             Home(),
-            new("Workspaces", "/Workspaces/Index"),
+            new("Organizations", "/Workspaces/Index"),
             new(ws.Name, $"/Workspaces/Details/{ws.Id:D}"),
             new("Projects", "/Projects/Index"),
             new(project.Key, $"/Projects/Details/{project.Id:D}"),

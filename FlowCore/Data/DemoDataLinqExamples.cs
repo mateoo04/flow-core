@@ -100,7 +100,7 @@ public static class DemoDataLinqExamples
         foreach (var row in TaskTitlesWithAssignees(workspaces, graph.Users).Take(4))
             Console.WriteLine($"       {row.TaskTitle} → {row.AssigneeName}");
 
-        var hero = FindTaskByTitleSubstring(workspaces, "Product");
-        Console.WriteLine("[LINQ] Find title containing 'Product': " + (hero?.Title ?? "(none)"));
+        var hero = FindTaskByTitleSubstring(workspaces, "hero");
+        Console.WriteLine("[LINQ] Find title containing 'hero': " + (hero?.Title ?? "(none)"));
     }
 }

@@ -4,13 +4,13 @@
     var maxStatus = Model.TasksByStatus.Count > 0 ? Model.TasksByStatus.Max(x => x.Count) : 1;
 }
 <h1 class="text-3xl font-bold tracking-tight text-fg">Dashboard</h1>
-<p class="mt-2 max-w-2xl text-fg-secondary">Mock workspace overview — pick a workspace or project from the sidebar, or open a busy project below.</p>
+<p class="mt-2 max-w-2xl text-fg-secondary">Mock org overview — pick your organization or a project from the sidebar, or open a busy project below.</p>
 
 <section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Overview metrics">
     <a asp-controller="Workspaces" asp-action="Index"
        class="rounded-xl bg-card p-5 shadow-card transition-colors duration-150 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
         <div class="text-3xl font-semibold tabular-nums text-fg">@Model.WorkspaceCount</div>
-        <div class="mt-1 text-sm text-fg-muted">Workspaces</div>
+        <div class="mt-1 text-sm text-fg-muted">Organizations</div>
     </a>
     <a asp-controller="Projects" asp-action="Index"
        class="rounded-xl bg-card p-5 shadow-card transition-colors duration-150 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">

@@ -30,7 +30,7 @@ if (app.Environment.IsDevelopment())
     var taskCount = DemoDataLinqExamples.AllTasks(demo.Workspaces).Count();
 
     Console.WriteLine(
-        $"[DemoData] Workspaces={demo.Workspaces.Count}, Projects={projectCount}, " +
+        $"[DemoData] Organizations={demo.Workspaces.Count}, Projects={projectCount}, " +
         $"TaskItems={taskCount}, Users={demo.Users.Count}, Tags={demo.Tags.Count}");
 
     DemoDataLinqExamples.WriteDevelopmentQuerySample(demo);

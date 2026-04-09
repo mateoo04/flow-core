@@ -1,9 +1,9 @@
 @model IReadOnlyList<WorkspaceListRow>
 @{
-    ViewData["Title"] = "Workspaces";
+    ViewData["Title"] = "Organizations";
 }
-<h1 class="text-3xl font-bold tracking-tight text-fg">Workspaces</h1>
-<p class="mt-2 text-fg-secondary">Browse delivery workspaces and their projects.</p>
+<h1 class="text-3xl font-bold tracking-tight text-fg">Organizations</h1>
+<p class="mt-2 text-fg-secondary">Each workspace is one organization. Open one to see its projects and boards.</p>
 
 <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     @foreach (var row in Model)
