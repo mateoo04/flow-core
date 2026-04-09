@@ -1,6 +1,3 @@
-// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
 (function () {
   var storageKey = "flowcore-theme";
 
@@ -14,13 +11,10 @@
       if (stored === "light" || stored === "dark") {
         return stored;
       }
-    } catch (_) {
-      /* ignore */
-    }
+    } catch (_) {}
     return null;
   }
 
-  /** Resolved theme: explicit choice or system preference. */
   function resolveTheme() {
     return getStoredTheme() ?? themeFromPreference();
   }
@@ -35,9 +29,7 @@
     if (persist) {
       try {
         localStorage.setItem(storageKey, theme);
-      } catch (_) {
-        /* ignore */
-      }
+      } catch (_) {}
     }
 
     var btn = document.getElementById("theme-toggle");

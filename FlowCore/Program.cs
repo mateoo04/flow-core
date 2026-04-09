@@ -5,7 +5,6 @@ using FlowCore.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<DemoDataGraph>(_ => DemoDataBuilder.CreateSampleGraph());
@@ -36,7 +35,6 @@ if (app.Environment.IsDevelopment())
     DemoDataLinqExamples.WriteDevelopmentQuerySample(demo);
 }
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

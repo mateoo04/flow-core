@@ -8,12 +8,10 @@ namespace FlowCore.Controllers;
 public class BoardsController : BaseController
 {
     private readonly IBoardRepository _boards;
-    private readonly IBreadcrumbTrailBuilder _breadcrumbs;
 
-    public BoardsController(IBoardRepository boards, IBreadcrumbTrailBuilder breadcrumbs)
+    public BoardsController(IBoardRepository boards)
     {
         _boards = boards;
-        _breadcrumbs = breadcrumbs;
     }
 
     public IActionResult Index()
@@ -27,8 +25,13 @@ public class BoardsController : BaseController
     public IActionResult Details(Guid id)
     {
         var entity = _boards.GetById(id);
-        if (entity?.Project is not null)
+        if (entity is null)
+            return NotFound();
+
+        if (entity.Project is not null)
             SetNav(entity.Project.WorkspaceId, entity.ProjectId);
-        return ViewDetails(entity, _breadcrumbs.ForBoard);
+
+        return RedirectToAction(nameof(ProjectsController.Details), "Projects",
+            new { id = entity.ProjectId, boardId = entity.Id });
     }
 }

@@ -11,6 +11,8 @@ public sealed class DemoDataGraph
 
 public static class DemoDataBuilder
 {
+    private readonly record struct Team(User Alex, User Sam, User Casey, User Jordan, User Morgan);
+
     public static DemoDataGraph CreateSampleGraph()
     {
         var now = new DateTime(2026, 4, 1, 12, 0, 0, DateTimeKind.Utc);
@@ -34,13 +36,40 @@ public static class DemoDataBuilder
             IsActive = true
         };
 
-        var users = new List<User> { ownerAlex, memberSam };
+        var casey = new User
+        {
+            Id = DemoSeedIds.UserCasey,
+            FullName = "Casey Rivera",
+            Email = "casey@flowcore.demo",
+            JoinedAt = now.AddMonths(-2),
+            IsActive = true
+        };
+
+        var jordan = new User
+        {
+            Id = DemoSeedIds.UserJordan,
+            FullName = "Jordan Lee",
+            Email = "jordan@flowcore.demo",
+            JoinedAt = now.AddMonths(-2),
+            IsActive = true
+        };
+
+        var morgan = new User
+        {
+            Id = DemoSeedIds.UserMorgan,
+            FullName = "Morgan Kim",
+            Email = "morgan@flowcore.demo",
+            JoinedAt = now.AddMonths(-1),
+            IsActive = true
+        };
+
+        var users = new List<User> { ownerAlex, memberSam, casey, jordan, morgan };
+        var team = new Team(ownerAlex, memberSam, casey, jordan, morgan);
 
         var tagUi = new Tag { Id = DemoSeedIds.TagUi, Name = "ui", ColorHex = "#6366F1" };
         var tagBug = new Tag { Id = DemoSeedIds.TagBug, Name = "bug", ColorHex = "#EF4444" };
         var tags = new List<Tag> { tagUi, tagBug };
 
-        // One workspace = one organization (tenant). Teams and domains split by project.
         var organization = new Workspace
         {
             Id = DemoSeedIds.WorkspaceNorth,
@@ -52,61 +81,55 @@ public static class DemoDataBuilder
             OwnerUserId = ownerAlex.Id
         };
 
-        // Five projects: two heavy delivery tracks, three lighter streams.
         var marketingSite = CreateProject(
             organization,
             Ng,
             now,
             "Acme.com — marketing & sign-up",
-            "MKT",
             "Public site, content, SEO, and self-serve trial checkout.",
             ProjectStatus.Active,
             ProjectPriority.High);
-        SeedMarketingSiteTasks(marketingSite, now, ownerAlex, memberSam, tagUi, tagBug, Ng);
+        SeedMarketingSiteTasks(marketingSite, now, team, tagUi, tagBug, Ng);
 
         var retailApp = CreateProject(
             organization,
             Ng,
             now,
             "Acme Shop — mobile",
-            "SHOP",
             "Customer iOS/Android app: browse, cart, and order tracking.",
             ProjectStatus.Active,
             ProjectPriority.High);
-        SeedRetailAppTasks(retailApp, now, ownerAlex, memberSam, tagUi, tagBug, Ng);
+        SeedRetailAppTasks(retailApp, now, team, tagUi, tagBug, Ng);
 
         var designSys = CreateProject(
             organization,
             Ng,
             now,
             "Compass — design system",
-            "CMP",
             "Figma kit, React primitives, and tokens shared across product surfaces.",
             ProjectStatus.Planning,
             ProjectPriority.Low);
-        SeedDesignSystemTasks(designSys, now, ownerAlex, memberSam, tagUi, Ng);
+        SeedDesignSystemTasks(designSys, now, team, tagUi, Ng);
 
         var partnerIntegrations = CreateProject(
             organization,
             Ng,
             now,
             "Partner Hub — revenue integrations",
-            "REV",
             "Wholesale portals, EDI hooks, and ERP-facing APIs for top partners.",
             ProjectStatus.Planning,
             ProjectPriority.Medium);
-        SeedPartnerIntegrationTasks(partnerIntegrations, now, ownerAlex, memberSam, tagBug, Ng);
+        SeedPartnerIntegrationTasks(partnerIntegrations, now, team, tagBug, Ng);
 
         var peopleTech = CreateProject(
             organization,
             Ng,
             now,
             "People tech — new hire experience",
-            "NHX",
             "Device prep, identity groups, and lightweight automations so week-one isn’t helpdesk roulette.",
             ProjectStatus.Active,
             ProjectPriority.Low);
-        SeedPeopleTechTasks(peopleTech, now, ownerAlex, memberSam, Ng);
+        SeedPeopleTechTasks(peopleTech, now, team, Ng);
 
         organization.Projects.Add(marketingSite.Project);
         organization.Projects.Add(retailApp.Project);
@@ -144,7 +167,6 @@ public static class DemoDataBuilder
         Func<Guid> ng,
         DateTime now,
         string name,
-        string key,
         string description,
         ProjectStatus status,
         ProjectPriority priority)
@@ -154,7 +176,6 @@ public static class DemoDataBuilder
             Id = ng(),
             WorkspaceId = ws.Id,
             Name = name,
-            Key = key,
             Description = description,
             StartDate = now.AddDays(-21),
             DueDate = now.AddMonths(3),
@@ -288,6 +309,12 @@ public static class DemoDataBuilder
         user.TaskAssignments.Add(a);
     }
 
+    private static void AssignMany(TaskItem task, DateTime baseAt, params User[] assignees)
+    {
+        for (var i = 0; i < assignees.Length; i++)
+            Assign(task, assignees[i], TaskRole.Assignee, baseAt.AddHours(-i));
+    }
+
     private static void LinkTag(TaskItem task, Tag tag, DateTime at)
     {
         var link = new TaskTag
@@ -317,16 +344,16 @@ public static class DemoDataBuilder
         task.Comments.Add(c);
     }
 
-    /// <summary>15 tasks: mixed statuses/columns, 3 parents with subtasks, several comments.</summary>
     private static void SeedMarketingSiteTasks(
         ProjectBoardContext ctx,
         DateTime now,
-        User alex,
-        User sam,
+        Team team,
         Tag tagUi,
         Tag tagBug,
         Func<Guid> ng)
     {
+        var (alex, sam, casey, jordan, morgan) = team;
+
         var epicIa = NewTask(
             ng,
             ctx.ColTodo,
@@ -339,7 +366,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(16),
             parent: null);
-        Assign(epicIa, alex, TaskRole.Assignee, now.AddDays(-14));
+        AssignMany(epicIa, now.AddDays(-14), alex, sam, casey);
         LinkTag(epicIa, tagUi, now.AddDays(-10));
 
         var subIa1 = NewTask(
@@ -381,7 +408,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(9),
             parent: null);
-        Assign(epicCheckout, sam, TaskRole.Assignee, now.AddDays(-8));
+        AssignMany(epicCheckout, now.AddDays(-8), alex, sam, casey, jordan, morgan);
 
         var subPay = NewTask(
             ng,
@@ -395,7 +422,7 @@ public static class DemoDataBuilder
             now,
             null,
             epicCheckout);
-        Assign(subPay, alex, TaskRole.Assignee, now.AddDays(-5));
+        AssignMany(subPay, now.AddDays(-5), alex, sam);
 
         var subErr = NewTask(
             ng,
@@ -475,7 +502,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(6),
             parent: null);
-        Assign(heroPl, sam, TaskRole.Assignee, now.AddDays(-7));
+        AssignMany(heroPl, now.AddDays(-7), alex, sam, casey, jordan);
         LinkTag(heroPl, tagUi, now.AddDays(-6));
 
         var analytics = NewTask(
@@ -505,7 +532,7 @@ public static class DemoDataBuilder
             now.AddDays(3),
             parent: null);
         LinkTag(safari, tagBug, now.AddDays(-3));
-        Assign(safari, alex, TaskRole.Assignee, now.AddDays(-4));
+        AssignMany(safari, now.AddDays(-4), sam, casey, jordan);
 
         NewTask(
             ng,
@@ -547,16 +574,16 @@ public static class DemoDataBuilder
             now.AddDays(-2));
     }
 
-    /// <summary>15 tasks: mixed statuses, 2 epics with subtasks, comments.</summary>
     private static void SeedRetailAppTasks(
         ProjectBoardContext ctx,
         DateTime now,
-        User alex,
-        User sam,
+        Team team,
         Tag tagUi,
         Tag tagBug,
         Func<Guid> ng)
     {
+        var (alex, sam, casey, jordan, morgan) = team;
+
         var epicOnboard = NewTask(
             ng,
             ctx.ColDoing,
@@ -569,7 +596,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(12),
             parent: null);
-        Assign(epicOnboard, sam, TaskRole.Assignee, now.AddDays(-11));
+        AssignMany(epicOnboard, now.AddDays(-11), alex, sam, casey, jordan, morgan);
         LinkTag(epicOnboard, tagUi, now.AddDays(-9));
 
         var subSplash = NewTask(
@@ -611,7 +638,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(20),
             parent: null);
-        Assign(epicOffline, alex, TaskRole.Assignee, now.AddDays(-7));
+        AssignMany(epicOffline, now.AddDays(-7), sam, casey, jordan, morgan);
 
         var subSync = NewTask(
             ng,
@@ -651,7 +678,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(6),
             parent: null);
-        Assign(push, sam, TaskRole.Assignee, now.AddDays(-5));
+        AssignMany(push, now.AddDays(-5), alex, sam, morgan);
 
         var crash = NewTask(
             ng,
@@ -666,7 +693,7 @@ public static class DemoDataBuilder
             now.AddDays(4),
             parent: null);
         LinkTag(crash, tagBug, now.AddDays(-2));
-        Assign(crash, sam, TaskRole.Assignee, now.AddDays(-2));
+        AssignMany(crash, now.AddDays(-2), casey, jordan);
 
         NewTask(
             ng,
@@ -777,11 +804,12 @@ public static class DemoDataBuilder
     private static void SeedDesignSystemTasks(
         ProjectBoardContext ctx,
         DateTime now,
-        User alex,
-        User sam,
+        Team team,
         Tag tagUi,
         Func<Guid> ng)
     {
+        var (alex, sam, casey, jordan, morgan) = team;
+
         var buttons = NewTask(
             ng,
             ctx.ColDoing,
@@ -794,7 +822,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(14),
             parent: null);
-        Assign(buttons, alex, TaskRole.Assignee, now.AddDays(-8));
+        AssignMany(buttons, now.AddDays(-8), alex, jordan, morgan);
         LinkTag(buttons, tagUi, now.AddDays(-7));
 
         NewTask(
@@ -858,11 +886,12 @@ public static class DemoDataBuilder
     private static void SeedPartnerIntegrationTasks(
         ProjectBoardContext ctx,
         DateTime now,
-        User alex,
-        User sam,
+        Team team,
         Tag tagBug,
         Func<Guid> ng)
     {
+        var (alex, sam, casey, jordan, morgan) = team;
+
         var webhooks = NewTask(
             ng,
             ctx.ColDoing,
@@ -875,7 +904,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(9),
             parent: null);
-        Assign(webhooks, alex, TaskRole.Assignee, now.AddDays(-6));
+        AssignMany(webhooks, now.AddDays(-6), alex, sam, casey, jordan, morgan);
         LinkTag(webhooks, tagBug, now.AddDays(-5));
 
         var netsuite = NewTask(
@@ -903,7 +932,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(18),
             parent: null);
-        Assign(sso, sam, TaskRole.Assignee, now.AddDays(-4));
+        AssignMany(sso, now.AddDays(-4), sam, morgan);
 
         AddComment(ng, webhooks, sam,
             "Logged 412 duplicates last Friday — table `wh_order_events` is catching them now.",
@@ -916,10 +945,11 @@ public static class DemoDataBuilder
     private static void SeedPeopleTechTasks(
         ProjectBoardContext ctx,
         DateTime now,
-        User alex,
-        User sam,
+        Team team,
         Func<Guid> ng)
     {
+        var (alex, sam, casey, jordan, morgan) = team;
+
         var laptops = NewTask(
             ng,
             ctx.ColDoing,
@@ -932,7 +962,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(12),
             parent: null);
-        Assign(laptops, sam, TaskRole.Assignee, now.AddDays(-9));
+        AssignMany(laptops, now.AddDays(-9), alex, sam, casey);
 
         NewTask(
             ng,

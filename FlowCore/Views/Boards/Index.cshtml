@@ -26,7 +26,7 @@
                 <td class="px-4 py-3 tabular-nums text-fg-secondary">@row.ColumnCount</td>
                 <td class="px-4 py-3">
                     <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card"
-                       asp-controller="Projects" asp-action="Details" asp-route-id="@row.ProjectId"
+                       asp-controller="Projects" asp-action="Details" asp-route-id="@row.ProjectId" asp-route-boardId="@row.Id"
                        aria-label="Open project linked to board @row.Name">Open project</a>
                 </td>
             </tr>

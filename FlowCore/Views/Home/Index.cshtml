@@ -1,68 +1,50 @@
-@model DashboardViewModel
+@model MyWorkViewModel
 @{
-    ViewData["Title"] = "Dashboard";
-    var maxStatus = Model.TasksByStatus.Count > 0 ? Model.TasksByStatus.Max(x => x.Count) : 1;
+    ViewData["Title"] = "My work";
 }
-<h1 class="text-3xl font-bold tracking-tight text-fg">Dashboard</h1>
-<p class="mt-2 max-w-2xl text-fg-secondary">Mock org overview — pick your organization or a project from the sidebar, or open a busy project below.</p>
+<h1 class="text-3xl font-bold tracking-tight text-fg">My work</h1>
+<p class="mt-2 max-w-2xl text-fg-secondary">Tasks assigned to you, grouped by status. Signed in as <span class="font-medium text-fg">@Model.CurrentUserDisplayName</span> (demo).</p>
 
-<section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Overview metrics">
-    <a asp-controller="Workspaces" asp-action="Index"
-       class="rounded-xl bg-card p-5 shadow-card transition-colors duration-150 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-        <div class="text-3xl font-semibold tabular-nums text-fg">@Model.WorkspaceCount</div>
-        <div class="mt-1 text-sm text-fg-muted">Organizations</div>
-    </a>
-    <a asp-controller="Projects" asp-action="Index"
-       class="rounded-xl bg-card p-5 shadow-card transition-colors duration-150 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-        <div class="text-3xl font-semibold tabular-nums text-fg">@Model.ProjectCount</div>
-        <div class="mt-1 text-sm text-fg-muted">Projects</div>
-    </a>
-    <a asp-controller="Tasks" asp-action="Index"
-       class="rounded-xl bg-card p-5 shadow-card transition-colors duration-150 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-        <div class="text-3xl font-semibold tabular-nums text-fg">@Model.TaskCount</div>
-        <div class="mt-1 text-sm text-fg-muted">Tasks</div>
-    </a>
-    <div class="rounded-xl bg-card p-5 shadow-card">
-        <div class="text-3xl font-semibold tabular-nums text-brand-warn">@Model.HotTaskCount</div>
-        <div class="mt-1 text-sm text-fg-muted">Hot tasks (High / Urgent)</div>
-        <span class="sr-only">Summary only — not a link.</span>
-    </div>
-</section>
-
-<section class="mt-10">
-    <h2 class="text-lg font-semibold text-fg">Tasks by status</h2>
-    <div class="mt-4 flex flex-col gap-3">
-        @foreach (var row in Model.TasksByStatus)
-        {
-            var pct = maxStatus > 0 ? (int)Math.Round(100.0 * row.Count / maxStatus) : 0;
-            <div class="rounded-xl bg-card px-4 py-3 shadow-card">
-                <div class="flex items-center justify-between gap-4 text-sm">
-                    <span class="font-medium text-fg">@row.StatusName</span>
-                    <span class="tabular-nums text-fg-secondary">@row.Count</span>
-                </div>
-                <div class="mt-2 h-2 overflow-hidden rounded-full bg-raised" aria-hidden="true">
-                    <div class="h-full rounded-full bg-brand transition-all" style="width: @(pct)%"></div>
-                </div>
+@if (Model.StatusGroups.Count == 0)
+{
+    <p class="mt-10 rounded-xl border border-dashed border-fg-muted/30 bg-card p-8 text-center text-fg-muted">No assigned tasks yet.</p>
+}
+else
+{
+    @for (var gi = 0; gi < Model.StatusGroups.Count; gi++)
+    {
+        var group = Model.StatusGroups[gi];
+        var stripe = group.StatusColorHex ?? "#6366f1";
+        var headingId = $"status-heading-{gi}";
+        <section class="mt-10" aria-labelledby="@headingId">
+            <div class="flex items-center gap-3 border-b border-fg-muted/15 pb-3">
+                <span class="h-3 w-1 rounded-full" style="background-color: @stripe" aria-hidden="true"></span>
+                <h2 id="@headingId" class="text-lg font-semibold text-fg">@group.StatusName</h2>
+                <span class="text-sm tabular-nums text-fg-muted">@group.Tasks.Count</span>
             </div>
-        }
-    </div>
-</section>
-
-<section class="mt-10">
-    <h2 class="text-lg font-semibold text-fg">Busiest projects</h2>
-    <div class="mt-4 grid gap-4 sm:grid-cols-2">
-        @foreach (var row in Model.TopProjectsByTasks)
-        {
-            <a asp-controller="Projects" asp-action="Details" asp-route-id="@row.ProjectId"
-               class="group rounded-xl border border-fg-muted/10 bg-card p-4 shadow-card transition-colors duration-150 hover:border-brand/40 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-                <div class="font-mono text-xs text-brand">@row.ProjectKey</div>
-                <div class="mt-1 font-medium text-fg">@row.ProjectName</div>
-                <div class="mt-2 text-sm text-fg-muted">@row.WorkspaceName</div>
-                <div class="mt-3 text-sm text-fg-secondary">@row.TaskCount tasks</div>
-            </a>
-        }
-    </div>
-</section>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                @foreach (var card in group.Tasks)
+                {
+                    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@card.TaskId"
+                       class="fc-task-avatar-ring fc-task-avatar-ring--card flex flex-col rounded-xl border border-fg-muted/10 bg-card p-4 text-left shadow-card transition-colors duration-150 hover:border-brand/30 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                       style="border-left: 3px solid @stripe">
+                        <div class="line-clamp-2 font-medium text-fg">@card.Title</div>
+                        <div class="mt-2 text-xs text-fg-muted">
+                            <span class="text-fg-secondary">@card.ProjectName</span>
+                        </div>
+                        @if (card.Assignees.Shown.Count > 0 || card.Assignees.ExtraCount > 0)
+                        {
+                            <div class="mt-3 flex items-center justify-end gap-2 pt-3">
+                                <span class="sr-only">Assignees</span>
+                                <partial name="_AssigneeAvatarStack" model="card.Assignees"/>
+                            </div>
+                        }
+                    </a>
+                }
+            </div>
+        </section>
+    }
+}
 
 <section class="mt-10 flex flex-wrap gap-x-4 gap-y-2 text-sm text-fg-muted" aria-label="Additional directory links">
     <span class="text-fg-secondary">More:</span>

@@ -7,15 +7,14 @@
 <p class="mt-2 text-fg-secondary">Per-project workflow columns (definitions).</p>
 
 <div class="mt-8 space-y-10">
-    @foreach (var group in Model.GroupBy(r => r.ProjectId).OrderBy(g => ProjectRepo.GetById(g.Key)?.Key ?? ""))
+    @foreach (var group in Model.GroupBy(r => r.ProjectId).OrderBy(g => ProjectRepo.GetById(g.Key)?.Name ?? ""))
     {
         var proj = ProjectRepo.GetById(group.Key);
         <section>
             <h2 class="flex flex-wrap items-center gap-2 text-lg font-semibold text-fg">
                 @if (proj is not null)
                 {
-                    <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Projects" asp-action="Details" asp-route-id="@proj.Id">@proj.Key</a>
-                    <span class="text-fg-muted font-normal">— @proj.Name</span>
+                    <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Projects" asp-action="Details" asp-route-id="@proj.Id">@proj.Name</a>
                 }
                 else
                 {
