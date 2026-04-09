@@ -22,7 +22,7 @@
                 var s = localStorage.getItem(k);
                 var dark = s === 'dark' || (s !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                 document.documentElement.classList.toggle('dark', dark);
-            } catch (e) { /* ignore */ }
+            } catch (e) {}
         })();
     </script>
     <title>@ViewData["Title"] - FlowCore</title>
@@ -44,7 +44,7 @@
                 </div>
                 <button type="button"
                         id="theme-toggle"
-                        class="shrink-0 rounded-lg p-2 text-fg-muted transition-colors hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                        class="cursor-pointer shrink-0 rounded-lg p-2 text-fg-muted transition-colors hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                         aria-label="Switch color theme"
                         aria-pressed="false">
                     <span class="sr-only">Toggle light / dark mode</span>
@@ -60,7 +60,7 @@
 
         <nav class="flex flex-1 flex-col gap-1 overflow-y-auto p-3 text-sm" aria-label="Main">
             <a class="rounded-lg px-3 py-2 font-medium text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "bg-raised text-fg" : "")"
-               asp-controller="Home" asp-action="Index">Dashboard</a>
+               asp-controller="Home" asp-action="Index">My work</a>
 
             <p class="mt-3 px-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">Organizations</p>
             @foreach (var ws in workspaces)
@@ -83,17 +83,15 @@
                    title="@p.Name">@p.Name</a>
             }
 
-            <p class="mt-4 px-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">Core</p>
-            <a class="rounded-lg px-3 py-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tasks" ? "bg-raised text-fg" : "")"
-               asp-controller="Tasks" asp-action="Index">Tasks</a>
-            <a class="rounded-lg px-3 py-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Comments" ? "bg-raised text-fg" : "")"
-               asp-controller="Comments" asp-action="Index">Comments</a>
-
             <details class="mt-4 rounded-lg border border-fg-muted/20 bg-app/50 open:bg-raised/30">
                 <summary class="cursor-pointer list-none rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-fg-muted marker:content-none outline-none [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
                     <span class="text-fg-secondary">More site sections</span>
                 </summary>
                 <div class="flex flex-col gap-0.5 border-t border-fg-muted/15 p-2">
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors duration-150 hover:bg-card hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                       asp-controller="Tasks" asp-action="Index">Tasks</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors duration-150 hover:bg-card hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                       asp-controller="Comments" asp-action="Index">Comments</a>
                     <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors duration-150 hover:bg-card hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                        asp-controller="Boards" asp-action="Index">Boards</a>
                     <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors duration-150 hover:bg-card hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"

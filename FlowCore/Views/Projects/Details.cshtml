@@ -1,50 +1,43 @@
-@model Project
+@model ProjectDetailsPageViewModel
 @{
-    ViewData["Title"] = Model.Key;
-    var defaultBoard = Model.Boards.FirstOrDefault(b => b.IsDefault) ?? Model.Boards.FirstOrDefault();
+    ViewData["Title"] = Model.Project.Name;
+    var project = Model.Project;
 }
 <header class="border-b border-fg-muted/15 pb-6">
     <div class="flex flex-wrap items-start justify-between gap-4">
-        <div>
-            <p class="font-mono text-sm text-brand">@Model.Key</p>
-            <h1 class="mt-1 text-3xl font-bold tracking-tight text-fg">@Model.Name</h1>
-            <p class="mt-2 max-w-2xl text-fg-secondary">@Model.Description</p>
+        <div class="min-w-0">
+            <h1 class="text-3xl font-bold tracking-tight text-fg">@project.Name</h1>
+            <p class="mt-2 max-w-2xl text-fg-secondary">@project.Description</p>
             <div class="mt-4 flex flex-wrap gap-2">
-                <span class="rounded-full bg-raised px-3 py-1 text-xs font-medium text-fg-secondary">@Model.Status</span>
-                <span class="rounded-full bg-raised px-3 py-1 text-xs text-fg-muted">Priority @Model.Priority</span>
+                <span class="rounded-full bg-raised px-3 py-1 text-xs font-medium text-fg-secondary">@project.Status</span>
+                <span class="rounded-full bg-raised px-3 py-1 text-xs text-fg-muted">Priority @project.Priority</span>
             </div>
         </div>
-        @if (defaultBoard is not null)
-        {
-            <a asp-controller="Boards" asp-action="Details" asp-route-id="@defaultBoard.Id"
-               class="inline-flex items-center justify-center rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white shadow-card transition-colors duration-150 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-                Open board
-            </a>
-        }
     </div>
     <div class="mt-4 text-sm">
-        <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Workspaces" asp-action="Details" asp-route-id="@Model.WorkspaceId"><span aria-hidden="true">← </span>Organization</a>
+        <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Workspaces" asp-action="Details" asp-route-id="@project.WorkspaceId"><span aria-hidden="true">← </span>Organization</a>
     </div>
 </header>
 
-@if (defaultBoard is null)
+@if (Model.BoardsOrdered.Count == 0)
 {
     <p class="mt-8 rounded-xl border border-dashed border-fg-muted/30 bg-card p-8 text-center text-fg-muted">No board on this project yet.</p>
 }
 else
 {
-    <p class="mt-6 text-sm text-fg-muted">Default board: <span class="text-fg-secondary">@defaultBoard.Name</span>. Use <strong>Open board</strong> for the full column view.</p>
-}
-
-<section class="mt-8">
-    <h2 class="text-lg font-semibold text-fg">All boards</h2>
-    <ul class="mt-3 flex flex-wrap gap-2">
-        @foreach (var b in Model.Boards)
+    <div class="mt-6 flex flex-wrap gap-1 border-b border-fg-muted/15 pb-px" role="tablist" aria-label="Boards">
+        @foreach (var b in Model.BoardsOrdered)
         {
-            <li>
-                <a class="rounded-lg border border-fg-muted/20 px-3 py-2 text-sm text-brand outline-none transition-colors hover:border-brand/40 hover:bg-raised focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app"
-                   asp-controller="Boards" asp-action="Details" asp-route-id="@b.Id">@b.Name</a>
-            </li>
+            var isActive = Model.ActiveBoard?.Id == b.Id;
+            <a role="tab"
+               aria-selected="@(isActive ? "true" : "false")"
+               class="rounded-t-lg px-4 py-2.5 text-sm font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(isActive ? "border-b-2 border-brand bg-raised/60 text-fg" : "text-fg-secondary hover:bg-raised/40 hover:text-fg")"
+               asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" asp-route-boardId="@b.Id">@b.Name</a>
         }
-    </ul>
-</section>
+    </div>
+
+    @if (Model.ActiveBoard is { } board)
+    {
+        <partial name="_BoardKanban" model="board"/>
+    }
+}

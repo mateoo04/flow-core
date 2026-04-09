@@ -1,0 +1,22 @@
+@model FlowCore.Models.ViewModels.TaskAssigneeStackVm
+@if (Model.Shown.Count > 0 || Model.ExtraCount > 0)
+{
+    <div class="flex flex-row items-center justify-end" aria-label="Assignees">
+        @if (Model.Shown.Count > 0)
+        {
+            <div class="isolate flex flex-row items-center justify-end -space-x-2">
+                @for (var i = 0; i < Model.Shown.Count; i++)
+                {
+                    var a = Model.Shown[i];
+                    var z = (Model.Shown.Count - i) * 10;
+                    <span class="relative inline-flex flex-none items-center justify-center overflow-hidden rounded-full text-[10px] font-semibold leading-none text-white transition-shadow duration-150 ease-out"
+                          style="background-color: @a.BackgroundHex; width: 1.75rem; height: 1.75rem; z-index: @z; box-shadow: 0 0 0 2px var(--avatar-cutout, var(--color-card));">@a.Initials</span>
+                }
+            </div>
+        }
+        @if (Model.ExtraCount > 0)
+        {
+            <span class="relative z-0 shrink-0 text-[10px] font-semibold tabular-nums text-fg-muted ml-2" >+@Model.ExtraCount</span>
+        }
+    </div>
+}

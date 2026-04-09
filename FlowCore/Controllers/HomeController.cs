@@ -2,6 +2,7 @@ using System.Diagnostics;
 using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.ViewModels;
+using FlowCore.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowCore.Controllers;
@@ -17,17 +18,51 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        var workspaces = _graph.Workspaces;
-        var vm = new DashboardViewModel
+        var currentUserId = DemoSeedIds.UserAlex;
+        var user = _graph.Users.FirstOrDefault(u => u.Id == currentUserId);
+
+        var tasks = DemoDataLinqExamples.AllTasks(_graph.Workspaces)
+            .Where(t => t.TaskAssignments.Any(a => a.UserId == currentUserId && a.Role == TaskRole.Assignee))
+            .ToList();
+
+        var groups = tasks
+            .GroupBy(t => t.TaskStatusDefinition?.Name ?? "Unknown")
+            .Select(g =>
+            {
+                var sortKey = g.Min(t => t.TaskStatusDefinition?.Position ?? 999);
+                var color = g.Select(t => t.TaskStatusDefinition?.ColorHex).FirstOrDefault(c => !string.IsNullOrEmpty(c));
+                var cards = g
+                    .OrderBy(t => t.Title)
+                    .Select(t =>
+                    {
+                        var project = t.BoardColumn?.Board?.Project;
+                        return new MyTaskCardVm
+                        {
+                            TaskId = t.Id,
+                            Title = t.Title,
+                            ProjectId = project?.Id ?? Guid.Empty,
+                            ProjectName = project?.Name ?? "Project",
+                            Assignees = TaskAssigneeStackBuilder.FromTask(t)
+                        };
+                    })
+                    .ToList();
+
+                return new StatusTaskGroupVm
+                {
+                    StatusName = g.Key,
+                    StatusColorHex = color,
+                    SortKey = sortKey,
+                    Tasks = cards
+                };
+            })
+            .OrderBy(x => x.SortKey)
+            .ThenBy(x => x.StatusName)
+            .ToList();
+
+        var vm = new MyWorkViewModel
         {
-            WorkspaceCount = workspaces.Count,
-            ProjectCount = workspaces.Sum(w => w.Projects.Count),
-            TaskCount = DemoDataLinqExamples.AllTasks(workspaces).Count(),
-            UserCount = _graph.Users.Count,
-            TagCount = _graph.Tags.Count,
-            HotTaskCount = DemoDataLinqExamples.HotTasks(workspaces).Count(),
-            TasksByStatus = DemoDataLinqExamples.TaskCountByStatus(workspaces).ToList(),
-            TopProjectsByTasks = DemoDataLinqExamples.ProjectsByTaskVolumeWithIds(workspaces).Take(8).ToList()
+            CurrentUserDisplayName = user?.FullName ?? "You",
+            StatusGroups = groups
         };
         return View(vm);
     }

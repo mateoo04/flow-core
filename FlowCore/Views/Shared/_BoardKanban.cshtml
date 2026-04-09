@@ -1,25 +1,5 @@
+@using FlowCore.Services
 @model Board
-@{
-    ViewData["Title"] = Model.Name;
-}
-<div class="flex flex-wrap items-start justify-between gap-4 border-b border-fg-muted/15 pb-4">
-    <div>
-        <h1 class="text-2xl font-bold tracking-tight text-fg">@Model.Name</h1>
-        <p class="mt-1 text-sm text-fg-muted">
-            @if (Model.Project is { } proj)
-            {
-                <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app"
-                   asp-controller="Projects" asp-action="Details" asp-route-id="@proj.Id">Project @proj.Key — @proj.Name</a>
-            }
-            else
-            {
-                <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app"
-                   asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">Open project</a>
-            }
-        </p>
-    </div>
-</div>
-
 <p class="mt-4 text-sm text-fg-secondary">Scroll horizontally on small screens. Each card opens the task.</p>
 
 <div class="mt-6 flex gap-4 overflow-x-auto pb-4" role="region" aria-label="Board columns and tasks">
@@ -46,24 +26,28 @@
                     foreach (var task in col.Tasks.OrderBy(t => t.Title))
                     {
                         var stripe = task.TaskStatusDefinition?.ColorHex ?? "#6366f1";
+                        var assignees = TaskAssigneeStackBuilder.FromTask(task);
                         <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id"
-                           class="block rounded-lg border border-fg-muted/10 bg-app/80 p-3 text-left transition-colors duration-150 hover:border-brand/40 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                           class="fc-task-avatar-ring block rounded-lg border border-fg-muted/10 bg-app/80 p-3 text-left transition-colors duration-150 hover:border-brand/40 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                            style="border-left: 3px solid @stripe">
                             @if (task.TaskStatusDefinition is { } st)
                             {
                                 <span class="sr-only">Status: @st.Name.</span>
                             }
                             <div class="line-clamp-2 text-sm font-medium text-fg">@task.Title</div>
-                            <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-fg-muted">
-                                <span>@task.Priority</span>
-                                @if (task.StoryPoints > 0)
-                                {
-                                    <span class="rounded bg-raised px-1.5 py-0.5 tabular-nums">@task.StoryPoints sp</span>
-                                }
-                                @if (task.ParentTaskItemId is not null)
-                                {
-                                    <span class="rounded bg-brand/10 px-1.5 py-0.5 text-brand">Subtask</span>
-                                }
+                            <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-fg-muted">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span>@task.Priority</span>
+                                    @if (task.StoryPoints > 0)
+                                    {
+                                        <span class="rounded bg-raised px-1.5 py-0.5 tabular-nums">@task.StoryPoints sp</span>
+                                    }
+                                    @if (task.ParentTaskItemId is not null)
+                                    {
+                                        <span class="rounded bg-brand/10 px-1.5 py-0.5 text-brand">Subtask</span>
+                                    }
+                                </div>
+                                <partial name="_AssigneeAvatarStack" model="assignees"/>
                             </div>
                         </a>
                     }

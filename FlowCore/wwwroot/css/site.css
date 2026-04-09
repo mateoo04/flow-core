@@ -1,6 +1,21 @@
-/* App tweaks; semantic colors come from Tailwind @theme. */
 html {
   font-size: 16px;
+}
+
+.fc-task-avatar-ring {
+  --avatar-cutout: var(--color-app);
+}
+
+.fc-task-avatar-ring:hover {
+  --avatar-cutout: var(--color-raised);
+}
+
+.fc-task-avatar-ring--card {
+  --avatar-cutout: var(--color-card);
+}
+
+.fc-task-avatar-ring--card:hover {
+  --avatar-cutout: var(--color-raised);
 }
 
 a:focus-visible {
