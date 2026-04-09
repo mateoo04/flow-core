@@ -7,8 +7,8 @@
     var activeWs = ViewData["ActiveWorkspaceId"] as Guid?;
     var activeProject = ViewData["ActiveProjectId"] as Guid?;
     var sidebarProjects = activeWs is { } w
-        ? allProjects.Where(p => p.WorkspaceId == w).OrderBy(p => p.Key).Take(12).ToList()
-        : allProjects.OrderBy(p => p.Key).Take(8).ToList();
+        ? allProjects.Where(p => p.WorkspaceId == w).OrderBy(p => p.Name).Take(12).ToList()
+        : allProjects.OrderBy(p => p.Name).Take(8).ToList();
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -40,7 +40,7 @@
                 <div class="min-w-0">
                     <a class="rounded text-lg font-semibold tracking-tight text-fg no-underline outline-none transition-colors hover:text-brand focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card"
                        asp-controller="Home" asp-action="Index">FlowCore</a>
-                    <p class="mt-1 text-xs text-fg-muted">Project workspace</p>
+                    <p class="mt-1 text-xs text-fg-muted">Org &amp; project delivery</p>
                 </div>
                 <button type="button"
                         id="theme-toggle"
@@ -62,7 +62,7 @@
             <a class="rounded-lg px-3 py-2 font-medium text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "bg-raised text-fg" : "")"
                asp-controller="Home" asp-action="Index">Dashboard</a>
 
-            <p class="mt-3 px-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">Workspaces</p>
+            <p class="mt-3 px-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">Organizations</p>
             @foreach (var ws in workspaces)
             {
                 var wsActive = activeWs == ws.Id;
@@ -70,7 +70,7 @@
                    asp-controller="Workspaces" asp-action="Details" asp-route-id="@ws.Id">@ws.Name</a>
             }
             <a class="mt-1 rounded-lg px-3 py-2 text-xs text-fg-muted transition-colors duration-150 hover:bg-raised hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-               asp-controller="Workspaces" asp-action="Index">All workspaces…</a>
+               asp-controller="Workspaces" asp-action="Index">All organizations…</a>
 
             <p class="mt-4 px-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">Projects</p>
             <a class="rounded-lg px-3 py-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "bg-raised text-fg" : "")"
@@ -78,9 +78,9 @@
             @foreach (var p in sidebarProjects)
             {
                 var pActive = activeProject == p.Id;
-                <a class="block truncate rounded-lg border-l-2 py-1.5 pl-3 pr-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(pActive ? "border-brand bg-raised text-fg" : "border-transparent")"
+                <a class="block min-w-0 truncate rounded-lg border-l-2 py-1.5 pl-3 pr-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(pActive ? "border-brand bg-raised text-fg" : "border-transparent")"
                    asp-controller="Projects" asp-action="Details" asp-route-id="@p.Id"
-                   title="@p.Name">@p.Key</a>
+                   title="@p.Name">@p.Name</a>
             }
 
             <p class="mt-4 px-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">Core</p>

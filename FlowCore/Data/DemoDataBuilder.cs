@@ -40,261 +40,81 @@ public static class DemoDataBuilder
         var tagBug = new Tag { Id = DemoSeedIds.TagBug, Name = "bug", ColorHex = "#EF4444" };
         var tags = new List<Tag> { tagUi, tagBug };
 
-        var workspaces = new List<Workspace>();
-        var workspaceNames = new[] { "North Division", "South Division", "Platform Guild" };
-        var workspaceIds = new[]
+        // One workspace = one organization (tenant). Teams and domains split by project.
+        var organization = new Workspace
         {
-            DemoSeedIds.WorkspaceNorth, DemoSeedIds.WorkspaceSouth, DemoSeedIds.WorkspacePlatform
+            Id = DemoSeedIds.WorkspaceNorth,
+            Name = "Acme Corporation",
+            Description = "Your company’s workspace — projects group work by product, platform, or internal function.",
+            CreatedAt = now.AddDays(-90),
+            ArchivedAt = null,
+            Visibility = WorkspaceVisibility.Team,
+            OwnerUserId = ownerAlex.Id
         };
 
-        for (var w = 0; w < 3; w++)
-        {
-            var workspace = new Workspace
-            {
-                Id = workspaceIds[w],
-                Name = workspaceNames[w],
-                Description = $"Workspace #{w + 1} — multi-project delivery.",
-                CreatedAt = now.AddDays(-30 * (w + 1)),
-                ArchivedAt = null,
-                Visibility = w == 0 ? WorkspaceVisibility.Team : WorkspaceVisibility.Private,
-                OwnerUserId = w % 2 == 0 ? ownerAlex.Id : memberSam.Id
-            };
+        // Five projects: two heavy delivery tracks, three lighter streams.
+        var marketingSite = CreateProject(
+            organization,
+            Ng,
+            now,
+            "Acme.com — marketing & sign-up",
+            "MKT",
+            "Public site, content, SEO, and self-serve trial checkout.",
+            ProjectStatus.Active,
+            ProjectPriority.High);
+        SeedMarketingSiteTasks(marketingSite, now, ownerAlex, memberSam, tagUi, tagBug, Ng);
 
-            for (var p = 0; p < 3; p++)
-            {
-                var project = new Project
-                {
-                    Id = Ng(),
-                    WorkspaceId = workspace.Id,
-                    Name = $"{workspace.Name[..Math.Min(4, workspace.Name.Length)]} Product {p + 1}",
-                    Key = $"WS{w + 1}-P{p + 1}",
-                    Description = "Sample project with board, custom statuses, and tasks.",
-                    StartDate = now.AddDays(-14),
-                    DueDate = now.AddMonths(2),
-                    Status = p == 0 ? ProjectStatus.Active : ProjectStatus.Planning,
-                    Priority = (ProjectPriority)(p % 4)
-                };
+        var retailApp = CreateProject(
+            organization,
+            Ng,
+            now,
+            "Acme Shop — mobile",
+            "SHOP",
+            "Customer iOS/Android app: browse, cart, and order tracking.",
+            ProjectStatus.Active,
+            ProjectPriority.High);
+        SeedRetailAppTasks(retailApp, now, ownerAlex, memberSam, tagUi, tagBug, Ng);
 
-                project.Workspace = workspace;
+        var designSys = CreateProject(
+            organization,
+            Ng,
+            now,
+            "Compass — design system",
+            "CMP",
+            "Figma kit, React primitives, and tokens shared across product surfaces.",
+            ProjectStatus.Planning,
+            ProjectPriority.Low);
+        SeedDesignSystemTasks(designSys, now, ownerAlex, memberSam, tagUi, Ng);
 
-                var statusDefs = CreateDefaultStatuses(project.Id, now);
-                foreach (var s in statusDefs)
-                {
-                    s.Project = project;
-                    project.TaskStatusDefinitions.Add(s);
-                }
+        var partnerIntegrations = CreateProject(
+            organization,
+            Ng,
+            now,
+            "Partner Hub — revenue integrations",
+            "REV",
+            "Wholesale portals, EDI hooks, and ERP-facing APIs for top partners.",
+            ProjectStatus.Planning,
+            ProjectPriority.Medium);
+        SeedPartnerIntegrationTasks(partnerIntegrations, now, ownerAlex, memberSam, tagBug, Ng);
 
-                var backlogId = statusDefs[0].Id;
-                var todoId = statusDefs[1].Id;
-                var inProgressId = statusDefs[2].Id;
+        var peopleTech = CreateProject(
+            organization,
+            Ng,
+            now,
+            "People tech — new hire experience",
+            "NHX",
+            "Device prep, identity groups, and lightweight automations so week-one isn’t helpdesk roulette.",
+            ProjectStatus.Active,
+            ProjectPriority.Low);
+        SeedPeopleTechTasks(peopleTech, now, ownerAlex, memberSam, Ng);
 
-                var board = new Board
-                {
-                    Id = Ng(),
-                    ProjectId = project.Id,
-                    Name = "Delivery board",
-                    Position = 0,
-                    IsDefault = true,
-                    CreatedAt = now.AddDays(-10),
-                    UpdatedAt = now
-                };
-                board.Project = project;
+        organization.Projects.Add(marketingSite.Project);
+        organization.Projects.Add(retailApp.Project);
+        organization.Projects.Add(designSys.Project);
+        organization.Projects.Add(partnerIntegrations.Project);
+        organization.Projects.Add(peopleTech.Project);
 
-                var colTodo = new BoardColumn
-                {
-                    Id = Ng(),
-                    BoardId = board.Id,
-                    Name = "To do",
-                    Position = 0,
-                    WipLimit = 0,
-                    IsDoneColumn = false,
-                    CreatedAt = now.AddDays(-10),
-                    Board = board
-                };
-                var colDoing = new BoardColumn
-                {
-                    Id = Ng(),
-                    BoardId = board.Id,
-                    Name = "Doing",
-                    Position = 1,
-                    WipLimit = 3,
-                    IsDoneColumn = false,
-                    CreatedAt = now.AddDays(-10),
-                    Board = board
-                };
-                var colDone = new BoardColumn
-                {
-                    Id = Ng(),
-                    BoardId = board.Id,
-                    Name = "Done",
-                    Position = 2,
-                    WipLimit = 0,
-                    IsDoneColumn = true,
-                    CreatedAt = now.AddDays(-10),
-                    Board = board
-                };
-
-                board.Columns.Add(colTodo);
-                board.Columns.Add(colDoing);
-                board.Columns.Add(colDone);
-
-                var parentTask = new TaskItem
-                {
-                    Id = Ng(),
-                    BoardColumnId = colTodo.Id,
-                    Title = w == 0 && p == 0 ? "Product page" : $"Epic task W{w + 1}-P{p + 1}",
-                    Description = "Parent task with subtasks.",
-                    TaskStatusDefinitionId = todoId,
-                    Priority = TaskPriority.High,
-                    StoryPoints = 5,
-                    ParentTaskItemId = null,
-                    CreatedAt = now.AddDays(-5),
-                    UpdatedAt = now,
-                    DueDate = now.AddDays(14),
-                    BoardColumn = colTodo,
-                    TaskStatusDefinition = statusDefs[1]
-                };
-
-                var subA = new TaskItem
-                {
-                    Id = Ng(),
-                    BoardColumnId = colTodo.Id,
-                    Title = "Wireframe hero section",
-                    Description = string.Empty,
-                    TaskStatusDefinitionId = inProgressId,
-                    Priority = TaskPriority.Medium,
-                    StoryPoints = 2,
-                    ParentTaskItemId = parentTask.Id,
-                    CreatedAt = now.AddDays(-4),
-                    UpdatedAt = now,
-                    DueDate = null,
-                    BoardColumn = colTodo,
-                    TaskStatusDefinition = statusDefs[2],
-                    ParentTaskItem = parentTask
-                };
-
-                var subB = new TaskItem
-                {
-                    Id = Ng(),
-                    BoardColumnId = colTodo.Id,
-                    Title = "Hook up CMS fields",
-                    Description = string.Empty,
-                    TaskStatusDefinitionId = backlogId,
-                    Priority = TaskPriority.Low,
-                    StoryPoints = 1,
-                    ParentTaskItemId = parentTask.Id,
-                    CreatedAt = now.AddDays(-4),
-                    UpdatedAt = now,
-                    DueDate = null,
-                    BoardColumn = colTodo,
-                    TaskStatusDefinition = statusDefs[0],
-                    ParentTaskItem = parentTask
-                };
-
-                parentTask.Subtasks.Add(subA);
-                parentTask.Subtasks.Add(subB);
-
-                var sideTask = new TaskItem
-                {
-                    Id = Ng(),
-                    BoardColumnId = colDoing.Id,
-                    Title = "QA regression sweep",
-                    Description = "Cross-browser checks.",
-                    TaskStatusDefinitionId = inProgressId,
-                    Priority = TaskPriority.Medium,
-                    StoryPoints = 3,
-                    ParentTaskItemId = null,
-                    CreatedAt = now.AddDays(-2),
-                    UpdatedAt = now,
-                    DueDate = now.AddDays(7),
-                    BoardColumn = colDoing,
-                    TaskStatusDefinition = statusDefs[2]
-                };
-
-                colTodo.Tasks.Add(parentTask);
-                colTodo.Tasks.Add(subA);
-                colTodo.Tasks.Add(subB);
-                colDoing.Tasks.Add(sideTask);
-
-                foreach (var t in new[] { parentTask, subA, subB, sideTask })
-                {
-                    t.TaskStatusDefinition!.TaskItems.Add(t);
-                }
-
-                var assignParent = new TaskAssignment
-                {
-                    TaskItemId = parentTask.Id,
-                    UserId = ownerAlex.Id,
-                    Role = TaskRole.Assignee,
-                    AssignedAt = now.AddDays(-5),
-                    TaskItem = parentTask,
-                    User = ownerAlex
-                };
-                var assignSide = new TaskAssignment
-                {
-                    TaskItemId = sideTask.Id,
-                    UserId = memberSam.Id,
-                    Role = TaskRole.Assignee,
-                    AssignedAt = now.AddDays(-2),
-                    TaskItem = sideTask,
-                    User = memberSam
-                };
-                var assignSub = new TaskAssignment
-                {
-                    TaskItemId = subA.Id,
-                    UserId = memberSam.Id,
-                    Role = TaskRole.Reviewer,
-                    AssignedAt = now.AddDays(-3),
-                    TaskItem = subA,
-                    User = memberSam
-                };
-
-                parentTask.TaskAssignments.Add(assignParent);
-                sideTask.TaskAssignments.Add(assignSide);
-                subA.TaskAssignments.Add(assignSub);
-                ownerAlex.TaskAssignments.Add(assignParent);
-                memberSam.TaskAssignments.Add(assignSide);
-                memberSam.TaskAssignments.Add(assignSub);
-
-                var linkUi = new TaskTag
-                {
-                    TaskItemId = parentTask.Id,
-                    TagId = tagUi.Id,
-                    LinkedAt = now.AddDays(-4),
-                    TaskItem = parentTask,
-                    Tag = tagUi
-                };
-                var linkBug = new TaskTag
-                {
-                    TaskItemId = sideTask.Id,
-                    TagId = tagBug.Id,
-                    LinkedAt = now.AddDays(-1),
-                    TaskItem = sideTask,
-                    Tag = tagBug
-                };
-                parentTask.TaskTags.Add(linkUi);
-                tagUi.TaskTags.Add(linkUi);
-                sideTask.TaskTags.Add(linkBug);
-                tagBug.TaskTags.Add(linkBug);
-
-                var comment = new Comment
-                {
-                    Id = Ng(),
-                    TaskItemId = parentTask.Id,
-                    AuthorUserId = memberSam.Id,
-                    Body = "Subtasks look good — prioritize CMS hookup.",
-                    CreatedAt = now.AddDays(-3),
-                    EditedAt = null,
-                    TaskItem = parentTask
-                };
-                parentTask.Comments.Add(comment);
-
-                project.Boards.Add(board);
-                workspace.Projects.Add(project);
-            }
-
-            workspaces.Add(workspace);
-        }
+        var workspaces = new List<Workspace> { organization };
 
         return new DemoDataGraph
         {
@@ -302,6 +122,874 @@ public static class DemoDataBuilder
             Users = users,
             Tags = tags
         };
+    }
+
+    private sealed class ProjectBoardContext
+    {
+        public required Project Project { get; init; }
+        public required Board Board { get; init; }
+        public required BoardColumn ColTodo { get; init; }
+        public required BoardColumn ColDoing { get; init; }
+        public required BoardColumn ColDone { get; init; }
+        public required List<TaskStatusDefinition> StatusDefs { get; init; }
+
+        public TaskStatusDefinition Backlog => StatusDefs[0];
+        public TaskStatusDefinition Todo => StatusDefs[1];
+        public TaskStatusDefinition InProgress => StatusDefs[2];
+        public TaskStatusDefinition Done => StatusDefs[3];
+    }
+
+    private static ProjectBoardContext CreateProject(
+        Workspace ws,
+        Func<Guid> ng,
+        DateTime now,
+        string name,
+        string key,
+        string description,
+        ProjectStatus status,
+        ProjectPriority priority)
+    {
+        var project = new Project
+        {
+            Id = ng(),
+            WorkspaceId = ws.Id,
+            Name = name,
+            Key = key,
+            Description = description,
+            StartDate = now.AddDays(-21),
+            DueDate = now.AddMonths(3),
+            Status = status,
+            Priority = priority
+        };
+
+        project.Workspace = ws;
+
+        var statusDefs = CreateDefaultStatuses(project.Id, now);
+        foreach (var s in statusDefs)
+        {
+            s.Project = project;
+            project.TaskStatusDefinitions.Add(s);
+        }
+
+        var board = new Board
+        {
+            Id = ng(),
+            ProjectId = project.Id,
+            Name = "Delivery board",
+            Position = 0,
+            IsDefault = true,
+            CreatedAt = now.AddDays(-14),
+            UpdatedAt = now
+        };
+        board.Project = project;
+
+        var colTodo = new BoardColumn
+        {
+            Id = ng(),
+            BoardId = board.Id,
+            Name = "To do",
+            Position = 0,
+            WipLimit = 0,
+            IsDoneColumn = false,
+            CreatedAt = now.AddDays(-14),
+            Board = board
+        };
+        var colDoing = new BoardColumn
+        {
+            Id = ng(),
+            BoardId = board.Id,
+            Name = "Doing",
+            Position = 1,
+            WipLimit = 5,
+            IsDoneColumn = false,
+            CreatedAt = now.AddDays(-14),
+            Board = board
+        };
+        var colDone = new BoardColumn
+        {
+            Id = ng(),
+            BoardId = board.Id,
+            Name = "Done",
+            Position = 2,
+            WipLimit = 0,
+            IsDoneColumn = true,
+            CreatedAt = now.AddDays(-14),
+            Board = board
+        };
+
+        board.Columns.Add(colTodo);
+        board.Columns.Add(colDoing);
+        board.Columns.Add(colDone);
+        project.Boards.Add(board);
+
+        return new ProjectBoardContext
+        {
+            Project = project,
+            Board = board,
+            ColTodo = colTodo,
+            ColDoing = colDoing,
+            ColDone = colDone,
+            StatusDefs = statusDefs
+        };
+    }
+
+    private static TaskItem NewTask(
+        Func<Guid> ng,
+        BoardColumn column,
+        TaskStatusDefinition status,
+        string title,
+        string description,
+        TaskPriority priority,
+        int storyPoints,
+        DateTime createdAt,
+        DateTime updatedAt,
+        DateTime? dueDate,
+        TaskItem? parent)
+    {
+        var t = new TaskItem
+        {
+            Id = ng(),
+            BoardColumnId = column.Id,
+            Title = title,
+            Description = description,
+            TaskStatusDefinitionId = status.Id,
+            Priority = priority,
+            StoryPoints = storyPoints,
+            ParentTaskItemId = parent?.Id,
+            CreatedAt = createdAt,
+            UpdatedAt = updatedAt,
+            DueDate = dueDate,
+            BoardColumn = column,
+            TaskStatusDefinition = status,
+            ParentTaskItem = parent
+        };
+        column.Tasks.Add(t);
+        status.TaskItems.Add(t);
+        if (parent is not null)
+        {
+            parent.Subtasks.Add(t);
+        }
+
+        return t;
+    }
+
+    private static void Assign(TaskItem task, User user, TaskRole role, DateTime at)
+    {
+        var a = new TaskAssignment
+        {
+            TaskItemId = task.Id,
+            UserId = user.Id,
+            Role = role,
+            AssignedAt = at,
+            TaskItem = task,
+            User = user
+        };
+        task.TaskAssignments.Add(a);
+        user.TaskAssignments.Add(a);
+    }
+
+    private static void LinkTag(TaskItem task, Tag tag, DateTime at)
+    {
+        var link = new TaskTag
+        {
+            TaskItemId = task.Id,
+            TagId = tag.Id,
+            LinkedAt = at,
+            TaskItem = task,
+            Tag = tag
+        };
+        task.TaskTags.Add(link);
+        tag.TaskTags.Add(link);
+    }
+
+    private static void AddComment(Func<Guid> ng, TaskItem task, User author, string body, DateTime at)
+    {
+        var c = new Comment
+        {
+            Id = ng(),
+            TaskItemId = task.Id,
+            AuthorUserId = author.Id,
+            Body = body,
+            CreatedAt = at,
+            EditedAt = null,
+            TaskItem = task
+        };
+        task.Comments.Add(c);
+    }
+
+    /// <summary>15 tasks: mixed statuses/columns, 3 parents with subtasks, several comments.</summary>
+    private static void SeedMarketingSiteTasks(
+        ProjectBoardContext ctx,
+        DateTime now,
+        User alex,
+        User sam,
+        Tag tagUi,
+        Tag tagBug,
+        Func<Guid> ng)
+    {
+        var epicIa = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Primary nav & URL scheme (pre-build)",
+            "Lock IA before eng cuts templates—pricing, solutions, and docs need stable paths.",
+            TaskPriority.High,
+            8,
+            now.AddDays(-14),
+            now,
+            now.AddDays(16),
+            parent: null);
+        Assign(epicIa, alex, TaskRole.Assignee, now.AddDays(-14));
+        LinkTag(epicIa, tagUi, now.AddDays(-10));
+
+        var subIa1 = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.InProgress,
+            "Approved nav wireframes (desktop + mobile)",
+            string.Empty,
+            TaskPriority.Medium,
+            3,
+            now.AddDays(-10),
+            now,
+            null,
+            epicIa);
+        Assign(subIa1, sam, TaskRole.Assignee, now.AddDays(-10));
+
+        var subIa2 = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Backlog,
+            "301/302 redirect map from legacy blog URLs",
+            string.Empty,
+            TaskPriority.Medium,
+            2,
+            now.AddDays(-10),
+            now,
+            null,
+            epicIa);
+
+        var epicCheckout = NewTask(
+            ng,
+            ctx.ColDoing,
+            ctx.InProgress,
+            "14-day trial checkout (Stripe)",
+            "Card-on-file optional; region-aware tax display.",
+            TaskPriority.High,
+            13,
+            now.AddDays(-8),
+            now,
+            now.AddDays(9),
+            parent: null);
+        Assign(epicCheckout, sam, TaskRole.Assignee, now.AddDays(-8));
+
+        var subPay = NewTask(
+            ng,
+            ctx.ColDoing,
+            ctx.InProgress,
+            "PaymentIntent lifecycle + signed webhooks",
+            string.Empty,
+            TaskPriority.High,
+            5,
+            now.AddDays(-5),
+            now,
+            null,
+            epicCheckout);
+        Assign(subPay, alex, TaskRole.Assignee, now.AddDays(-5));
+
+        var subErr = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Toast + retry copy for soft declines",
+            string.Empty,
+            TaskPriority.Medium,
+            2,
+            now.AddDays(-4),
+            now,
+            null,
+            epicCheckout);
+
+        var epicTrust = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Trial module — trust badges & fine print",
+            "Above-the-fold block on signup; legal wants EU-specific footnotes.",
+            TaskPriority.Medium,
+            5,
+            now.AddDays(-6),
+            now,
+            now.AddDays(11),
+            parent: null);
+        Assign(epicTrust, sam, TaskRole.Assignee, now.AddDays(-6));
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Backlog,
+            "Source SVG badges from brand toolkit (SOC2, GDPR)",
+            string.Empty,
+            TaskPriority.Medium,
+            2,
+            now.AddDays(-5),
+            now,
+            null,
+            epicTrust);
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Legal review notes folded into signup accordion",
+            string.Empty,
+            TaskPriority.Low,
+            2,
+            now.AddDays(-3),
+            now,
+            null,
+            epicTrust);
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Backlog,
+            "Programmatic SEO: PDP + collection title templates",
+            "Coordinate with catalog ops on character limits.",
+            TaskPriority.Medium,
+            3,
+            now.AddDays(-4),
+            now,
+            null,
+            parent: null);
+
+        var heroPl = NewTask(
+            ng,
+            ctx.ColDoing,
+            ctx.InProgress,
+            "Homepage hero + bestseller rail (responsive)",
+            "Match Figma 1440 / 768 / 390 breakpoints.",
+            TaskPriority.High,
+            5,
+            now.AddDays(-7),
+            now,
+            now.AddDays(6),
+            parent: null);
+        Assign(heroPl, sam, TaskRole.Assignee, now.AddDays(-7));
+        LinkTag(heroPl, tagUi, now.AddDays(-6));
+
+        var analytics = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "GA4: sign-up funnel event map v2",
+            "Align names with mobile for exec dashboard.",
+            TaskPriority.Medium,
+            2,
+            now.AddDays(-2),
+            now,
+            now.AddDays(13),
+            parent: null);
+        Assign(analytics, alex, TaskRole.Assignee, now.AddDays(-2));
+
+        var safari = NewTask(
+            ng,
+            ctx.ColDoing,
+            ctx.InProgress,
+            "Safari 17: flex gap regression on category chips",
+            "Polyfill only if perf budget allows.",
+            TaskPriority.Medium,
+            2,
+            now.AddDays(-4),
+            now,
+            now.AddDays(3),
+            parent: null);
+        LinkTag(safari, tagBug, now.AddDays(-3));
+        Assign(safari, alex, TaskRole.Assignee, now.AddDays(-4));
+
+        NewTask(
+            ng,
+            ctx.ColDone,
+            ctx.Done,
+            "Privacy center IA — shipped in docs subdomain",
+            string.Empty,
+            TaskPriority.Medium,
+            3,
+            now.AddDays(-22),
+            now.AddDays(-4),
+            null,
+            parent: null);
+
+        NewTask(
+            ng,
+            ctx.ColDone,
+            ctx.Done,
+            "Homepage hero A/B (Q1) — readout & shutdown",
+            string.Empty,
+            TaskPriority.Low,
+            2,
+            now.AddDays(-18),
+            now.AddDays(-6),
+            null,
+            parent: null);
+
+        AddComment(ng, epicIa, sam,
+            "Redirects wait on wireframe sign-off — don’t ask CMS for slugs yet.",
+            now.AddDays(-8));
+        AddComment(ng, epicCheckout, alex,
+            "Webhook signing secret rotated in vault this morning; staging redeployed.",
+            now.AddDays(-3));
+        AddComment(ng, heroPl, sam,
+            "Using 2× exports from Figma node `Hero / Spring` — ping if raster shifts.",
+            now.AddDays(-5));
+        AddComment(ng, safari, sam,
+            "Still reproduces on iOS 18.4 simulator — not visible in Chromium.",
+            now.AddDays(-2));
+    }
+
+    /// <summary>15 tasks: mixed statuses, 2 epics with subtasks, comments.</summary>
+    private static void SeedRetailAppTasks(
+        ProjectBoardContext ctx,
+        DateTime now,
+        User alex,
+        User sam,
+        Tag tagUi,
+        Tag tagBug,
+        Func<Guid> ng)
+    {
+        var epicOnboard = NewTask(
+            ng,
+            ctx.ColDoing,
+            ctx.InProgress,
+            "First-launch experience (v3)",
+            "Fewer screens; Face ID optional; restore purchases.",
+            TaskPriority.High,
+            8,
+            now.AddDays(-11),
+            now,
+            now.AddDays(12),
+            parent: null);
+        Assign(epicOnboard, sam, TaskRole.Assignee, now.AddDays(-11));
+        LinkTag(epicOnboard, tagUi, now.AddDays(-9));
+
+        var subSplash = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Motion-safe splash + notification pre-prompt",
+            string.Empty,
+            TaskPriority.Medium,
+            2,
+            now.AddDays(-8),
+            now,
+            null,
+            epicOnboard);
+        Assign(subSplash, alex, TaskRole.Assignee, now.AddDays(-8));
+
+        var subBio = NewTask(
+            ng,
+            ctx.ColDoing,
+            ctx.InProgress,
+            "Biometric opt-in & fallback to PIN",
+            string.Empty,
+            TaskPriority.Medium,
+            3,
+            now.AddDays(-6),
+            now,
+            null,
+            epicOnboard);
+
+        var epicOffline = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Offline product browse (read-mostly)",
+            "Show last-synced catalog when offline banner shows.",
+            TaskPriority.High,
+            13,
+            now.AddDays(-7),
+            now,
+            now.AddDays(20),
+            parent: null);
+        Assign(epicOffline, alex, TaskRole.Assignee, now.AddDays(-7));
+
+        var subSync = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Backlog,
+            "Merge rules when prices change mid-session",
+            string.Empty,
+            TaskPriority.High,
+            5,
+            now.AddDays(-5),
+            now,
+            null,
+            epicOffline);
+
+        var subQueue = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Reliable outbox for favorites + cart deltas",
+            string.Empty,
+            TaskPriority.Medium,
+            5,
+            now.AddDays(-4),
+            now,
+            null,
+            epicOffline);
+
+        var push = NewTask(
+            ng,
+            ctx.ColDoing,
+            ctx.InProgress,
+            "Push deep links: order status → in-app screen",
+            "Handle cold start and expired JWT.",
+            TaskPriority.Medium,
+            3,
+            now.AddDays(-5),
+            now,
+            now.AddDays(6),
+            parent: null);
+        Assign(push, sam, TaskRole.Assignee, now.AddDays(-5));
+
+        var crash = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Crash: UIImagePickerController on 256MB devices",
+            "#1 in Firebase for build 3.0.4.",
+            TaskPriority.High,
+            2,
+            now.AddDays(-2),
+            now,
+            now.AddDays(4),
+            parent: null);
+        LinkTag(crash, tagBug, now.AddDays(-2));
+        Assign(crash, sam, TaskRole.Assignee, now.AddDays(-2));
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Order tracking map: match fulfilment carrier palette",
+            string.Empty,
+            TaskPriority.Medium,
+            3,
+            now.AddDays(-3),
+            now,
+            now.AddDays(9),
+            parent: null);
+
+        var saveForLater = NewTask(
+            ng,
+            ctx.ColDoing,
+            ctx.InProgress,
+            "Save-for-later sync across phone + tablet",
+            string.Empty,
+            TaskPriority.Medium,
+            5,
+            now.AddDays(-4),
+            now,
+            now.AddDays(8),
+            parent: null);
+        Assign(saveForLater, alex, TaskRole.Assignee, now.AddDays(-4));
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "App Review notes + demo account for 3.1 submission",
+            string.Empty,
+            TaskPriority.High,
+            2,
+            now.AddDays(-1),
+            now,
+            now.AddDays(5),
+            parent: null);
+
+        NewTask(
+            ng,
+            ctx.ColDone,
+            ctx.Done,
+            "App Store creatives refresh (spring drop)",
+            string.Empty,
+            TaskPriority.Low,
+            2,
+            now.AddDays(-19),
+            now.AddDays(-3),
+            null,
+            parent: null);
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Backlog,
+            "Dark mode regression matrix (iPad + phone)",
+            string.Empty,
+            TaskPriority.Low,
+            3,
+            now.AddDays(-1),
+            now,
+            null,
+            parent: null);
+
+        NewTask(
+            ng,
+            ctx.ColDone,
+            ctx.Done,
+            "February beta cohort — feedback export & thank-you mail",
+            string.Empty,
+            TaskPriority.Medium,
+            1,
+            now.AddDays(-14),
+            now.AddDays(-5),
+            null,
+            parent: null);
+
+        NewTask(
+            ng,
+            ctx.ColDone,
+            ctx.Done,
+            "Sunset legacy wishlist endpoint (410 Gone)",
+            string.Empty,
+            TaskPriority.Medium,
+            2,
+            now.AddDays(-25),
+            now.AddDays(-7),
+            null,
+            parent: null);
+
+        AddComment(ng, epicOnboard, alex,
+            "Drop the second marketing slide if locale = DE — legal asked yesterday.",
+            now.AddDays(-5));
+        AddComment(ng, epicOffline, sam,
+            "Desktop team wants same merge rules eventually; keep interfaces internal for now.",
+            now.AddDays(-4));
+        AddComment(ng, push, alex,
+            "Firebase dynamic link TTL is 7d — doc that in runbook.",
+            now.AddDays(-2));
+        AddComment(ng, crash, alex,
+            "Repro on iPhone SE 2022 with 20+ tabs backgrounded.",
+            now.AddDays(-1));
+    }
+
+    private static void SeedDesignSystemTasks(
+        ProjectBoardContext ctx,
+        DateTime now,
+        User alex,
+        User sam,
+        Tag tagUi,
+        Func<Guid> ng)
+    {
+        var buttons = NewTask(
+            ng,
+            ctx.ColDoing,
+            ctx.InProgress,
+            "Button primitives — size ramps & focus ring",
+            "Align with WCAG 2.2 focus-visible spec.",
+            TaskPriority.Medium,
+            5,
+            now.AddDays(-8),
+            now,
+            now.AddDays(14),
+            parent: null);
+        Assign(buttons, alex, TaskRole.Assignee, now.AddDays(-8));
+        LinkTag(buttons, tagUi, now.AddDays(-7));
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "SM / MD / LG touch targets from spacing scale 4/6/8",
+            string.Empty,
+            TaskPriority.Medium,
+            2,
+            now.AddDays(-6),
+            now,
+            null,
+            buttons);
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Backlog,
+            "Destructive variant: hover vs focus story in Storybook",
+            string.Empty,
+            TaskPriority.Low,
+            1,
+            now.AddDays(-4),
+            now,
+            null,
+            buttons);
+
+        var audit = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Quarterly drift check: Figma UI kit vs Storybook props",
+            string.Empty,
+            TaskPriority.Low,
+            2,
+            now.AddDays(-3),
+            now,
+            now.AddDays(21),
+            parent: null);
+        Assign(audit, sam, TaskRole.Assignee, now.AddDays(-3));
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Backlog,
+            "DataTable density tokens (comfortable / compact)",
+            "Blocked on commerce grid work.",
+            TaskPriority.Low,
+            3,
+            now.AddDays(-2),
+            now,
+            null,
+            parent: null);
+
+        AddComment(ng, buttons, sam,
+            "Ping design before merging — they’re renaming `accent-subtle` this week.",
+            now.AddDays(-5));
+    }
+
+    private static void SeedPartnerIntegrationTasks(
+        ProjectBoardContext ctx,
+        DateTime now,
+        User alex,
+        User sam,
+        Tag tagBug,
+        Func<Guid> ng)
+    {
+        var webhooks = NewTask(
+            ng,
+            ctx.ColDoing,
+            ctx.InProgress,
+            "Shopify wholesale orders — idempotent webhook handler",
+            "Double events during flash sales; use payload id + HMAC.",
+            TaskPriority.High,
+            8,
+            now.AddDays(-6),
+            now,
+            now.AddDays(9),
+            parent: null);
+        Assign(webhooks, alex, TaskRole.Assignee, now.AddDays(-6));
+        LinkTag(webhooks, tagBug, now.AddDays(-5));
+
+        var netsuite = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Backlog,
+            "NetSuite SKU sync — discovery brief for RevOps",
+            "Need field map from ERP owner before API spike.",
+            TaskPriority.Medium,
+            3,
+            now.AddDays(-2),
+            now,
+            null,
+            parent: null);
+
+        var sso = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Distributor portal SSO handoff (SAML)",
+            "Vendor: Okta; target pilot account in May.",
+            TaskPriority.Medium,
+            5,
+            now.AddDays(-4),
+            now,
+            now.AddDays(18),
+            parent: null);
+        Assign(sso, sam, TaskRole.Assignee, now.AddDays(-4));
+
+        AddComment(ng, webhooks, sam,
+            "Logged 412 duplicates last Friday — table `wh_order_events` is catching them now.",
+            now.AddDays(-2));
+        AddComment(ng, netsuite, alex,
+            "Won’t schedule eng until RevOps confirms nightly vs near-real-time.",
+            now.AddDays(-1));
+    }
+
+    private static void SeedPeopleTechTasks(
+        ProjectBoardContext ctx,
+        DateTime now,
+        User alex,
+        User sam,
+        Func<Guid> ng)
+    {
+        var laptops = NewTask(
+            ng,
+            ctx.ColDoing,
+            ctx.InProgress,
+            "Spring laptop refresh — pilot cohort (sales)",
+            "Encrypted fleet; ship window March 18–28.",
+            TaskPriority.Medium,
+            5,
+            now.AddDays(-9),
+            now,
+            now.AddDays(12),
+            parent: null);
+        Assign(laptops, sam, TaskRole.Assignee, now.AddDays(-9));
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Jamf policy tag: `refresh-2026-spring` on 42 devices",
+            string.Empty,
+            TaskPriority.Medium,
+            2,
+            now.AddDays(-6),
+            now,
+            null,
+            laptops);
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "FedEx return labels + spreadsheet for Facilities",
+            string.Empty,
+            TaskPriority.Low,
+            1,
+            now.AddDays(-5),
+            now,
+            null,
+            laptops);
+
+        var okta = NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Todo,
+            "Okta: auto-add new hires to “All Acme” + Slack on day-one",
+            "HRIS webhook already sends start date.",
+            TaskPriority.Medium,
+            3,
+            now.AddDays(-4),
+            now,
+            now.AddDays(20),
+            parent: null);
+        Assign(okta, alex, TaskRole.Assignee, now.AddDays(-4));
+
+        NewTask(
+            ng,
+            ctx.ColTodo,
+            ctx.Backlog,
+            "Swag + desk checklist automation (Notion → email)",
+            "Nice-to-have after laptop flow is stable.",
+            TaskPriority.Low,
+            2,
+            now.AddDays(-2),
+            now,
+            null,
+            parent: null);
+
+        AddComment(ng, laptops, alex,
+            "Two folks in London warehouse extended ship by 3 days — rows 18–19 on the sheet.",
+            now.AddDays(-3));
     }
 
     private static List<TaskStatusDefinition> CreateDefaultStatuses(Guid projectId, DateTime now)
