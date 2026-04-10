@@ -9,4 +9,8 @@ public interface ITaskRepository
     IReadOnlyList<TaskItem> GetByBoardColumnId(Guid boardColumnId);
 
     TaskItem? GetById(Guid id);
+
+    TaskItem? Create(CreateTaskRequest request);
+
+    bool TryDelete(Guid id);
 }

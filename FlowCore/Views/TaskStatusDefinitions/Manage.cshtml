@@ -1,0 +1,82 @@
+@model IReadOnlyList<TaskStatusDefinition>
+@inject FlowCore.Services.UiText T
+@{
+    ViewData["Title"] = T["crud.statuses.manage_title"];
+    var projectId = (Guid)ViewBag.ProjectId;
+}
+<header class="border-b border-fg-muted/15 pb-6">
+    <h1 class="text-3xl font-bold tracking-tight text-fg">@T["crud.statuses.manage_title"]</h1>
+    <p class="mt-2 text-sm text-fg-secondary">
+        <a class="text-brand hover:underline" asp-controller="Projects" asp-action="Details" asp-route-id="@projectId">← Back to project</a>
+    </p>
+</header>
+
+<section class="mt-8 max-w-xl">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-fg-muted">@T["crud.statuses.add"]</h2>
+    <form method="post" asp-action="CreateStatus" asp-route-projectId="@projectId" class="mt-4 space-y-3 rounded-xl border border-fg-muted/15 bg-card p-4">
+        @Html.AntiForgeryToken()
+        <div>
+            <label class="block text-xs text-fg-muted">Name</label>
+            <input name="Name" required class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-sm text-fg"/>
+        </div>
+        <div>
+            <label class="block text-xs text-fg-muted">Color (hex)</label>
+            <input name="ColorHex" value="#94A3B8" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-sm font-mono text-fg"/>
+        </div>
+        <div class="flex flex-wrap gap-4 text-sm">
+            <label class="inline-flex items-center gap-2"><input type="checkbox" name="IsDefault" value="true"/> Default for new tasks</label>
+            <label class="inline-flex items-center gap-2"><input type="checkbox" name="IsDoneState" value="true"/> Done state</label>
+        </div>
+        <button type="submit" class="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white">@T["crud.statuses.add"]</button>
+    </form>
+</section>
+
+<section class="mt-10">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-fg-muted">Existing</h2>
+    <ul class="mt-4 space-y-3">
+        @foreach (var s in Model.OrderBy(x => x.Position))
+        {
+            <li class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-fg-muted/10 bg-card px-4 py-3">
+                <div class="flex items-center gap-3">
+                    <span class="h-4 w-4 shrink-0 rounded" style="background-color: @s.ColorHex"></span>
+                    <span class="font-medium text-fg">@s.Name</span>
+                    @if (s.IsDefault)
+                    {
+                        <span class="rounded bg-raised px-2 py-0.5 text-xs text-fg-muted">default</span>
+                    }
+                    @if (s.IsDoneState)
+                    {
+                        <span class="rounded bg-raised px-2 py-0.5 text-xs text-fg-muted">done</span>
+                    }
+                    <span class="text-xs text-fg-muted">@s.TaskItems.Count tasks</span>
+                </div>
+                <form method="post" asp-action="DeleteStatus" asp-route-id="@s.Id" asp-route-projectId="@projectId" class="flex flex-wrap items-center gap-2">
+                    @Html.AntiForgeryToken()
+                    @if (s.TaskItems.Count > 0)
+                    {
+                        <label class="text-xs text-fg-muted">@T["crud.statuses.reassign_hint"]</label>
+                        <select name="reassignToStatusId" class="rounded border border-fg-muted/20 bg-app px-2 py-1 text-xs text-fg" required>
+                            <option value="">—</option>
+                            @foreach (var alt in Model.Where(x => x.Id != s.Id).OrderBy(x => x.Name))
+                            {
+                                <option value="@alt.Id">@alt.Name</option>
+                            }
+                        </select>
+                    }
+                    @if (Model.Count > 1)
+                    {
+                        <button type="submit" class="rounded border border-brand-warn/40 px-2 py-1 text-xs font-medium text-brand-warn hover:bg-brand-warn/10">
+                            @T["crud.statuses.delete"]
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" disabled class="cursor-not-allowed rounded border border-fg-muted/20 px-2 py-1 text-xs text-fg-muted" title="Keep at least one status">
+                            @T["crud.statuses.delete"]
+                        </button>
+                    }
+                </form>
+            </li>
+        }
+    </ul>
+</section>

@@ -60,10 +60,10 @@ public static class DemoDataLinqExamples
     public static TaskItem? FindTaskByTitleSubstring(IEnumerable<Workspace> workspaces, string substring) =>
         AllTasks(workspaces).FirstOrDefault(t => t.Title.Contains(substring, StringComparison.OrdinalIgnoreCase));
 
-    public static void WriteDevelopmentQuerySample(DemoDataGraph graph)
+    public static void WriteDevelopmentQuerySample(
+        IEnumerable<Workspace> workspaces,
+        IEnumerable<User> users)
     {
-        var workspaces = graph.Workspaces;
-
         Console.WriteLine("[LINQ] Root tasks (no parent): " + RootTasksOnly(workspaces).Count());
         Console.WriteLine("[LINQ] Parent tasks with subtasks: " + string.Join(", ",
             ParentTasksWithSubtasks(workspaces).Select(t => t.Title).Take(3)));
@@ -78,7 +78,7 @@ public static class DemoDataLinqExamples
             Console.WriteLine($"       {row.WorkspaceName} / {row.ProjectName}: {row.TaskCount} tasks");
 
         Console.WriteLine("[LINQ] Sample assignee rows:");
-        foreach (var row in TaskTitlesWithAssignees(workspaces, graph.Users).Take(4))
+        foreach (var row in TaskTitlesWithAssignees(workspaces, users).Take(4))
             Console.WriteLine($"       {row.TaskTitle} → {row.AssigneeName}");
 
         var hero = FindTaskByTitleSubstring(workspaces, "hero");

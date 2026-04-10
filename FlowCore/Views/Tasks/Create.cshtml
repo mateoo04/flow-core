@@ -1,0 +1,66 @@
+@model TaskCreateFormVm
+@inject FlowCore.Services.UiText T
+@{
+    ViewData["Title"] = T["crud.tasks.create_title"];
+    var project = ViewBag.Project as Project;
+    var board = ViewBag.Board as Board;
+    if (project is null || board is null)
+    {
+        throw new InvalidOperationException("Project and board are required.");
+    }
+}
+<h1 class="text-3xl font-bold tracking-tight text-fg">@T["crud.tasks.create_title"]</h1>
+<p class="mt-2 text-fg-secondary">@project.Name — @board.Name</p>
+@if (Model.ParentTaskItemId is { } pid)
+{
+    <p class="mt-2 text-sm text-fg-muted">Parent task ID: <span class="font-mono">@pid</span></p>
+}
+<form method="post" asp-action="Create" class="mt-8 max-w-xl space-y-5">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="ProjectId"/>
+    <input type="hidden" asp-for="BoardId"/>
+    <input type="hidden" asp-for="ParentTaskItemId"/>
+    <div asp-validation-summary="All" class="text-sm text-brand-warn"></div>
+    <div>
+        <label asp-for="Title" class="block text-sm font-medium text-fg-secondary">Title</label>
+        <input asp-for="Title" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg" required/>
+    </div>
+    <div>
+        <label asp-for="Description" class="block text-sm font-medium text-fg-secondary">Description</label>
+        <textarea asp-for="Description" rows="4" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg"></textarea>
+    </div>
+    <div>
+        <label asp-for="BoardColumnId" class="block text-sm font-medium text-fg-secondary">Column</label>
+        <select asp-for="BoardColumnId" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg">
+            @foreach (var c in board.Columns.OrderBy(x => x.Position))
+            {
+                <option value="@c.Id">@c.Name</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label asp-for="TaskStatusDefinitionId" class="block text-sm font-medium text-fg-secondary">Workflow status</label>
+        <select asp-for="TaskStatusDefinitionId" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg">
+            @foreach (var s in project.TaskStatusDefinitions.OrderBy(x => x.Position))
+            {
+                <option value="@s.Id">@s.Name</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label asp-for="Priority" class="block text-sm font-medium text-fg-secondary">Priority</label>
+        <select asp-for="Priority" asp-items="Html.GetEnumSelectList<TaskPriority>()" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg"></select>
+    </div>
+    <div>
+        <label asp-for="StoryPoints" class="block text-sm font-medium text-fg-secondary">Story points</label>
+        <input asp-for="StoryPoints" type="number" min="0" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg"/>
+    </div>
+    <div>
+        <label asp-for="DueDate" class="block text-sm font-medium text-fg-secondary">Due (optional)</label>
+        <input asp-for="DueDate" type="date" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg"/>
+    </div>
+    <div class="flex gap-3">
+        <button type="submit" class="rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white">@T["crud.tasks.create_submit"]</button>
+        <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" asp-route-boardId="@board.Id" class="rounded-xl border border-fg-muted/20 px-4 py-2 text-sm text-fg-secondary">Cancel</a>
+    </div>
+</form>

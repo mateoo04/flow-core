@@ -9,4 +9,13 @@ public interface IProjectRepository
     IReadOnlyList<Project> GetByWorkspaceId(Guid workspaceId);
 
     Project? GetById(Guid id);
+
+    Project CreateInWorkspace(
+        Guid workspaceId,
+        string name,
+        string description,
+        ProjectStatus status,
+        ProjectPriority priority);
+
+    bool TryDelete(Guid id);
 }

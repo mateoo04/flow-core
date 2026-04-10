@@ -5,24 +5,35 @@ namespace FlowCore.Repositories.InMemory;
 
 public sealed class InMemoryBoardColumnRepository : IBoardColumnRepository
 {
-    private readonly IReadOnlyList<BoardColumn> _all;
-    private readonly Dictionary<Guid, BoardColumn> _byId;
+    private readonly InMemoryDataStore _store;
 
-    public InMemoryBoardColumnRepository(DemoDataGraph graph)
+    public InMemoryBoardColumnRepository(InMemoryDataStore store) => _store = store;
+
+    public IReadOnlyList<BoardColumn> GetAll()
     {
-        _all = graph.Workspaces
-            .SelectMany(w => w.Projects)
-            .SelectMany(p => p.Boards)
-            .SelectMany(b => b.Columns)
-            .ToList();
-        _byId = _all.ToDictionary(c => c.Id);
+        lock (_store.Sync)
+            return _store.Workspaces
+                .SelectMany(w => w.Projects)
+                .SelectMany(p => p.Boards)
+                .SelectMany(b => b.Columns)
+                .ToList();
     }
 
-    public IReadOnlyList<BoardColumn> GetAll() => _all;
+    public IReadOnlyList<BoardColumn> GetByBoardId(Guid boardId)
+    {
+        lock (_store.Sync)
+            return _store.Workspaces
+                .SelectMany(w => w.Projects)
+                .SelectMany(p => p.Boards)
+                .Where(b => b.Id == boardId)
+                .SelectMany(b => b.Columns)
+                .OrderBy(c => c.Position)
+                .ToList();
+    }
 
-    public IReadOnlyList<BoardColumn> GetByBoardId(Guid boardId) =>
-        _all.Where(c => c.BoardId == boardId).OrderBy(c => c.Position).ToList();
-
-    public BoardColumn? GetById(Guid id) =>
-        _byId.TryGetValue(id, out var c) ? c : null;
+    public BoardColumn? GetById(Guid id)
+    {
+        lock (_store.Sync)
+            return _store.FindBoardColumn(id);
+    }
 }

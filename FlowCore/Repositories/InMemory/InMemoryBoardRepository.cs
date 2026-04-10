@@ -5,23 +5,32 @@ namespace FlowCore.Repositories.InMemory;
 
 public sealed class InMemoryBoardRepository : IBoardRepository
 {
-    private readonly IReadOnlyList<Board> _all;
-    private readonly Dictionary<Guid, Board> _byId;
+    private readonly InMemoryDataStore _store;
 
-    public InMemoryBoardRepository(DemoDataGraph graph)
+    public InMemoryBoardRepository(InMemoryDataStore store) => _store = store;
+
+    public IReadOnlyList<Board> GetAll()
     {
-        _all = graph.Workspaces
-            .SelectMany(w => w.Projects)
-            .SelectMany(p => p.Boards)
-            .ToList();
-        _byId = _all.ToDictionary(b => b.Id);
+        lock (_store.Sync)
+            return _store.Workspaces
+                .SelectMany(w => w.Projects)
+                .SelectMany(p => p.Boards)
+                .ToList();
     }
 
-    public IReadOnlyList<Board> GetAll() => _all;
+    public IReadOnlyList<Board> GetByProjectId(Guid projectId)
+    {
+        lock (_store.Sync)
+            return _store.FindProject(projectId)?.Boards.ToList()
+                   ?? (IReadOnlyList<Board>)Array.Empty<Board>();
+    }
 
-    public IReadOnlyList<Board> GetByProjectId(Guid projectId) =>
-        _all.Where(b => b.ProjectId == projectId).ToList();
-
-    public Board? GetById(Guid id) =>
-        _byId.TryGetValue(id, out var b) ? b : null;
+    public Board? GetById(Guid id)
+    {
+        lock (_store.Sync)
+            return _store.Workspaces
+                .SelectMany(w => w.Projects)
+                .SelectMany(p => p.Boards)
+                .FirstOrDefault(b => b.Id == id);
+    }
 }

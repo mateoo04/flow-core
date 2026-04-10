@@ -81,7 +81,7 @@ public static class DemoDataBuilder
             OwnerUserId = ownerAlex.Id
         };
 
-        var marketingSite = CreateProject(
+        var marketingSite = ProjectBlueprint.CreateProject(
             organization,
             Ng,
             now,
@@ -91,7 +91,7 @@ public static class DemoDataBuilder
             ProjectPriority.High);
         SeedMarketingSiteTasks(marketingSite, now, team, tagUi, tagBug, Ng);
 
-        var retailApp = CreateProject(
+        var retailApp = ProjectBlueprint.CreateProject(
             organization,
             Ng,
             now,
@@ -101,7 +101,7 @@ public static class DemoDataBuilder
             ProjectPriority.High);
         SeedRetailAppTasks(retailApp, now, team, tagUi, tagBug, Ng);
 
-        var designSys = CreateProject(
+        var designSys = ProjectBlueprint.CreateProject(
             organization,
             Ng,
             now,
@@ -111,7 +111,7 @@ public static class DemoDataBuilder
             ProjectPriority.Low);
         SeedDesignSystemTasks(designSys, now, team, tagUi, Ng);
 
-        var partnerIntegrations = CreateProject(
+        var partnerIntegrations = ProjectBlueprint.CreateProject(
             organization,
             Ng,
             now,
@@ -121,7 +121,7 @@ public static class DemoDataBuilder
             ProjectPriority.Medium);
         SeedPartnerIntegrationTasks(partnerIntegrations, now, team, tagBug, Ng);
 
-        var peopleTech = CreateProject(
+        var peopleTech = ProjectBlueprint.CreateProject(
             organization,
             Ng,
             now,
@@ -144,113 +144,6 @@ public static class DemoDataBuilder
             Workspaces = workspaces,
             Users = users,
             Tags = tags
-        };
-    }
-
-    private sealed class ProjectBoardContext
-    {
-        public required Project Project { get; init; }
-        public required Board Board { get; init; }
-        public required BoardColumn ColTodo { get; init; }
-        public required BoardColumn ColDoing { get; init; }
-        public required BoardColumn ColDone { get; init; }
-        public required List<TaskStatusDefinition> StatusDefs { get; init; }
-
-        public TaskStatusDefinition Backlog => StatusDefs[0];
-        public TaskStatusDefinition Todo => StatusDefs[1];
-        public TaskStatusDefinition InProgress => StatusDefs[2];
-        public TaskStatusDefinition Done => StatusDefs[3];
-    }
-
-    private static ProjectBoardContext CreateProject(
-        Workspace ws,
-        Func<Guid> ng,
-        DateTime now,
-        string name,
-        string description,
-        ProjectStatus status,
-        ProjectPriority priority)
-    {
-        var project = new Project
-        {
-            Id = ng(),
-            WorkspaceId = ws.Id,
-            Name = name,
-            Description = description,
-            StartDate = now.AddDays(-21),
-            DueDate = now.AddMonths(3),
-            Status = status,
-            Priority = priority
-        };
-
-        project.Workspace = ws;
-
-        var statusDefs = CreateDefaultStatuses(project.Id, now);
-        foreach (var s in statusDefs)
-        {
-            s.Project = project;
-            project.TaskStatusDefinitions.Add(s);
-        }
-
-        var board = new Board
-        {
-            Id = ng(),
-            ProjectId = project.Id,
-            Name = "Delivery board",
-            Position = 0,
-            IsDefault = true,
-            CreatedAt = now.AddDays(-14),
-            UpdatedAt = now
-        };
-        board.Project = project;
-
-        var colTodo = new BoardColumn
-        {
-            Id = ng(),
-            BoardId = board.Id,
-            Name = "To do",
-            Position = 0,
-            WipLimit = 0,
-            IsDoneColumn = false,
-            CreatedAt = now.AddDays(-14),
-            Board = board
-        };
-        var colDoing = new BoardColumn
-        {
-            Id = ng(),
-            BoardId = board.Id,
-            Name = "Doing",
-            Position = 1,
-            WipLimit = 5,
-            IsDoneColumn = false,
-            CreatedAt = now.AddDays(-14),
-            Board = board
-        };
-        var colDone = new BoardColumn
-        {
-            Id = ng(),
-            BoardId = board.Id,
-            Name = "Done",
-            Position = 2,
-            WipLimit = 0,
-            IsDoneColumn = true,
-            CreatedAt = now.AddDays(-14),
-            Board = board
-        };
-
-        board.Columns.Add(colTodo);
-        board.Columns.Add(colDoing);
-        board.Columns.Add(colDone);
-        project.Boards.Add(board);
-
-        return new ProjectBoardContext
-        {
-            Project = project,
-            Board = board,
-            ColTodo = colTodo,
-            ColDoing = colDoing,
-            ColDone = colDone,
-            StatusDefs = statusDefs
         };
     }
 
@@ -1022,56 +915,4 @@ public static class DemoDataBuilder
             now.AddDays(-3));
     }
 
-    private static List<TaskStatusDefinition> CreateDefaultStatuses(Guid projectId, DateTime now)
-    {
-        Guid Ng() => Guid.NewGuid();
-
-        return
-        [
-            new TaskStatusDefinition
-            {
-                Id = Ng(),
-                ProjectId = projectId,
-                Name = "Backlog",
-                ColorHex = "#94A3B8",
-                Position = 0,
-                IsDefault = false,
-                IsDoneState = false,
-                CreatedAt = now
-            },
-            new TaskStatusDefinition
-            {
-                Id = Ng(),
-                ProjectId = projectId,
-                Name = "Todo",
-                ColorHex = "#3B82F6",
-                Position = 1,
-                IsDefault = true,
-                IsDoneState = false,
-                CreatedAt = now
-            },
-            new TaskStatusDefinition
-            {
-                Id = Ng(),
-                ProjectId = projectId,
-                Name = "In progress",
-                ColorHex = "#F59E0B",
-                Position = 2,
-                IsDefault = false,
-                IsDoneState = false,
-                CreatedAt = now
-            },
-            new TaskStatusDefinition
-            {
-                Id = Ng(),
-                ProjectId = projectId,
-                Name = "Done",
-                ColorHex = "#22C55E",
-                Position = 3,
-                IsDefault = false,
-                IsDoneState = true,
-                CreatedAt = now
-            }
-        ];
-    }
 }

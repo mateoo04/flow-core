@@ -1,6 +1,7 @@
 @using FlowCore.Services
 @model Board
-<p class="mt-4 text-sm text-fg-secondary">Scroll horizontally on small screens. Each card opens the task.</p>
+@inject FlowCore.Services.UiText T
+<p class="mt-4 text-sm text-fg-secondary">@T["crud.board.hint"]</p>
 
 <div class="mt-6 flex gap-4 overflow-x-auto pb-4" role="region" aria-label="Board columns and tasks">
     @foreach (var col in Model.Columns.OrderBy(c => c.Position))
@@ -57,4 +58,4 @@
     }
 </div>
 
-<p class="mt-6 text-sm text-fg-muted">Read-only demo — <span class="text-brand-warn">Add task</span> is intentionally disabled for the lab.</p>
+<p class="mt-6 text-sm text-fg-muted">@T["crud.board.footer"]</p>
