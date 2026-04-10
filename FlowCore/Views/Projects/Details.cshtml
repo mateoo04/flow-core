@@ -1,7 +1,9 @@
 @model ProjectDetailsPageViewModel
+@inject FlowCore.Services.UiText T
 @{
     ViewData["Title"] = Model.Project.Name;
     var project = Model.Project;
+    var activeBoard = Model.ActiveBoard;
 }
 <header class="border-b border-fg-muted/15 pb-6">
     <div class="flex flex-wrap items-start justify-between gap-4">
@@ -12,6 +14,19 @@
                 <span class="rounded-full bg-raised px-3 py-1 text-xs font-medium text-fg-secondary">@project.Status</span>
                 <span class="rounded-full bg-raised px-3 py-1 text-xs text-fg-muted">Priority @project.Priority</span>
             </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            @if (activeBoard is not null)
+            {
+                <a class="rounded-xl border-2 border-brand px-3 py-2 text-sm font-semibold text-brand outline-none transition-colors hover:bg-brand/10"
+                   asp-controller="Tasks" asp-action="Create" asp-route-projectId="@project.Id" asp-route-boardId="@activeBoard.Id">New task</a>
+            }
+            <a class="rounded-xl border border-fg-muted/20 px-3 py-2 text-sm text-fg-secondary hover:bg-raised"
+               asp-controller="TaskStatusDefinitions" asp-action="Manage" asp-route-projectId="@project.Id">@T["crud.statuses.manage_link"]</a>
+            <form method="post" asp-action="Delete" asp-route-id="@project.Id" class="inline" onsubmit="return confirm('Delete this project and all tasks?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="rounded-xl border border-brand-warn/40 px-3 py-2 text-sm font-medium text-brand-warn hover:bg-brand-warn/10">@T["crud.projects.delete"]</button>
+            </form>
         </div>
     </div>
     <div class="mt-4 text-sm">

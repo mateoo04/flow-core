@@ -5,17 +5,19 @@ namespace FlowCore.Repositories.InMemory;
 
 public sealed class InMemoryUserRepository : IUserRepository
 {
-    private readonly IReadOnlyList<User> _all;
-    private readonly Dictionary<Guid, User> _byId;
+    private readonly InMemoryDataStore _store;
 
-    public InMemoryUserRepository(DemoDataGraph graph)
+    public InMemoryUserRepository(InMemoryDataStore store) => _store = store;
+
+    public IReadOnlyList<User> GetAll()
     {
-        _all = graph.Users.ToList();
-        _byId = _all.ToDictionary(u => u.Id);
+        lock (_store.Sync)
+            return _store.Users.ToList();
     }
 
-    public IReadOnlyList<User> GetAll() => _all;
-
-    public User? GetById(Guid id) =>
-        _byId.TryGetValue(id, out var u) ? u : null;
+    public User? GetById(Guid id)
+    {
+        lock (_store.Sync)
+            return _store.Users.FirstOrDefault(u => u.Id == id);
+    }
 }

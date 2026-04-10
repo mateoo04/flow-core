@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<DemoDataGraph>(_ => DemoDataBuilder.CreateSampleGraph());
+builder.Services.AddSingleton(sp => new InMemoryDataStore(sp.GetRequiredService<DemoDataGraph>()));
 builder.Services.AddSingleton<IWorkspaceRepository, InMemoryWorkspaceRepository>();
 builder.Services.AddSingleton<IProjectRepository, InMemoryProjectRepository>();
 builder.Services.AddSingleton<ITaskRepository, InMemoryTaskRepository>();
@@ -18,21 +19,22 @@ builder.Services.AddSingleton<IBoardColumnRepository, InMemoryBoardColumnReposit
 builder.Services.AddSingleton<ITaskStatusDefinitionRepository, InMemoryTaskStatusDefinitionRepository>();
 builder.Services.AddSingleton<ICommentRepository, InMemoryCommentRepository>();
 builder.Services.AddSingleton<IBreadcrumbTrailBuilder, BreadcrumbTrailBuilder>();
+builder.Services.AddSingleton<UiText>();
 
 var app = builder.Build();
 Console.WriteLine("Starting application... is development: " + app.Environment.IsDevelopment());
 if (app.Environment.IsDevelopment())
 {
-    var demo = app.Services.GetRequiredService<DemoDataGraph>();
+    var store = app.Services.GetRequiredService<InMemoryDataStore>();
 
-    var projectCount = demo.Workspaces.Sum(w => w.Projects.Count);
-    var taskCount = DemoDataLinqExamples.AllTasks(demo.Workspaces).Count();
+    var projectCount = store.Workspaces.Sum(w => w.Projects.Count);
+    var taskCount = DemoDataLinqExamples.AllTasks(store.Workspaces).Count();
 
     Console.WriteLine(
-        $"[DemoData] Organizations={demo.Workspaces.Count}, Projects={projectCount}, " +
-        $"TaskItems={taskCount}, Users={demo.Users.Count}, Tags={demo.Tags.Count}");
+        $"[DemoData] Organizations={store.Workspaces.Count}, Projects={projectCount}, " +
+        $"TaskItems={taskCount}, Users={store.Users.Count}, Tags={store.Tags.Count}");
 
-    DemoDataLinqExamples.WriteDevelopmentQuerySample(demo);
+    DemoDataLinqExamples.WriteDevelopmentQuerySample(store.Workspaces, store.Users);
 }
 
 if (!app.Environment.IsDevelopment())

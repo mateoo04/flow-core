@@ -1,9 +1,14 @@
 @model IReadOnlyList<ProjectListRow>
+@inject FlowCore.Services.UiText T
 @{
     ViewData["Title"] = "Projects";
     var filterWs = ViewBag.FilterWorkspaceId as Guid?;
 }
-<h1 class="text-3xl font-bold tracking-tight text-fg">Projects</h1>
+<div class="flex flex-wrap items-end justify-between gap-4">
+    <h1 class="text-3xl font-bold tracking-tight text-fg">Projects</h1>
+    <a class="rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white"
+       asp-action="Create" asp-route-workspaceId="@filterWs">@T["crud.projects.create_title"]</a>
+</div>
 @if (filterWs is { } wsId)
 {
     <div class="mt-3 inline-flex items-center gap-2 rounded-full bg-raised px-3 py-1 text-sm text-fg-secondary">

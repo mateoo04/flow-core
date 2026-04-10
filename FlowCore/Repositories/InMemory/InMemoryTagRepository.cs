@@ -5,17 +5,19 @@ namespace FlowCore.Repositories.InMemory;
 
 public sealed class InMemoryTagRepository : ITagRepository
 {
-    private readonly IReadOnlyList<Tag> _all;
-    private readonly Dictionary<Guid, Tag> _byId;
+    private readonly InMemoryDataStore _store;
 
-    public InMemoryTagRepository(DemoDataGraph graph)
+    public InMemoryTagRepository(InMemoryDataStore store) => _store = store;
+
+    public IReadOnlyList<Tag> GetAll()
     {
-        _all = graph.Tags.ToList();
-        _byId = _all.ToDictionary(t => t.Id);
+        lock (_store.Sync)
+            return _store.Tags.ToList();
     }
 
-    public IReadOnlyList<Tag> GetAll() => _all;
-
-    public Tag? GetById(Guid id) =>
-        _byId.TryGetValue(id, out var t) ? t : null;
+    public Tag? GetById(Guid id)
+    {
+        lock (_store.Sync)
+            return _store.Tags.FirstOrDefault(t => t.Id == id);
+    }
 }

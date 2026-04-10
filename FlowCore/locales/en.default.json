@@ -1,0 +1,18 @@
+{
+  "crud.projects.create_title": "Create project",
+  "crud.projects.create_submit": "Create project",
+  "crud.projects.delete": "Delete project",
+  "crud.tasks.create_title": "New task",
+  "crud.tasks.create_submit": "Create task",
+  "crud.tasks.delete": "Delete task",
+  "crud.tasks.add_comment": "Add comment",
+  "crud.tasks.comment_placeholder": "Write a comment…",
+  "crud.tasks.subtask_create": "New subtask",
+  "crud.statuses.manage_title": "Task statuses",
+  "crud.statuses.manage_link": "Manage statuses",
+  "crud.statuses.add": "Add status",
+  "crud.statuses.delete": "Delete",
+  "crud.statuses.reassign_hint": "Reassign tasks to",
+  "crud.board.hint": "Drag columns scroll on small screens. Each card opens the task.",
+  "crud.board.footer": "Changes are kept in memory until the app restarts."
+}

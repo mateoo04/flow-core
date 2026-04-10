@@ -5,17 +5,19 @@ namespace FlowCore.Repositories.InMemory;
 
 public sealed class InMemoryWorkspaceRepository : IWorkspaceRepository
 {
-    private readonly IReadOnlyList<Workspace> _all;
-    private readonly Dictionary<Guid, Workspace> _byId;
+    private readonly InMemoryDataStore _store;
 
-    public InMemoryWorkspaceRepository(DemoDataGraph graph)
+    public InMemoryWorkspaceRepository(InMemoryDataStore store) => _store = store;
+
+    public IReadOnlyList<Workspace> GetAll()
     {
-        _all = graph.Workspaces.ToList();
-        _byId = _all.ToDictionary(w => w.Id);
+        lock (_store.Sync)
+            return _store.Workspaces.ToList();
     }
 
-    public IReadOnlyList<Workspace> GetAll() => _all;
-
-    public Workspace? GetById(Guid id) =>
-        _byId.TryGetValue(id, out var w) ? w : null;
+    public Workspace? GetById(Guid id)
+    {
+        lock (_store.Sync)
+            return _store.FindWorkspace(id);
+    }
 }

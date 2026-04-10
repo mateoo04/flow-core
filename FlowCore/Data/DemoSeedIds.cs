@@ -1,6 +1,6 @@
 namespace FlowCore.Data;
 
-internal static class DemoSeedIds
+public static class DemoSeedIds
 {
     public static readonly Guid UserAlex = Guid.Parse("a1000001-0000-4000-8000-000000000001");
     public static readonly Guid UserSam = Guid.Parse("a1000001-0000-4000-8000-000000000002");
