@@ -81,10 +81,18 @@ public static class DemoDataBuilder
             OwnerUserId = ownerAlex.Id
         };
 
+        var statuses = ProjectBlueprint.CreateWorkspaceStatuses(organization.Id, now, Ng);
+        foreach (var s in statuses.All)
+        {
+            s.Workspace = organization;
+            organization.TaskStatusDefinitions.Add(s);
+        }
+
         var marketingSite = ProjectBlueprint.CreateProject(
             organization,
             Ng,
             now,
+            statuses,
             "Acme.com — marketing & sign-up",
             "Public site, content, SEO, and self-serve trial checkout.",
             ProjectStatus.Active,
@@ -95,6 +103,7 @@ public static class DemoDataBuilder
             organization,
             Ng,
             now,
+            statuses,
             "Acme Shop — mobile",
             "Customer iOS/Android app: browse, cart, and order tracking.",
             ProjectStatus.Active,
@@ -105,6 +114,7 @@ public static class DemoDataBuilder
             organization,
             Ng,
             now,
+            statuses,
             "Compass — design system",
             "Figma kit, React primitives, and tokens shared across product surfaces.",
             ProjectStatus.Planning,
@@ -115,6 +125,7 @@ public static class DemoDataBuilder
             organization,
             Ng,
             now,
+            statuses,
             "Partner Hub — revenue integrations",
             "Wholesale portals, EDI hooks, and ERP-facing APIs for top partners.",
             ProjectStatus.Planning,
@@ -125,6 +136,7 @@ public static class DemoDataBuilder
             organization,
             Ng,
             now,
+            statuses,
             "People tech — new hire experience",
             "Device prep, identity groups, and lightweight automations so week-one isn’t helpdesk roulette.",
             ProjectStatus.Active,
@@ -149,7 +161,7 @@ public static class DemoDataBuilder
 
     private static TaskItem NewTask(
         Func<Guid> ng,
-        BoardColumn column,
+        Board board,
         TaskStatusDefinition status,
         string title,
         string description,
@@ -163,7 +175,7 @@ public static class DemoDataBuilder
         var t = new TaskItem
         {
             Id = ng(),
-            BoardColumnId = column.Id,
+            BoardId = board.Id,
             Title = title,
             Description = description,
             TaskStatusDefinitionId = status.Id,
@@ -173,11 +185,11 @@ public static class DemoDataBuilder
             CreatedAt = createdAt,
             UpdatedAt = updatedAt,
             DueDate = dueDate,
-            BoardColumn = column,
+            Board = board,
             TaskStatusDefinition = status,
             ParentTaskItem = parent
         };
-        column.Tasks.Add(t);
+        board.Tasks.Add(t);
         status.TaskItems.Add(t);
         if (parent is not null)
         {
@@ -249,7 +261,7 @@ public static class DemoDataBuilder
 
         var epicIa = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Primary nav & URL scheme (pre-build)",
             "Lock IA before eng cuts templates—pricing, solutions, and docs need stable paths.",
@@ -264,7 +276,7 @@ public static class DemoDataBuilder
 
         var subIa1 = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.InProgress,
             "Approved nav wireframes (desktop + mobile)",
             string.Empty,
@@ -278,7 +290,7 @@ public static class DemoDataBuilder
 
         var subIa2 = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Backlog,
             "301/302 redirect map from legacy blog URLs",
             string.Empty,
@@ -291,7 +303,7 @@ public static class DemoDataBuilder
 
         var epicCheckout = NewTask(
             ng,
-            ctx.ColDoing,
+            ctx.Board,
             ctx.InProgress,
             "14-day trial checkout (Stripe)",
             "Card-on-file optional; region-aware tax display.",
@@ -305,7 +317,7 @@ public static class DemoDataBuilder
 
         var subPay = NewTask(
             ng,
-            ctx.ColDoing,
+            ctx.Board,
             ctx.InProgress,
             "PaymentIntent lifecycle + signed webhooks",
             string.Empty,
@@ -319,7 +331,7 @@ public static class DemoDataBuilder
 
         var subErr = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Toast + retry copy for soft declines",
             string.Empty,
@@ -332,7 +344,7 @@ public static class DemoDataBuilder
 
         var epicTrust = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Trial module — trust badges & fine print",
             "Above-the-fold block on signup; legal wants EU-specific footnotes.",
@@ -346,7 +358,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Backlog,
             "Source SVG badges from brand toolkit (SOC2, GDPR)",
             string.Empty,
@@ -359,7 +371,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Legal review notes folded into signup accordion",
             string.Empty,
@@ -372,7 +384,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Backlog,
             "Programmatic SEO: PDP + collection title templates",
             "Coordinate with catalog ops on character limits.",
@@ -385,7 +397,7 @@ public static class DemoDataBuilder
 
         var heroPl = NewTask(
             ng,
-            ctx.ColDoing,
+            ctx.Board,
             ctx.InProgress,
             "Homepage hero + bestseller rail (responsive)",
             "Match Figma 1440 / 768 / 390 breakpoints.",
@@ -400,7 +412,7 @@ public static class DemoDataBuilder
 
         var analytics = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "GA4: sign-up funnel event map v2",
             "Align names with mobile for exec dashboard.",
@@ -414,7 +426,7 @@ public static class DemoDataBuilder
 
         var safari = NewTask(
             ng,
-            ctx.ColDoing,
+            ctx.Board,
             ctx.InProgress,
             "Safari 17: flex gap regression on category chips",
             "Polyfill only if perf budget allows.",
@@ -429,7 +441,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColDone,
+            ctx.Board,
             ctx.Done,
             "Privacy center IA — shipped in docs subdomain",
             string.Empty,
@@ -442,7 +454,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColDone,
+            ctx.Board,
             ctx.Done,
             "Homepage hero A/B (Q1) — readout & shutdown",
             string.Empty,
@@ -479,7 +491,7 @@ public static class DemoDataBuilder
 
         var epicOnboard = NewTask(
             ng,
-            ctx.ColDoing,
+            ctx.Board,
             ctx.InProgress,
             "First-launch experience (v3)",
             "Fewer screens; Face ID optional; restore purchases.",
@@ -494,7 +506,7 @@ public static class DemoDataBuilder
 
         var subSplash = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Motion-safe splash + notification pre-prompt",
             string.Empty,
@@ -508,7 +520,7 @@ public static class DemoDataBuilder
 
         var subBio = NewTask(
             ng,
-            ctx.ColDoing,
+            ctx.Board,
             ctx.InProgress,
             "Biometric opt-in & fallback to PIN",
             string.Empty,
@@ -521,7 +533,7 @@ public static class DemoDataBuilder
 
         var epicOffline = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Offline product browse (read-mostly)",
             "Show last-synced catalog when offline banner shows.",
@@ -535,7 +547,7 @@ public static class DemoDataBuilder
 
         var subSync = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Backlog,
             "Merge rules when prices change mid-session",
             string.Empty,
@@ -548,7 +560,7 @@ public static class DemoDataBuilder
 
         var subQueue = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Reliable outbox for favorites + cart deltas",
             string.Empty,
@@ -561,7 +573,7 @@ public static class DemoDataBuilder
 
         var push = NewTask(
             ng,
-            ctx.ColDoing,
+            ctx.Board,
             ctx.InProgress,
             "Push deep links: order status → in-app screen",
             "Handle cold start and expired JWT.",
@@ -575,7 +587,7 @@ public static class DemoDataBuilder
 
         var crash = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Crash: UIImagePickerController on 256MB devices",
             "#1 in Firebase for build 3.0.4.",
@@ -590,7 +602,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Order tracking map: match fulfilment carrier palette",
             string.Empty,
@@ -603,7 +615,7 @@ public static class DemoDataBuilder
 
         var saveForLater = NewTask(
             ng,
-            ctx.ColDoing,
+            ctx.Board,
             ctx.InProgress,
             "Save-for-later sync across phone + tablet",
             string.Empty,
@@ -617,7 +629,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "App Review notes + demo account for 3.1 submission",
             string.Empty,
@@ -630,7 +642,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColDone,
+            ctx.Board,
             ctx.Done,
             "App Store creatives refresh (spring drop)",
             string.Empty,
@@ -643,7 +655,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Backlog,
             "Dark mode regression matrix (iPad + phone)",
             string.Empty,
@@ -656,7 +668,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColDone,
+            ctx.Board,
             ctx.Done,
             "February beta cohort — feedback export & thank-you mail",
             string.Empty,
@@ -669,7 +681,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColDone,
+            ctx.Board,
             ctx.Done,
             "Sunset legacy wishlist endpoint (410 Gone)",
             string.Empty,
@@ -705,7 +717,7 @@ public static class DemoDataBuilder
 
         var buttons = NewTask(
             ng,
-            ctx.ColDoing,
+            ctx.Board,
             ctx.InProgress,
             "Button primitives — size ramps & focus ring",
             "Align with WCAG 2.2 focus-visible spec.",
@@ -720,7 +732,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "SM / MD / LG touch targets from spacing scale 4/6/8",
             string.Empty,
@@ -733,7 +745,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Backlog,
             "Destructive variant: hover vs focus story in Storybook",
             string.Empty,
@@ -746,7 +758,7 @@ public static class DemoDataBuilder
 
         var audit = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Quarterly drift check: Figma UI kit vs Storybook props",
             string.Empty,
@@ -760,7 +772,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Backlog,
             "DataTable density tokens (comfortable / compact)",
             "Blocked on commerce grid work.",
@@ -787,7 +799,7 @@ public static class DemoDataBuilder
 
         var webhooks = NewTask(
             ng,
-            ctx.ColDoing,
+            ctx.Board,
             ctx.InProgress,
             "Shopify wholesale orders — idempotent webhook handler",
             "Double events during flash sales; use payload id + HMAC.",
@@ -802,7 +814,7 @@ public static class DemoDataBuilder
 
         var netsuite = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Backlog,
             "NetSuite SKU sync — discovery brief for RevOps",
             "Need field map from ERP owner before API spike.",
@@ -815,7 +827,7 @@ public static class DemoDataBuilder
 
         var sso = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Distributor portal SSO handoff (SAML)",
             "Vendor: Okta; target pilot account in May.",
@@ -845,7 +857,7 @@ public static class DemoDataBuilder
 
         var laptops = NewTask(
             ng,
-            ctx.ColDoing,
+            ctx.Board,
             ctx.InProgress,
             "Spring laptop refresh — pilot cohort (sales)",
             "Encrypted fleet; ship window March 18–28.",
@@ -859,7 +871,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Jamf policy tag: `refresh-2026-spring` on 42 devices",
             string.Empty,
@@ -872,7 +884,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "FedEx return labels + spreadsheet for Facilities",
             string.Empty,
@@ -885,7 +897,7 @@ public static class DemoDataBuilder
 
         var okta = NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Todo,
             "Okta: auto-add new hires to “All Acme” + Slack on day-one",
             "HRIS webhook already sends start date.",
@@ -899,7 +911,7 @@ public static class DemoDataBuilder
 
         NewTask(
             ng,
-            ctx.ColTodo,
+            ctx.Board,
             ctx.Backlog,
             "Swag + desk checklist automation (Notion → email)",
             "Nice-to-have after laptop flow is stable.",

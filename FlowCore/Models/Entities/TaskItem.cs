@@ -3,7 +3,7 @@ namespace FlowCore.Models;
 public class TaskItem
 {
     public Guid Id { get; set; }
-    public Guid BoardColumnId { get; set; }
+    public Guid BoardId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public Guid TaskStatusDefinitionId { get; set; }
@@ -14,7 +14,7 @@ public class TaskItem
     public DateTime UpdatedAt { get; set; }
     public DateTime? DueDate { get; set; }
 
-    public BoardColumn? BoardColumn { get; set; }
+    public Board? Board { get; set; }
     public TaskStatusDefinition? TaskStatusDefinition { get; set; }
     public TaskItem? ParentTaskItem { get; set; }
     public ICollection<TaskItem> Subtasks { get; set; } = new List<TaskItem>();

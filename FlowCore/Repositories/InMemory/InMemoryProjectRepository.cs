@@ -44,10 +44,23 @@ public sealed class InMemoryProjectRepository : IProjectRepository
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name is required.", nameof(name));
 
+            var ordered = ws.TaskStatusDefinitions.OrderBy(s => s.Position).ToList();
+            if (ordered.Count < 4)
+                throw new InvalidOperationException("This workspace needs at least four task statuses before a project can be created.");
+
+            var workspaceStatuses = new WorkspaceStatuses
+            {
+                Backlog = ordered[0],
+                Todo = ordered.Count > 1 ? ordered[1] : ordered[0],
+                InProgress = ordered.Count > 2 ? ordered[2] : ordered[0],
+                Done = ordered.LastOrDefault(s => s.IsDoneState) ?? ordered[^1]
+            };
+
             var ctx = ProjectBlueprint.CreateProject(
                 ws,
                 Guid.NewGuid,
                 DateTime.UtcNow,
+                workspaceStatuses,
                 name.Trim(),
                 description.Trim(),
                 status,
@@ -65,8 +78,8 @@ public sealed class InMemoryProjectRepository : IProjectRepository
             if (project?.Workspace is null)
                 return false;
 
-            var inProject = DemoDataLinqExamples.AllTasks(_store.Workspaces)
-                .Where(t => t.BoardColumn?.Board?.ProjectId == id)
+            var inProject = project.Boards
+                .SelectMany(b => b.Tasks)
                 .ToList();
 
             foreach (var root in inProject.Where(t => t.ParentTaskItemId is null).ToList())

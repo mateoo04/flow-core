@@ -13,5 +13,4 @@ public class Project
 
     public Workspace? Workspace { get; set; }
     public ICollection<Board> Boards { get; set; } = new List<Board>();
-    public ICollection<TaskStatusDefinition> TaskStatusDefinitions { get; set; } = new List<TaskStatusDefinition>();
 }

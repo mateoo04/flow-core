@@ -17,7 +17,7 @@ public class BoardsController : BaseController
     public IActionResult Index()
     {
         var rows = _boards.GetAll()
-            .Select(b => new BoardListRow(b.Id, b.Name, b.ProjectId, b.IsDefault, b.Columns.Count))
+            .Select(b => new BoardListRow(b.Id, b.Name, b.ProjectId, b.IsDefault, b.Tasks.Count))
             .ToList();
         return View(rows);
     }

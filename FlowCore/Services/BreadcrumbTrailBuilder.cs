@@ -11,11 +11,7 @@ public interface IBreadcrumbTrailBuilder
 
     IReadOnlyList<BreadcrumbItem> ForBoard(Board b);
 
-    IReadOnlyList<BreadcrumbItem> ForBoardColumn(BoardColumn c);
-
     IReadOnlyList<BreadcrumbItem> ForTask(TaskItem t);
-
-    IReadOnlyList<BreadcrumbItem> ForTaskStatusDefinition(TaskStatusDefinition s);
 
     IReadOnlyList<BreadcrumbItem> ForUser(User u);
 
@@ -51,25 +47,9 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
         ];
     }
 
-    public IReadOnlyList<BreadcrumbItem> ForBoardColumn(BoardColumn c)
-    {
-        var board = c.Board;
-        var project = board?.Project;
-        if (project is null)
-            return [new("Columns", "/BoardColumns/Index"), new("Column", null)];
-
-        return
-        [
-            ProjectsIndex(),
-            new(project.Name, $"/Projects/Details/{project.Id:D}"),
-            new(board!.Name, $"/Projects/Details/{project.Id:D}?boardId={board.Id:D}")
-        ];
-    }
-
     public IReadOnlyList<BreadcrumbItem> ForTask(TaskItem t)
     {
-        var col = t.BoardColumn;
-        var board = col?.Board;
+        var board = t.Board;
         var project = board?.Project;
 
         if (project is null || board is null)
@@ -80,20 +60,6 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
             ProjectsIndex(),
             new(project.Name, $"/Projects/Details/{project.Id:D}"),
             new(board.Name, $"/Projects/Details/{project.Id:D}?boardId={board.Id:D}")
-        ];
-    }
-
-    public IReadOnlyList<BreadcrumbItem> ForTaskStatusDefinition(TaskStatusDefinition s)
-    {
-        var project = s.Project;
-        if (project is null)
-            return [new("Statuses", "/TaskStatusDefinitions/Index"), new(s.Name, null)];
-
-        return
-        [
-            ProjectsIndex(),
-            new(project.Name, $"/Projects/Details/{project.Id:D}"),
-            new(s.Name, null)
         ];
     }
 

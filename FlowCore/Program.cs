@@ -15,8 +15,6 @@ builder.Services.AddSingleton<ITaskRepository, InMemoryTaskRepository>();
 builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
 builder.Services.AddSingleton<ITagRepository, InMemoryTagRepository>();
 builder.Services.AddSingleton<IBoardRepository, InMemoryBoardRepository>();
-builder.Services.AddSingleton<IBoardColumnRepository, InMemoryBoardColumnRepository>();
-builder.Services.AddSingleton<ITaskStatusDefinitionRepository, InMemoryTaskStatusDefinitionRepository>();
 builder.Services.AddSingleton<ICommentRepository, InMemoryCommentRepository>();
 builder.Services.AddSingleton<IBreadcrumbTrailBuilder, BreadcrumbTrailBuilder>();
 builder.Services.AddSingleton<UiText>();

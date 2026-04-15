@@ -13,23 +13,26 @@ public class TasksController : BaseController
     private readonly IProjectRepository _projects;
     private readonly ICommentRepository _comments;
     private readonly IBreadcrumbTrailBuilder _breadcrumbs;
+    private readonly InMemoryDataStore _store;
 
     public TasksController(
         ITaskRepository tasks,
         IProjectRepository projects,
         ICommentRepository comments,
-        IBreadcrumbTrailBuilder breadcrumbs)
+        IBreadcrumbTrailBuilder breadcrumbs,
+        InMemoryDataStore store)
     {
         _tasks = tasks;
         _projects = projects;
         _comments = comments;
         _breadcrumbs = breadcrumbs;
+        _store = store;
     }
 
     public IActionResult Index()
     {
         var rows = _tasks.GetAll()
-            .Select(t => new TaskListRow(t.Id, t.Title, t.Priority, t.BoardColumnId, t.ParentTaskItemId))
+            .Select(t => new TaskListRow(t.Id, t.Title, t.Priority, t.BoardId, t.ParentTaskItemId))
             .OrderBy(r => r.Title)
             .ToList();
         return View(rows);
@@ -50,10 +53,12 @@ public class TasksController : BaseController
         if (board is null)
             return NotFound();
 
-        var defaultColumn = board.Columns.OrderBy(c => c.Position).FirstOrDefault();
-        var defaultStatus = project.TaskStatusDefinitions.FirstOrDefault(s => s.IsDefault)
-                            ?? project.TaskStatusDefinitions.OrderBy(s => s.Position).FirstOrDefault();
-        if (defaultColumn is null || defaultStatus is null)
+        var workspace = project.Workspace ?? _store.FindWorkspace(project.WorkspaceId);
+        if (workspace is null)
+            return NotFound();
+        var statuses = workspace.TaskStatusDefinitions.OrderBy(s => s.Position).ToList();
+        var defaultStatus = statuses.FirstOrDefault();
+        if (defaultStatus is null)
             return NotFound();
 
         SetNav(project.WorkspaceId, project.Id);
@@ -62,12 +67,12 @@ public class TasksController : BaseController
         {
             ProjectId = projectId,
             BoardId = board.Id,
-            BoardColumnId = defaultColumn.Id,
             TaskStatusDefinitionId = defaultStatus.Id,
             ParentTaskItemId = parentTaskItemId
         };
         ViewBag.Project = project;
         ViewBag.Board = board;
+        ViewBag.Statuses = statuses;
         return View(vm);
     }
 
@@ -79,17 +84,22 @@ public class TasksController : BaseController
         if (project is null)
             return NotFound();
 
+        var workspace = project.Workspace ?? _store.FindWorkspace(project.WorkspaceId);
+        var statuses = workspace?.TaskStatusDefinitions.OrderBy(s => s.Position).ToList()
+                       ?? new List<TaskStatusDefinition>();
+
         if (!ModelState.IsValid)
         {
             var board = project.Boards.FirstOrDefault(b => b.Id == model.BoardId)
                         ?? project.Boards.OrderBy(b => b.Position).First();
             ViewBag.Project = project;
             ViewBag.Board = board;
+            ViewBag.Statuses = statuses;
             return View(model);
         }
 
         var req = new CreateTaskRequest(
-            model.BoardColumnId,
+            model.BoardId,
             model.TaskStatusDefinitionId,
             model.Title,
             model.Description,
@@ -106,6 +116,7 @@ public class TasksController : BaseController
                         ?? project.Boards.OrderBy(b => b.Position).First();
             ViewBag.Project = project;
             ViewBag.Board = board;
+            ViewBag.Statuses = statuses;
             return View(model);
         }
 
@@ -115,7 +126,7 @@ public class TasksController : BaseController
     public IActionResult Details(Guid id)
     {
         var entity = _tasks.GetById(id);
-        var project = entity?.BoardColumn?.Board?.Project;
+        var project = entity?.Board?.Project;
         if (project is not null)
             SetNav(project.WorkspaceId, project.Id);
         return ViewDetails(entity, _breadcrumbs.ForTask);
@@ -143,7 +154,7 @@ public class TasksController : BaseController
         if (entity is null)
             return NotFound();
 
-        var projectId = entity.BoardColumn?.Board?.ProjectId;
+        var projectId = entity.Board?.ProjectId;
         if (!_tasks.TryDelete(id))
             return NotFound();
 

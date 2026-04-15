@@ -5,7 +5,7 @@ namespace FlowCore.Repositories.InMemory;
 
 internal static class TaskGraphRemoval
 {
-    /// <summary>Removes a task and all descendants from the graph (columns, status, parent, assignments, tags, comments).</summary>
+    /// <summary>Removes a task and all descendants from the graph (board, status, parent, assignments, tags, comments).</summary>
     public static void RemoveTaskRecursive(InMemoryDataStore store, TaskItem task)
     {
         foreach (var child in task.Subtasks.ToList())
@@ -29,7 +29,7 @@ internal static class TaskGraphRemoval
             task.TaskTags.Remove(tt);
         }
 
-        task.BoardColumn?.Tasks.Remove(task);
+        task.Board?.Tasks.Remove(task);
         task.TaskStatusDefinition?.TaskItems.Remove(task);
         task.ParentTaskItem?.Subtasks.Remove(task);
     }

@@ -4,13 +4,13 @@
     ViewData["Title"] = T["crud.projects.create_title"];
     var workspaces = ViewBag.Workspaces as IReadOnlyList<Workspace> ?? Array.Empty<Workspace>();
 }
-<h1 class="text-3xl font-bold tracking-tight text-fg">@T["crud.projects.create_title"]</h1>
+<h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg">@T["crud.projects.create_title"]</h1>
 <form method="post" asp-action="Create" class="mt-8 max-w-xl space-y-5">
     @Html.AntiForgeryToken()
-    <div asp-validation-summary="All" class="text-sm text-brand-warn"></div>
+    <div asp-validation-summary="All" class="text-sm text-[var(--color-error)]"></div>
     <div>
         <label asp-for="WorkspaceId" class="block text-sm font-medium text-fg-secondary">Organization</label>
-        <select asp-for="WorkspaceId" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg">
+        <select asp-for="WorkspaceId" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]">
             @foreach (var w in workspaces)
             {
                 <option value="@w.Id">@w.Name</option>
@@ -19,22 +19,25 @@
     </div>
     <div>
         <label asp-for="Name" class="block text-sm font-medium text-fg-secondary">Name</label>
-        <input asp-for="Name" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg" required/>
+        <input asp-for="Name" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]" required/>
     </div>
     <div>
         <label asp-for="Description" class="block text-sm font-medium text-fg-secondary">Description</label>
-        <textarea asp-for="Description" rows="4" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg"></textarea>
+        <textarea asp-for="Description" rows="4" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></textarea>
     </div>
     <div>
         <label asp-for="Status" class="block text-sm font-medium text-fg-secondary">Status</label>
-        <select asp-for="Status" asp-items="Html.GetEnumSelectList<ProjectStatus>()" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg"></select>
+        <select asp-for="Status" asp-items="Html.GetEnumSelectList<ProjectStatus>()" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></select>
     </div>
     <div>
         <label asp-for="Priority" class="block text-sm font-medium text-fg-secondary">Priority</label>
-        <select asp-for="Priority" asp-items="Html.GetEnumSelectList<ProjectPriority>()" class="mt-1 w-full rounded-lg border border-fg-muted/20 bg-app px-3 py-2 text-fg"></select>
+        <select asp-for="Priority" asp-items="Html.GetEnumSelectList<ProjectPriority>()" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></select>
     </div>
     <div class="flex gap-3">
-        <button type="submit" class="rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white">@T["crud.projects.create_submit"]</button>
-        <a asp-action="Index" class="rounded-xl border border-fg-muted/20 px-4 py-2 text-sm text-fg-secondary">Cancel</a>
+        <button type="submit" class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+            @T["crud.projects.create_submit"]
+        </button>
+        <a asp-action="Index" class="rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]">Cancel</a>
     </div>
 </form>

@@ -30,11 +30,6 @@
                     New task
                 </a>
             }
-            <a class="flex items-center gap-2 rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]"
-               asp-controller="TaskStatusDefinitions" asp-action="Manage" asp-route-projectId="@project.Id">
-                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">tune</span>
-                @T["crud.statuses.manage_link"]
-            </a>
             <form method="post" asp-action="Delete" asp-route-id="@project.Id" class="inline" onsubmit="return confirm('Delete this project and all tasks?');">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="flex items-center gap-2 rounded-full border border-[var(--color-error)] px-4 py-2 text-sm font-semibold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-error)]/20">

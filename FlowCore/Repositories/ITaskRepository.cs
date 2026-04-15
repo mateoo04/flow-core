@@ -6,7 +6,7 @@ public interface ITaskRepository
 {
     IReadOnlyList<TaskItem> GetAll();
 
-    IReadOnlyList<TaskItem> GetByBoardColumnId(Guid boardColumnId);
+    IReadOnlyList<TaskItem> GetByBoardId(Guid boardId);
 
     TaskItem? GetById(Guid id);
 

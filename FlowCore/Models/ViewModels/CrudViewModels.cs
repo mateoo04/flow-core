@@ -23,10 +23,8 @@ public sealed class TaskCreateFormVm
     [Required]
     public Guid ProjectId { get; set; }
 
-    public Guid BoardId { get; set; }
-
     [Required]
-    public Guid BoardColumnId { get; set; }
+    public Guid BoardId { get; set; }
 
     [Required]
     public Guid TaskStatusDefinitionId { get; set; }
@@ -58,7 +56,10 @@ public sealed class TaskStatusFormVm
 
     public string ColorHex { get; set; } = "#94A3B8";
 
-    public bool IsDefault { get; set; }
-
     public bool IsDoneState { get; set; }
 }
+
+public sealed record SettingsIndexVm(
+    Workspace ActiveWorkspace,
+    IReadOnlyList<TaskStatusDefinition> Statuses,
+    IReadOnlyList<Workspace> AllWorkspaces);
