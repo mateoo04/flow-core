@@ -98,13 +98,18 @@
                 </div>
             </details>
 
-            <details class="group mt-1" @(activeProject is not null || ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" ? "open" : "")>
+            <details class="group mt-1" open>
                 <summary class="flex cursor-pointer list-none items-center gap-3 rounded-lg px-4 py-2 text-fg-secondary transition-colors hover:bg-raised hover:text-fg marker:content-none [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
                     <span class="material-symbols-outlined text-[20px]" aria-hidden="true">folder</span>
                     <span class="font-headline flex-1 text-sm font-semibold">@T["nav.projects"]</span>
                     <span class="material-symbols-outlined text-[18px] text-fg-muted transition-transform group-open:rotate-180" aria-hidden="true">keyboard_arrow_down</span>
                 </summary>
                 <div class="mt-1 space-y-0.5 pl-3">
+                    <a class="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold text-[var(--color-secondary)] transition-colors hover:bg-[var(--color-secondary)]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
+                       asp-controller="Projects" asp-action="Create">
+                        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+                        New project
+                    </a>
                     <a class="block rounded-lg px-3 py-1.5 text-sm text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "bg-raised font-medium text-fg" : "")"
                        asp-controller="Projects" asp-action="Index">@T["nav.all_projects"]</a>
                     @foreach (var p in sidebarProjects)
@@ -125,8 +130,6 @@
                     <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Tasks" asp-action="Index">Tasks</a>
                     <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Comments" asp-action="Index">Comments</a>
                     <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Boards" asp-action="Index">Boards</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="BoardColumns" asp-action="Index">Columns</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="TaskStatusDefinitions" asp-action="Index">Statuses</a>
                     <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Users" asp-action="Index">Users</a>
                     <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Tags" asp-action="Index">Tags</a>
                 </div>
@@ -134,8 +137,11 @@
         </nav>
 
         <div class="sticky bottom-0 z-10 shrink-0 border-t border-border/60 bg-sidebar p-3">
+            @{
+                var settingsWsId = activeWs ?? workspaces.FirstOrDefault()?.Id;
+            }
             <a class="font-headline flex items-center gap-3 rounded-lg px-4 py-2 text-sm text-fg-secondary transition-colors hover:bg-raised hover:text-fg"
-               asp-controller="Home" asp-action="Privacy">
+               asp-controller="Settings" asp-action="Index" asp-route-workspaceId="@settingsWsId">
                 <span class="material-symbols-outlined text-[18px]" aria-hidden="true">settings</span>
                 @T["nav.settings"]
             </a>
@@ -164,14 +170,6 @@
 @if (IsSectionDefined("Fab"))
 {
     @RenderSection("Fab", required: false)
-}
-else
-{
-    <a class="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-secondary)] text-white shadow-2xl shadow-[var(--color-secondary)]/30 transition-transform hover:scale-110 active:scale-95"
-       asp-controller="Projects" asp-action="Index" title="Create">
-        <span class="material-symbols-outlined text-2xl" aria-hidden="true">add</span>
-        <span class="sr-only">Create</span>
-    </a>
 }
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>

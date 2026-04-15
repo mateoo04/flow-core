@@ -35,7 +35,7 @@ public class HomeController : Controller
                     .OrderBy(t => t.Title)
                     .Select(t =>
                     {
-                        var project = t.BoardColumn?.Board?.Project;
+                        var project = t.Board?.Project;
                         return new MyTaskCardVm
                         {
                             TaskId = t.Id,
@@ -65,11 +65,6 @@ public class HomeController : Controller
             StatusGroups = groups
         };
         return View(vm);
-    }
-
-    public IActionResult Privacy()
-    {
-        return View();
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

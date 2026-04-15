@@ -11,7 +11,7 @@
         <tr>
             <th class="px-4 py-3" scope="col">Name</th>
             <th class="px-4 py-3" scope="col">Default</th>
-            <th class="px-4 py-3" scope="col">Columns</th>
+            <th class="px-4 py-3" scope="col">Tasks</th>
             <th class="px-4 py-3" scope="col">Project</th>
         </tr>
         </thead>
@@ -23,7 +23,7 @@
                     <a class="rounded font-medium text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card" asp-controller="Boards" asp-action="Details" asp-route-id="@row.Id">@row.Name</a>
                 </td>
                 <td class="px-4 py-3 text-fg-muted">@(row.IsDefault ? "Yes" : "")</td>
-                <td class="px-4 py-3 tabular-nums text-fg-secondary">@row.ColumnCount</td>
+                <td class="px-4 py-3 tabular-nums text-fg-secondary">@row.TaskCount</td>
                 <td class="px-4 py-3">
                     <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card"
                        asp-controller="Projects" asp-action="Details" asp-route-id="@row.ProjectId" asp-route-boardId="@row.Id"

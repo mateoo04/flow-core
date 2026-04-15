@@ -3,7 +3,7 @@ using FlowCore.Models;
 namespace FlowCore.Repositories;
 
 public sealed record CreateTaskRequest(
-    Guid BoardColumnId,
+    Guid BoardId,
     Guid TaskStatusDefinitionId,
     string Title,
     string? Description,

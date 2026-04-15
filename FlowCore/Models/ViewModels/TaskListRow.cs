@@ -6,5 +6,5 @@ public sealed record TaskListRow(
     Guid Id,
     string Title,
     TaskPriority Priority,
-    Guid BoardColumnId,
+    Guid BoardId,
     Guid? ParentTaskItemId);

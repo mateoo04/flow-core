@@ -14,47 +14,48 @@
             "bg-emerald-100 text-emerald-800 dark:bg-emerald-600 dark:text-white",
         _ => "bg-raised text-fg-secondary"
     };
+
+    private const string DefaultAccentHex = "#94a3b8";
+
+    private static string AccentHex(TaskStatusDefinition? status) =>
+        status is null || string.IsNullOrWhiteSpace(status.ColorHex) ? DefaultAccentHex : status.ColorHex.Trim();
+}
+@{
+    var groups = Model.Tasks
+        .Where(t => t.TaskStatusDefinition is not null)
+        .GroupBy(t => t.TaskStatusDefinition!)
+        .OrderBy(g => g.Key.Position)
+        .ToList();
 }
 <p class="mt-4 text-sm text-fg-secondary">@T["crud.board.hint"]</p>
 
-<div class="mt-8 hide-scrollbar -mx-4 overflow-x-auto px-4 pb-6" role="region" aria-label="Board columns and tasks">
+<div class="mt-8 hide-scrollbar -mx-4 overflow-x-auto px-4 pb-6 [mask-image:linear-gradient(to_right,transparent_0,black_2rem,black_calc(100%-2rem),transparent_100%)]" role="region" aria-label="Board statuses and tasks">
     <div class="flex min-w-max items-start gap-8 pb-4">
-    @foreach (var col in Model.Columns.OrderBy(c => c.Position))
+    @foreach (var group in groups)
     {
-        var accent = BoardColumnUi.AccentHex(col);
+        var status = group.Key;
+        var accent = AccentHex(status);
+        var tasksInStatus = group.OrderBy(t => t.Title).ToList();
         <section class="w-80 shrink-0 space-y-6">
             <div class="flex items-center justify-between px-2">
                 <div class="flex items-center gap-3">
                     <span class="h-2 w-2 shrink-0 rounded-full" style="background-color: @accent" aria-hidden="true"></span>
-                    <h2 class="font-headline text-lg font-bold tracking-tight text-fg">@col.Name</h2>
-                    <span class="rounded-md bg-[var(--color-primary)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-fg/70">@col.Tasks.Count</span>
+                    <h2 class="font-headline text-lg font-bold tracking-tight text-fg">@status.Name</h2>
+                    <span class="rounded-md bg-[var(--color-primary)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-fg/70">@tasksInStatus.Count</span>
                 </div>
-                @if (col.WipLimit > 0)
-                {
-                    <span class="text-[10px] font-semibold uppercase tracking-wider text-fg-muted">WIP @col.WipLimit</span>
-                }
             </div>
             <div class="space-y-4">
-                @if (col.Tasks.Count == 0)
+                @foreach (var task in tasksInStatus)
                 {
-                    <p class="rounded-xl border border-dashed border-border px-3 py-10 text-center text-xs text-fg-muted">No tasks in this column.</p>
-                }
-                else
-                {
-                    foreach (var task in col.Tasks.OrderBy(t => t.Title))
-                    {
-                        var assignees = TaskAssigneeStackBuilder.FromTask(task);
-                        var subCount = task.Subtasks.Count;
-                        var pill = PriorityPillClass(task.Priority);
-                        var dueLabel = task.DueDate is { } d ? d.ToString("MMM d", CultureInfo.InvariantCulture) : null;
-                        <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id"
-                           class="fc-task-avatar-ring fc-task-avatar-ring--card group block cursor-pointer rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
-                           style="border-left-color: @accent">
-                            @if (task.TaskStatusDefinition is { } st)
-                            {
-                                <span class="sr-only">Status: @st.Name.</span>
-                            }
-                            <div class="flex justify-between gap-1">
+                    var assignees = TaskAssigneeStackBuilder.FromTask(task);
+                    var subCount = task.Subtasks.Count;
+                    var pill = PriorityPillClass(task.Priority);
+                    var dueLabel = task.DueDate is { } d ? d.ToString("MMM d", CultureInfo.InvariantCulture) : null;
+                    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id"
+                       class="fc-task-avatar-ring fc-task-avatar-ring--card group block cursor-pointer rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
+                       style="border-left-color: @accent">
+                        <span class="sr-only">Status: @status.Name.</span>
+                        <div class="flex justify-between gap-1">
                             <h3 class="mb-4 line-clamp-2 text-[15px] font-semibold leading-snug text-fg">@task.Title</h3>
                             @if (subCount > 0)
                             {
@@ -65,27 +66,26 @@
                                     </span>
                                 </div>
                             }
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                @if (assignees.Shown.Count > 0 || assignees.ExtraCount > 0)
+                                {
+                                    <partial name="_AssigneeAvatarStack" model="assignees"/>
+                                }
                             </div>
-                            <div class="flex items-center justify-between gap-2">
-                                <div class="min-w-0 flex-1">
-                                    @if (assignees.Shown.Count > 0 || assignees.ExtraCount > 0)
-                                    {
-                                        <partial name="_AssigneeAvatarStack" model="assignees"/>
-                                    }
-                                </div>
-                                <div class="flex shrink-0 items-center gap-3 text-fg-muted">
-                                    @if (dueLabel is not null)
-                                    {
-                                        <span class="inline-flex items-center gap-1 text-[11px] font-medium">
-                                            <span class="material-symbols-outlined text-[14px]" aria-hidden="true">calendar_today</span>
-                                            @dueLabel
-                                        </span>
-                                    }
-                                    <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide @pill">@task.Priority</span>
-                                </div>
+                            <div class="flex shrink-0 items-center gap-3 text-fg-muted">
+                                @if (dueLabel is not null)
+                                {
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-medium">
+                                        <span class="material-symbols-outlined text-[14px]" aria-hidden="true">calendar_today</span>
+                                        @dueLabel
+                                    </span>
+                                }
+                                <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide @pill">@task.Priority</span>
                             </div>
-                        </a>
-                    }
+                        </div>
+                    </a>
                 }
             </div>
         </section>

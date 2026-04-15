@@ -20,8 +20,6 @@
                     </a>
                     <div class="mt-1 flex flex-wrap gap-3 text-xs text-fg-muted">
                         <span>@row.Priority</span>
-                        <a class="rounded text-brand underline-offset-2 outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card"
-                           asp-controller="BoardColumns" asp-action="Details" asp-route-id="@row.BoardColumnId">Open column</a>
                         @if (row.ParentTaskItemId is { } pid)
                         {
                             <a class="rounded text-brand underline-offset-2 outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card"

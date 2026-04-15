@@ -11,4 +11,5 @@ public class Workspace
     public Guid OwnerUserId { get; set; }
 
     public ICollection<Project> Projects { get; set; } = new List<Project>();
+    public ICollection<TaskStatusDefinition> TaskStatusDefinitions { get; set; } = new List<TaskStatusDefinition>();
 }

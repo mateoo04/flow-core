@@ -31,16 +31,14 @@ public sealed class InMemoryDataStore
     public Workspace? FindWorkspace(Guid id) =>
         Workspaces.FirstOrDefault(w => w.Id == id);
 
-    public BoardColumn? FindBoardColumn(Guid id) =>
+    public Board? FindBoard(Guid id) =>
         Workspaces
             .SelectMany(w => w.Projects)
             .SelectMany(p => p.Boards)
-            .SelectMany(b => b.Columns)
-            .FirstOrDefault(c => c.Id == id);
+            .FirstOrDefault(b => b.Id == id);
 
     public TaskStatusDefinition? FindTaskStatusDefinition(Guid id) =>
         Workspaces
-            .SelectMany(w => w.Projects)
-            .SelectMany(p => p.TaskStatusDefinitions)
+            .SelectMany(w => w.TaskStatusDefinitions)
             .FirstOrDefault(s => s.Id == id);
 }

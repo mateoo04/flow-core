@@ -11,5 +11,5 @@ public class Board
     public DateTime UpdatedAt { get; set; }
 
     public Project? Project { get; set; }
-    public ICollection<BoardColumn> Columns { get; set; } = new List<BoardColumn>();
+    public ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
 }

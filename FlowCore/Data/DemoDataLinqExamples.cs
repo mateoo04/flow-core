@@ -8,8 +8,7 @@ public static class DemoDataLinqExamples
         workspaces
             .SelectMany(w => w.Projects)
             .SelectMany(p => p.Boards)
-            .SelectMany(b => b.Columns)
-            .SelectMany(c => c.Tasks);
+            .SelectMany(b => b.Tasks);
 
     public static IEnumerable<TaskItem> RootTasksOnly(IEnumerable<Workspace> workspaces) =>
         AllTasks(workspaces).Where(t => t.ParentTaskItemId is null);
@@ -34,7 +33,7 @@ public static class DemoDataLinqExamples
             .Select(x => (
                 WorkspaceName: x.Workspace.Name,
                 ProjectName: x.Project.Name,
-                TaskCount: x.Project.Boards.SelectMany(b => b.Columns).SelectMany(c => c.Tasks).Count()))
+                TaskCount: x.Project.Boards.SelectMany(b => b.Tasks).Count()))
             .OrderByDescending(x => x.TaskCount);
 
     public static IEnumerable<(Guid ProjectId, string WorkspaceName, string ProjectName, int TaskCount)>
@@ -45,7 +44,7 @@ public static class DemoDataLinqExamples
                 x.Project.Id,
                 x.Workspace.Name,
                 x.Project.Name,
-                TaskCount: x.Project.Boards.SelectMany(b => b.Columns).SelectMany(c => c.Tasks).Count()))
+                TaskCount: x.Project.Boards.SelectMany(b => b.Tasks).Count()))
             .OrderByDescending(x => x.TaskCount);
 
     public static IEnumerable<(string TaskTitle, string AssigneeName)> TaskTitlesWithAssignees(

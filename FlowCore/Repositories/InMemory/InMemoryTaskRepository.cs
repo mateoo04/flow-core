@@ -15,12 +15,12 @@ public sealed class InMemoryTaskRepository : ITaskRepository
             return DemoDataLinqExamples.AllTasks(_store.Workspaces).ToList();
     }
 
-    public IReadOnlyList<TaskItem> GetByBoardColumnId(Guid boardColumnId)
+    public IReadOnlyList<TaskItem> GetByBoardId(Guid boardId)
     {
         lock (_store.Sync)
         {
-            var col = _store.FindBoardColumn(boardColumnId);
-            return col?.Tasks.ToList() ?? (IReadOnlyList<TaskItem>)Array.Empty<TaskItem>();
+            var board = _store.FindBoard(boardId);
+            return board?.Tasks.ToList() ?? (IReadOnlyList<TaskItem>)Array.Empty<TaskItem>();
         }
     }
 
@@ -35,28 +35,23 @@ public sealed class InMemoryTaskRepository : ITaskRepository
         lock (_store.Sync)
         {
             var status = _store.FindTaskStatusDefinition(request.TaskStatusDefinitionId);
-            if (status?.Project is null)
+            if (status is null)
                 return null;
 
-            BoardColumn? column;
+            Board? board;
             TaskItem? parent = null;
 
             if (request.ParentTaskItemId is { } parentId)
             {
                 parent = _store.FindTask(parentId);
-                if (parent?.BoardColumn?.Board?.Project is null)
+                if (parent?.Board is null)
                     return null;
-                var project = parent.BoardColumn!.Board!.Project!;
-                if (project.Id != status.ProjectId)
-                    return null;
-                column = parent.BoardColumn;
+                board = parent.Board;
             }
             else
             {
-                column = _store.FindBoardColumn(request.BoardColumnId);
-                if (column?.Board?.Project is null)
-                    return null;
-                if (column.Board.Project.Id != status.ProjectId)
+                board = _store.FindBoard(request.BoardId);
+                if (board is null)
                     return null;
             }
 
@@ -67,7 +62,7 @@ public sealed class InMemoryTaskRepository : ITaskRepository
             var task = new TaskItem
             {
                 Id = Guid.NewGuid(),
-                BoardColumnId = column.Id,
+                BoardId = board.Id,
                 Title = request.Title.Trim(),
                 Description = request.Description?.Trim() ?? "",
                 TaskStatusDefinitionId = status.Id,
@@ -77,12 +72,12 @@ public sealed class InMemoryTaskRepository : ITaskRepository
                 CreatedAt = now,
                 UpdatedAt = now,
                 DueDate = request.DueDate,
-                BoardColumn = column,
+                Board = board,
                 TaskStatusDefinition = status,
                 ParentTaskItem = parent
             };
 
-            column.Tasks.Add(task);
+            board.Tasks.Add(task);
             status.TaskItems.Add(task);
             parent?.Subtasks.Add(task);
             return task;

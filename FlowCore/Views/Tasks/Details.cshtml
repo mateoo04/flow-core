@@ -4,9 +4,8 @@
 @inject FlowCore.Services.UiText T
 @{
     ViewData["Title"] = Model.Title;
-    var project = Model.BoardColumn?.Board?.Project;
-    var board = Model.BoardColumn?.Board;
-    var column = Model.BoardColumn;
+    var project = Model.Board?.Project;
+    var board = Model.Board;
 }
 <div class="lg:grid lg:grid-cols-3 lg:gap-8">
     <article class="lg:col-span-2">
@@ -69,7 +68,10 @@
                     <textarea id="comment-body" name="Body" rows="3" required
                               placeholder="@(T["crud.tasks.comment_placeholder"])"
                               class="w-full rounded-xl border border-fg-muted/20 bg-app px-3 py-2 text-sm text-fg"></textarea>
-                    <button type="submit" class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white">@T["crud.tasks.add_comment"]</button>
+                    <button type="submit" class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
+                        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">send</span>
+                        @T["crud.tasks.add_comment"]
+                    </button>
                 </form>
                 @if (Model.Comments.Count > 0)
                 {
@@ -124,15 +126,6 @@
                     <div>
                         <dt class="text-fg-muted">Due</dt>
                         <dd class="mt-0.5 text-fg">@due.ToString("d")</dd>
-                    </div>
-                }
-                @if (column is not null)
-                {
-                    <div>
-                        <dt class="text-fg-muted">Column</dt>
-                        <dd class="mt-0.5">
-                            <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card" asp-controller="BoardColumns" asp-action="Details" asp-route-id="@column.Id">@column.Name</a>
-                        </dd>
                     </div>
                 }
                 @if (project is not null)
