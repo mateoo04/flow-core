@@ -1,49 +1,118 @@
 @model MyWorkViewModel
 @{
-    ViewData["Title"] = "My work";
+    ViewData["Title"] = "My tasks";
 }
-<h1 class="text-3xl font-bold tracking-tight text-fg">My work</h1>
-<p class="mt-2 max-w-2xl text-fg-secondary">Tasks assigned to you, grouped by status. Signed in as <span class="font-medium text-fg">@Model.CurrentUserDisplayName</span> (demo).</p>
+@{
+    var totalTasks = Model.StatusGroups.Sum(g => g.Tasks.Count);
+}
+<div class="mb-10 flex flex-wrap items-end justify-between gap-4">
+    <div class="min-w-0">
+        <h1 class="font-headline mb-1 text-3xl font-extrabold tracking-tight text-fg">My Tasks</h1>
+        <p class="text-sm font-medium text-fg-secondary">
+            @if (totalTasks > 0)
+            {
+                <text>You have @totalTasks task@(totalTasks == 1 ? "" : "s") assigned across your workspaces.</text>
+            }
+            else
+            {
+                <text>No open tasks assigned to <span class="font-semibold text-fg">@Model.CurrentUserDisplayName</span>.</text>
+            }
+        </p>
+    </div>
+    <div class="flex gap-2">
+        <button type="button" class="flex items-center gap-2 rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">filter_list</span>
+            Filter
+        </button>
+        <button type="button" class="flex items-center gap-2 rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">sort</span>
+            Sort
+        </button>
+    </div>
+</div>
 
 @if (Model.StatusGroups.Count == 0)
 {
-    <p class="mt-10 rounded-xl border border-dashed border-fg-muted/30 bg-card p-8 text-center text-fg-muted">No assigned tasks yet.</p>
+    <p class="mt-10 rounded-2xl border border-dashed border-border bg-raised/20 p-10 text-center text-fg-muted">No assigned tasks yet.</p>
 }
 else
 {
-    @for (var gi = 0; gi < Model.StatusGroups.Count; gi++)
-    {
-        var group = Model.StatusGroups[gi];
-        var stripe = group.StatusColorHex ?? "#6366f1";
-        var headingId = $"status-heading-{gi}";
-        <section class="mt-10" aria-labelledby="@headingId">
-            <div class="flex items-center gap-3 border-b border-fg-muted/15 pb-3">
-                <span class="h-3 w-1 rounded-full" style="background-color: @stripe" aria-hidden="true"></span>
-                <h2 id="@headingId" class="text-lg font-semibold text-fg">@group.StatusName</h2>
-                <span class="text-sm tabular-nums text-fg-muted">@group.Tasks.Count</span>
-            </div>
-            <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                @foreach (var card in group.Tasks)
-                {
-                    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@card.TaskId"
-                       class="fc-task-avatar-ring fc-task-avatar-ring--card flex flex-col rounded-xl border border-fg-muted/10 bg-card p-4 text-left shadow-card transition-colors duration-150 hover:border-brand/30 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                       style="border-left: 3px solid @stripe">
-                        <div class="line-clamp-2 font-medium text-fg">@card.Title</div>
-                        <div class="mt-2 text-xs text-fg-muted">
-                            <span class="text-fg-secondary">@card.ProjectName</span>
+    <div class="-mx-4 overflow-x-auto px-4 pb-6 hide-scrollbar">
+        <div class="flex min-w-max items-start gap-8 pb-4">
+            @for (var gi = 0; gi < Model.StatusGroups.Count; gi++)
+            {
+                var group = Model.StatusGroups[gi];
+                var stripe = group.StatusColorHex ?? "#6366f1";
+                var headingId = $"status-heading-{gi}";
+                var nameLower = group.StatusName?.ToLowerInvariant() ?? "";
+                var isDone = nameLower.Contains("done") || nameLower.Contains("complete") || nameLower.Contains("closed");
+                <section class="w-80 shrink-0 space-y-6" aria-labelledby="@headingId">
+                    <div class="flex items-center justify-between px-2">
+                        <div class="flex items-center gap-3">
+                            <span class="h-2 w-2 shrink-0 rounded-full" style="background-color: @stripe" aria-hidden="true"></span>
+                            <h2 id="@headingId" class="font-headline text-lg font-bold tracking-tight text-fg">@group.StatusName</h2>
+                            <span class="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white" style="background-color: @stripe">@group.Tasks.Count</span>
                         </div>
-                        @if (card.Assignees.Shown.Count > 0 || card.Assignees.ExtraCount > 0)
-                        {
-                            <div class="mt-3 flex items-center justify-end gap-2 pt-3">
-                                <span class="sr-only">Assignees</span>
-                                <partial name="_AssigneeAvatarStack" model="card.Assignees"/>
-                            </div>
-                        }
-                    </a>
-                }
-            </div>
-        </section>
-    }
+                        <button type="button" class="text-fg-muted transition-colors hover:text-[var(--color-secondary)]" aria-label="Add task">
+                            <span class="material-symbols-outlined" aria-hidden="true">@(isDone ? "history" : "add")</span>
+                        </button>
+                    </div>
+                    @if (group.Tasks.Count == 0)
+                    {
+                        <p class="rounded-xl border border-dashed border-border bg-raised/20 p-6 text-center text-xs text-fg-muted">No tasks.</p>
+                    }
+                    else if (isDone)
+                    {
+                        <div class="space-y-3">
+                            @foreach (var card in group.Tasks)
+                            {
+                                <a asp-controller="Tasks" asp-action="Details" asp-route-id="@card.TaskId"
+                                   class="flex items-center gap-4 rounded-xl border-l-4 bg-card p-4 shadow-sm transition-all hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tertiary)]"
+                                   style="border-left-color: @stripe">
+                                    <span class="material-symbols-outlined text-[var(--color-tertiary)]" aria-hidden="true">check_circle</span>
+                                    <div class="min-w-0 flex-1">
+                                        <h3 class="truncate text-sm font-semibold text-fg-muted line-through decoration-fg-muted/40">@card.Title</h3>
+                                        <span class="text-[10px] font-bold uppercase tracking-widest text-fg-muted">@card.ProjectName</span>
+                                    </div>
+                                    @if (card.Assignees.Shown.Count > 0 || card.Assignees.ExtraCount > 0)
+                                    {
+                                        <partial name="_AssigneeAvatarStack" model="card.Assignees"/>
+                                    }
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="space-y-4">
+                            @foreach (var card in group.Tasks)
+                            {
+                                <a asp-controller="Tasks" asp-action="Details" asp-route-id="@card.TaskId"
+                                   class="fc-task-avatar-ring fc-task-avatar-ring--card group block rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
+                                   style="border-left-color: @stripe">
+                                    <div class="mb-3 flex items-start justify-between">
+                                        <span class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--color-secondary)] bg-[var(--color-secondary)]/10">@card.ProjectName</span>
+                                        <span class="material-symbols-outlined text-sm text-fg-muted opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true">more_horiz</span>
+                                    </div>
+                                    <h3 class="mb-4 line-clamp-2 text-[15px] font-semibold leading-snug text-fg">@card.Title</h3>
+                                    <div class="flex items-center justify-between gap-2">
+                                        @if (card.Assignees.Shown.Count > 0 || card.Assignees.ExtraCount > 0)
+                                        {
+                                            <partial name="_AssigneeAvatarStack" model="card.Assignees"/>
+                                        }
+                                        else
+                                        {
+                                            <span></span>
+                                        }
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+                </section>
+            }
+        </div>
+    </div>
 }
 
 <section class="mt-10 flex flex-wrap gap-x-4 gap-y-2 text-sm text-fg-muted" aria-label="Additional directory links">

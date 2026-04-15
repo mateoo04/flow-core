@@ -123,6 +123,7 @@ public static class ProjectBlueprint
             Position = 0,
             WipLimit = 0,
             IsDoneColumn = false,
+            ColorHex = "#94a3b8",
             CreatedAt = now.AddDays(-14),
             Board = board
         };
@@ -134,6 +135,7 @@ public static class ProjectBlueprint
             Position = 1,
             WipLimit = 5,
             IsDoneColumn = false,
+            ColorHex = "#3b82f6",
             CreatedAt = now.AddDays(-14),
             Board = board
         };
@@ -145,6 +147,7 @@ public static class ProjectBlueprint
             Position = 2,
             WipLimit = 0,
             IsDoneColumn = true,
+            ColorHex = "#10b981",
             CreatedAt = now.AddDays(-14),
             Board = board
         };

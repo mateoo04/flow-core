@@ -14,7 +14,22 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="892450da-da18-4736-82e4-454a8c8bedf3" name="Changes" comment="" />
+    <list default="true" id="892450da-da18-4736-82e4-454a8c8bedf3" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.cursor/logs/agent_log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/logs/agent_log.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.cursor/logs/hook-events.jsonl" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/logs/hook-events.jsonl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.FlowCore/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.FlowCore/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Data/ProjectBlueprint.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Data/ProjectBlueprint.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/FlowCore.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/FlowCore.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Models/Entities/BoardColumn.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Models/Entities/BoardColumn.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Styles/tailwind.input.css" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Styles/tailwind.input.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Home/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Home/Index.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Projects/Details.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Projects/Details.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Projects/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Projects/Index.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Shared/_BoardKanban.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Shared/_BoardKanban.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/Views/Shared/_Layout.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/Views/Shared/_Layout.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/locales/en.default.json" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/locales/en.default.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlowCore/wwwroot/css/tailwind.css" beforeDir="false" afterPath="$PROJECT_DIR$/FlowCore/wwwroot/css/tailwind.css" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -108,6 +123,8 @@
       <workItem from="1775053911619" duration="2225000" />
       <workItem from="1775217772140" duration="7952000" />
       <workItem from="1775668205267" duration="2507000" />
+      <workItem from="1775758727994" duration="7286000" />
+      <workItem from="1775851092398" duration="3990000" />
     </task>
     <servers />
   </component>
