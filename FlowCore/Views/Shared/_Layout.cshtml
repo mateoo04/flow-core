@@ -1,6 +1,9 @@
+@using FlowCore.Data
 @using FlowCore.Repositories
 @inject IWorkspaceRepository WorkspaceRepo
 @inject IProjectRepository ProjectRepo
+@inject IUserRepository UserRepo
+@inject FlowCore.Services.UiText T
 @{
     var workspaces = WorkspaceRepo.GetAll().ToList();
     var allProjects = ProjectRepo.GetAll().ToList();
@@ -9,12 +12,20 @@
     var sidebarProjects = activeWs is { } w
         ? allProjects.Where(p => p.WorkspaceId == w).OrderBy(p => p.Name).Take(12).ToList()
         : allProjects.OrderBy(p => p.Name).Take(8).ToList();
+    var profileUser = UserRepo.GetById(DemoSeedIds.UserAlex) ?? UserRepo.GetAll().FirstOrDefault();
+    var initials = profileUser is { FullName: var fn } && fn.Length > 0
+        ? string.Concat(fn.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(s => char.ToUpperInvariant(s[0])))
+        : "?";
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script>
         (function () {
             try {
@@ -30,18 +41,15 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/FlowCore.styles.css" asp-append-version="true"/>
 </head>
-<body class="flex min-h-screen flex-col bg-app text-fg antialiased">
+<body class="antialiased">
 <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-fg focus:shadow-card focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-brand"
    href="#main-content">Skip to main content</a>
-<div class="flex min-h-screen flex-1">
-    <aside class="flex w-64 shrink-0 flex-col border-r border-fg-muted/15 bg-card shadow-soft" aria-label="Site navigation">
-        <div class="flex flex-col gap-3 border-b border-fg-muted/15 p-4">
-            <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0">
-                    <a class="rounded text-lg font-semibold tracking-tight text-fg no-underline outline-none transition-colors hover:text-brand focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card"
-                       asp-controller="Home" asp-action="Index">FlowCore</a>
-                    <p class="mt-1 text-xs text-fg-muted">Org &amp; project delivery</p>
-                </div>
+<div class="flex h-screen max-h-screen min-h-0 overflow-hidden">
+    <aside class="flex h-full min-h-0 w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-sidebar" aria-label="Site navigation">
+        <div class="shrink-0 space-y-4 p-4">
+            <div class="flex items-center justify-between gap-2">
+                <a class="font-headline truncate text-xl font-extrabold tracking-tight text-fg no-underline outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+                   asp-controller="Home" asp-action="Index">FlowCore</a>
                 <button type="button"
                         id="theme-toggle"
                         class="cursor-pointer shrink-0 rounded-lg p-2 text-fg-muted transition-colors hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
@@ -56,73 +64,115 @@
                     </svg>
                 </button>
             </div>
+            <div class="relative">
+                <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-fg-muted" aria-hidden="true">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                </span>
+                <input type="search" name="sidebar-search" autocomplete="off"
+                       class="w-full rounded-lg border border-border bg-app py-2 pl-9 pr-3 text-sm text-fg placeholder:text-fg-muted outline-none transition-shadow focus:border-brand focus:ring-1 focus:ring-brand dark:bg-raised/50"
+                       placeholder="@T["nav.search_placeholder"]"/>
+            </div>
         </div>
 
-        <nav class="flex flex-1 flex-col gap-1 overflow-y-auto p-3 text-sm" aria-label="Main">
-            <a class="rounded-lg px-3 py-2 font-medium text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "bg-raised text-fg" : "")"
-               asp-controller="Home" asp-action="Index">My work</a>
+        <nav class="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 pb-2 text-sm" aria-label="Main">
+            @{ var onHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home"; }
+            <a class="font-headline flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-semibold transition-colors @(onHome ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-sm" : "text-fg-secondary hover:bg-raised hover:text-fg")"
+               asp-controller="Home" asp-action="Index">
+                <span class="material-symbols-outlined text-[20px]" aria-hidden="true">assignment_turned_in</span>
+                <span>@T["nav.my_tasks"]</span>
+            </a>
 
-            <p class="mt-3 px-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">Organizations</p>
-            @foreach (var ws in workspaces)
-            {
-                var wsActive = activeWs == ws.Id;
-                <a class="block rounded-lg border-l-2 py-2 pl-3 pr-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(wsActive ? "border-brand bg-raised text-fg" : "border-transparent")"
-                   asp-controller="Workspaces" asp-action="Details" asp-route-id="@ws.Id">@ws.Name</a>
-            }
-            <a class="mt-1 rounded-lg px-3 py-2 text-xs text-fg-muted transition-colors duration-150 hover:bg-raised hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-               asp-controller="Workspaces" asp-action="Index">All organizations…</a>
-
-            <p class="mt-4 px-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">Projects</p>
-            <a class="rounded-lg px-3 py-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "bg-raised text-fg" : "")"
-               asp-controller="Projects" asp-action="Index">All projects</a>
-            @foreach (var p in sidebarProjects)
-            {
-                var pActive = activeProject == p.Id;
-                <a class="block min-w-0 truncate rounded-lg border-l-2 py-1.5 pl-3 pr-2 text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(pActive ? "border-brand bg-raised text-fg" : "border-transparent")"
-                   asp-controller="Projects" asp-action="Details" asp-route-id="@p.Id"
-                   title="@p.Name">@p.Name</a>
-            }
-
-            <details class="mt-4 rounded-lg border border-fg-muted/20 bg-app/50 open:bg-raised/30">
-                <summary class="cursor-pointer list-none rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-fg-muted marker:content-none outline-none [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-                    <span class="text-fg-secondary">More site sections</span>
+            <details class="group mt-4" @(activeWs is not null ? "open" : "")>
+                <summary class="flex cursor-pointer list-none items-center gap-3 rounded-lg px-4 py-2 text-fg-secondary transition-colors hover:bg-raised hover:text-fg marker:content-none [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+                    <span class="material-symbols-outlined text-[20px]" aria-hidden="true">grid_view</span>
+                    <span class="font-headline flex-1 text-sm font-semibold">@T["nav.workspaces"]</span>
+                    <span class="material-symbols-outlined text-[18px] text-fg-muted transition-transform group-open:rotate-180" aria-hidden="true">keyboard_arrow_down</span>
                 </summary>
-                <div class="flex flex-col gap-0.5 border-t border-fg-muted/15 p-2">
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors duration-150 hover:bg-card hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                       asp-controller="Tasks" asp-action="Index">Tasks</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors duration-150 hover:bg-card hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                       asp-controller="Comments" asp-action="Index">Comments</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors duration-150 hover:bg-card hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                       asp-controller="Boards" asp-action="Index">Boards</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors duration-150 hover:bg-card hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                       asp-controller="BoardColumns" asp-action="Index">Columns</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors duration-150 hover:bg-card hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                       asp-controller="TaskStatusDefinitions" asp-action="Index">Statuses</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors duration-150 hover:bg-card hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                       asp-controller="Users" asp-action="Index">Users</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors duration-150 hover:bg-card hover:text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                       asp-controller="Tags" asp-action="Index">Tags</a>
+                <div class="mt-1 space-y-0.5 pl-3">
+                    @foreach (var ws in workspaces)
+                    {
+                        var wsActive = activeWs == ws.Id;
+                        <a class="block rounded-lg px-3 py-1.5 text-sm text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(wsActive ? "bg-raised font-medium text-fg" : "")"
+                           asp-controller="Workspaces" asp-action="Details" asp-route-id="@ws.Id">@ws.Name</a>
+                    }
+                </div>
+            </details>
+
+            <details class="group mt-1" @(activeProject is not null || ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" ? "open" : "")>
+                <summary class="flex cursor-pointer list-none items-center gap-3 rounded-lg px-4 py-2 text-fg-secondary transition-colors hover:bg-raised hover:text-fg marker:content-none [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+                    <span class="material-symbols-outlined text-[20px]" aria-hidden="true">folder</span>
+                    <span class="font-headline flex-1 text-sm font-semibold">@T["nav.projects"]</span>
+                    <span class="material-symbols-outlined text-[18px] text-fg-muted transition-transform group-open:rotate-180" aria-hidden="true">keyboard_arrow_down</span>
+                </summary>
+                <div class="mt-1 space-y-0.5 pl-3">
+                    <a class="block rounded-lg px-3 py-1.5 text-sm text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "bg-raised font-medium text-fg" : "")"
+                       asp-controller="Projects" asp-action="Index">@T["nav.all_projects"]</a>
+                    @foreach (var p in sidebarProjects)
+                    {
+                        var pActive = activeProject == p.Id;
+                        <a class="block min-w-0 truncate rounded-lg px-3 py-1.5 text-sm text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(pActive ? "bg-raised font-medium text-fg" : "")"
+                           asp-controller="Projects" asp-action="Details" asp-route-id="@p.Id"
+                           title="@p.Name">@p.Name</a>
+                    }
+                </div>
+            </details>
+
+            <details class="mt-4 rounded-lg border border-border bg-app/40 open:bg-raised/40 dark:bg-raised/20">
+                <summary class="cursor-pointer list-none rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-fg-muted marker:content-none outline-none [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+                    @T["nav.more_sections"]
+                </summary>
+                <div class="flex flex-col gap-0.5 border-t border-border/60 p-2">
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Tasks" asp-action="Index">Tasks</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Comments" asp-action="Index">Comments</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Boards" asp-action="Index">Boards</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="BoardColumns" asp-action="Index">Columns</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="TaskStatusDefinitions" asp-action="Index">Statuses</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Users" asp-action="Index">Users</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Tags" asp-action="Index">Tags</a>
                 </div>
             </details>
         </nav>
 
-        <div class="mt-auto border-t border-fg-muted/15 p-3 text-xs text-fg-muted">
-            <a class="rounded text-fg-secondary underline decoration-fg-muted/50 underline-offset-2 outline-none transition-colors hover:text-brand focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card"
-               asp-controller="Home" asp-action="Privacy">Privacy</a>
-            <span class="text-fg-muted"> · </span>
-            <span>&copy; 2026</span>
+        <div class="sticky bottom-0 z-10 shrink-0 border-t border-border/60 bg-sidebar p-3">
+            <a class="font-headline flex items-center gap-3 rounded-lg px-4 py-2 text-sm text-fg-secondary transition-colors hover:bg-raised hover:text-fg"
+               asp-controller="Home" asp-action="Privacy">
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">settings</span>
+                @T["nav.settings"]
+            </a>
+            @if (profileUser is not null)
+            {
+                <div class="mt-4 flex items-center gap-3 rounded-xl border border-border/70 bg-[var(--color-surface-container-low)] px-4 py-3">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-[var(--color-primary)]/10 text-xs font-semibold text-fg" aria-hidden="true">@initials</span>
+                    <div class="min-w-0 flex-1">
+                        <div class="truncate text-sm font-bold leading-none text-fg">@profileUser.FullName</div>
+                        <div class="mt-1 truncate text-[10px] leading-none text-fg-muted">@profileUser.Email</div>
+                    </div>
+                </div>
+            }
         </div>
     </aside>
 
-    <div class="flex min-w-0 flex-1 flex-col">
-        <main id="main-content" tabindex="-1" class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-            <div class="mx-auto max-w-6xl">
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background">
+        <main id="main-content" tabindex="-1" class="min-h-0 flex-1 overflow-y-auto px-6 py-10 sm:px-8 lg:px-12">
+            <div class="mx-auto max-w-7xl">
                 <partial name="_Breadcrumbs"/>
                 @RenderBody()
             </div>
         </main>
     </div>
 </div>
+@if (IsSectionDefined("Fab"))
+{
+    @RenderSection("Fab", required: false)
+}
+else
+{
+    <a class="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-secondary)] text-white shadow-2xl shadow-[var(--color-secondary)]/30 transition-transform hover:scale-110 active:scale-95"
+       asp-controller="Projects" asp-action="Index" title="Create">
+        <span class="material-symbols-outlined text-2xl" aria-hidden="true">add</span>
+        <span class="sr-only">Create</span>
+    </a>
+}
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)

@@ -1,4 +1,13 @@
 {
+  "nav.app_tagline": "Project delivery",
+  "nav.search_placeholder": "Search…",
+  "nav.my_tasks": "My tasks",
+  "nav.workspaces": "Workspaces",
+  "nav.projects": "Projects",
+  "nav.all_workspaces": "All workspaces",
+  "nav.all_projects": "All projects",
+  "nav.settings": "Settings",
+  "nav.more_sections": "More",
   "crud.projects.create_title": "Create project",
   "crud.projects.create_submit": "Create project",
   "crud.projects.delete": "Delete project",

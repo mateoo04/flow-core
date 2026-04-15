@@ -1,46 +1,113 @@
+/* FlowCore compiled theme — rebuild with: npm run build:css (repo root) */
 @import "tailwindcss";
 @source "../Views/**/*.cshtml";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Stitch "FlowCore - My Tasks (Refined)" palette:
+   Blackberry Cream primary, Fresh Sky secondary, Seaweed tertiary,
+   Floral White surface tones. Manrope for headings, Inter for body. */
 @theme {
-  --color-app: #f8fafc;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-headline: "Manrope", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Manrope", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Legacy semantic tokens (kept so older views keep rendering) */
+  --color-app: #ffffff;
+  --color-sidebar: #fff9ec;
   --color-card: #ffffff;
-  --color-raised: #f1f5f9;
-  --color-fg: #0f172a;
-  --color-fg-secondary: #475569;
-  --color-fg-muted: #64748b;
-  --color-brand: #4f46e5;
-  --color-brand-accent: #6366f1;
-  --color-brand-success: #16a34a;
+  --color-raised: #f8f1e0;
+  --color-border: #ede3c7;
+  --color-fg: #5d2a42;
+  --color-fg-secondary: #7a4258;
+  --color-fg-muted: #a17c8c;
+  --color-brand: #00a7e1;
+  --color-brand-accent: #00b295;
+  --color-brand-success: #00b295;
   --color-brand-warn: #d97706;
-  --color-danger: #dc2626;
-  --color-success: #059669;
-  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.08);
-  --shadow-soft: 0 4px 24px -4px rgb(0 0 0 / 0.12);
+  --color-danger: #fcb1a6;
+  --color-success: #00b295;
+
+  /* Stitch palette */
+  --color-primary: #5d2a42;
+  --color-secondary: #00a7e1;
+  --color-tertiary: #00b295;
+  --color-error: #fcb1a6;
+  --color-background: #ffffff;
+  --color-surface: #fff9ec;
+  --color-surface-container: #f8f1e0;
+  --color-surface-container-low: #fffdf8;
+  --color-surface-container-high: #f2ebd9;
+  --color-on-surface: #5d2a42;
+  --color-on-background: #5d2a42;
+  --color-on-primary: #ffffff;
+  --color-on-secondary: #ffffff;
+
+  --radius: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+
+  --shadow-card: 0 1px 2px 0 rgb(93 42 66 / 0.06);
+  --shadow-soft: 0 1px 3px 0 rgb(93 42 66 / 0.08);
+}
+
+html.dark {
+  --color-app: #0a0a0a;
+  --color-sidebar: #12080d;
+  --color-card: #1a1014;
+  --color-raised: #241820;
+  --color-border: #33232c;
+  --color-fg: #f5ebe0;
+  --color-fg-secondary: #d4b8c4;
+  --color-fg-muted: #a17c8c;
+  --color-brand: #00a7e1;
+  --color-brand-accent: #00b295;
+  --color-brand-success: #00b295;
+  --color-brand-warn: #fbbf24;
+  --color-danger: #fcb1a6;
+  --color-success: #00b295;
+
+  --color-primary: #f5ebe0;
+  --color-secondary: #00a7e1;
+  --color-tertiary: #00b295;
+  --color-error: #fcb1a6;
+  --color-background: #0a0a0a;
+  --color-surface: #12080d;
+  --color-surface-container: #1a1014;
+  --color-surface-container-low: #15090e;
+  --color-surface-container-high: #241820;
+  --color-on-surface: #f5ebe0;
+  --color-on-background: #f5ebe0;
+  --color-on-primary: #1a1014;
+  --color-on-secondary: #ffffff;
+
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.5);
 }
 
 @layer base {
-  html.dark {
-    --color-app: #0f172a;
-    --color-card: #111827;
-    --color-raised: #1f2937;
-    --color-fg: #e5e7eb;
-    --color-fg-secondary: #9ca3af;
-    --color-fg-muted: #6b7280;
-    --color-brand: #6366f1;
-    --color-brand-accent: #818cf8;
-    --color-brand-success: #22c55e;
-    --color-brand-warn: #f59e0b;
-    --color-danger: #ef4444;
-    --color-success: #10b981;
-    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.35);
-    --shadow-soft: 0 4px 24px -4px rgb(0 0 0 / 0.45);
+  html {
+    font-family: var(--font-sans);
+    @apply h-full;
   }
 
   body {
-    @apply bg-app text-fg antialiased;
+    @apply h-full min-h-0 overflow-hidden text-fg antialiased;
+    background-color: var(--color-background);
   }
+
+  .font-headline { font-family: var(--font-headline); }
+  .font-display  { font-family: var(--font-display); }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
   @media (prefers-reduced-motion: reduce) {
     *,

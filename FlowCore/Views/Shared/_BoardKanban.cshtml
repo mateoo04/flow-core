@@ -1,61 +1,96 @@
+@using System.Globalization
+@using FlowCore.Models
 @using FlowCore.Services
 @model Board
 @inject FlowCore.Services.UiText T
+@functions {
+    private static string PriorityPillClass(TaskPriority p) => p switch
+    {
+        TaskPriority.High or TaskPriority.Urgent =>
+            "bg-red-100 text-red-800 dark:bg-red-600 dark:text-white",
+        TaskPriority.Medium =>
+            "bg-amber-100 text-amber-900 dark:bg-amber-600 dark:text-white",
+        TaskPriority.Low =>
+            "bg-emerald-100 text-emerald-800 dark:bg-emerald-600 dark:text-white",
+        _ => "bg-raised text-fg-secondary"
+    };
+}
 <p class="mt-4 text-sm text-fg-secondary">@T["crud.board.hint"]</p>
 
-<div class="mt-6 flex gap-4 overflow-x-auto pb-4" role="region" aria-label="Board columns and tasks">
+<div class="mt-8 hide-scrollbar -mx-4 overflow-x-auto px-4 pb-6" role="region" aria-label="Board columns and tasks">
+    <div class="flex min-w-max items-start gap-8 pb-4">
     @foreach (var col in Model.Columns.OrderBy(c => c.Position))
     {
-        <div class="flex w-72 shrink-0 flex-col rounded-xl bg-card shadow-card">
-            <div class="border-b border-fg-muted/10 px-3 py-3">
-                <div class="flex items-center justify-between gap-2">
-                    <h2 class="font-semibold text-fg">@col.Name</h2>
-                    <span class="tabular-nums text-xs text-fg-muted" aria-label="@col.Tasks.Count tasks in this column">@col.Tasks.Count</span>
+        var accent = BoardColumnUi.AccentHex(col);
+        <section class="w-80 shrink-0 space-y-6">
+            <div class="flex items-center justify-between px-2">
+                <div class="flex items-center gap-3">
+                    <span class="h-2 w-2 shrink-0 rounded-full" style="background-color: @accent" aria-hidden="true"></span>
+                    <h2 class="font-headline text-lg font-bold tracking-tight text-fg">@col.Name</h2>
+                    <span class="rounded-md bg-[var(--color-primary)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-fg/70">@col.Tasks.Count</span>
                 </div>
                 @if (col.WipLimit > 0)
                 {
-                    <p class="mt-1 text-xs text-fg-muted">WIP @col.WipLimit</p>
+                    <span class="text-[10px] font-semibold uppercase tracking-wider text-fg-muted">WIP @col.WipLimit</span>
                 }
             </div>
-            <div class="flex flex-1 flex-col gap-2 p-2">
+            <div class="space-y-4">
                 @if (col.Tasks.Count == 0)
                 {
-                    <p class="rounded-lg border border-dashed border-fg-muted/25 px-3 py-6 text-center text-xs text-fg-muted">No tasks in this column.</p>
+                    <p class="rounded-xl border border-dashed border-border px-3 py-10 text-center text-xs text-fg-muted">No tasks in this column.</p>
                 }
                 else
                 {
                     foreach (var task in col.Tasks.OrderBy(t => t.Title))
                     {
-                        var stripe = task.TaskStatusDefinition?.ColorHex ?? "#6366f1";
                         var assignees = TaskAssigneeStackBuilder.FromTask(task);
+                        var subCount = task.Subtasks.Count;
+                        var pill = PriorityPillClass(task.Priority);
+                        var dueLabel = task.DueDate is { } d ? d.ToString("MMM d", CultureInfo.InvariantCulture) : null;
                         <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id"
-                           class="fc-task-avatar-ring block rounded-lg border border-fg-muted/10 bg-app/80 p-3 text-left transition-colors duration-150 hover:border-brand/40 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                           style="border-left: 3px solid @stripe">
+                           class="fc-task-avatar-ring fc-task-avatar-ring--card group block cursor-pointer rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
+                           style="border-left-color: @accent">
                             @if (task.TaskStatusDefinition is { } st)
                             {
                                 <span class="sr-only">Status: @st.Name.</span>
                             }
-                            <div class="line-clamp-2 text-sm font-medium text-fg">@task.Title</div>
-                            <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-fg-muted">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span>@task.Priority</span>
-                                    @if (task.StoryPoints > 0)
+                            <div class="flex justify-between gap-1">
+                            <h3 class="mb-4 line-clamp-2 text-[15px] font-semibold leading-snug text-fg">@task.Title</h3>
+                            @if (subCount > 0)
+                            {
+                                <div class="flex items-start justify-end">
+                                    <span class="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium tabular-nums text-fg-muted" title="Subtasks">
+                                        <span class="material-symbols-outlined text-[14px]" aria-hidden="true">checklist</span>
+                                        0/@subCount
+                                    </span>
+                                </div>
+                            }
+                            </div>
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="min-w-0 flex-1">
+                                    @if (assignees.Shown.Count > 0 || assignees.ExtraCount > 0)
                                     {
-                                        <span class="rounded bg-raised px-1.5 py-0.5 tabular-nums">@task.StoryPoints sp</span>
-                                    }
-                                    @if (task.ParentTaskItemId is not null)
-                                    {
-                                        <span class="rounded bg-brand/10 px-1.5 py-0.5 text-brand">Subtask</span>
+                                        <partial name="_AssigneeAvatarStack" model="assignees"/>
                                     }
                                 </div>
-                                <partial name="_AssigneeAvatarStack" model="assignees"/>
+                                <div class="flex shrink-0 items-center gap-3 text-fg-muted">
+                                    @if (dueLabel is not null)
+                                    {
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-medium">
+                                            <span class="material-symbols-outlined text-[14px]" aria-hidden="true">calendar_today</span>
+                                            @dueLabel
+                                        </span>
+                                    }
+                                    <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide @pill">@task.Priority</span>
+                                </div>
                             </div>
                         </a>
                     }
                 }
             </div>
-        </div>
+        </section>
     }
+    </div>
 </div>
 
 <p class="mt-6 text-sm text-fg-muted">@T["crud.board.footer"]</p>

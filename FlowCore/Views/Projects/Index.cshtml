@@ -4,10 +4,16 @@
     ViewData["Title"] = "Projects";
     var filterWs = ViewBag.FilterWorkspaceId as Guid?;
 }
-<div class="flex flex-wrap items-end justify-between gap-4">
-    <h1 class="text-3xl font-bold tracking-tight text-fg">Projects</h1>
-    <a class="rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white"
-       asp-action="Create" asp-route-workspaceId="@filterWs">@T["crud.projects.create_title"]</a>
+<div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+    <div class="min-w-0">
+        <h1 class="font-headline mb-1 text-3xl font-extrabold tracking-tight text-fg">Projects</h1>
+        <p class="text-sm font-medium text-fg-secondary">Open a project to see its board and work breakdown.</p>
+    </div>
+    <a class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-95"
+       asp-action="Create" asp-route-workspaceId="@filterWs">
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+        @T["crud.projects.create_title"]
+    </a>
 </div>
 @if (filterWs is { } wsId)
 {
@@ -17,19 +23,17 @@
         <a class="ml-2 rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-raised" asp-action="Index">Clear filter</a>
     </div>
 }
-<p class="mt-2 text-fg-secondary">Open a project to see the board and work breakdown.</p>
-
-<div class="mt-8 flex flex-col gap-3">
+<div class="flex flex-col gap-3">
     @foreach (var row in Model.OrderBy(r => r.Name))
     {
         <a asp-controller="Projects" asp-action="Details" asp-route-id="@row.Id"
-           class="group flex items-center justify-between gap-4 rounded-xl border border-fg-muted/10 bg-card px-4 py-4 shadow-card transition-colors duration-150 hover:border-brand/30 hover:bg-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+           class="group flex items-center justify-between gap-4 rounded-xl border-l-4 border-[var(--color-secondary)] bg-card px-5 py-4 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]">
             <div class="min-w-0">
-                <div class="truncate font-medium text-fg">@row.Name</div>
+                <div class="truncate font-headline text-base font-bold text-fg">@row.Name</div>
             </div>
             <div class="flex shrink-0 items-center gap-3">
-                <span class="rounded-md bg-raised px-2 py-1 text-xs text-fg-secondary">@row.Status</span>
-                <span class="text-fg-muted transition-transform group-hover:translate-x-0.5" aria-hidden="true">→</span>
+                <span class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--color-secondary)] bg-[var(--color-secondary)]/10">@row.Status</span>
+                <span class="material-symbols-outlined text-[18px] text-fg-muted transition-transform group-hover:translate-x-0.5" aria-hidden="true">arrow_forward</span>
             </div>
         </a>
     }

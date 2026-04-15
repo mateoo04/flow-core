@@ -5,48 +5,60 @@
     var project = Model.Project;
     var activeBoard = Model.ActiveBoard;
 }
-<header class="border-b border-fg-muted/15 pb-6">
-    <div class="flex flex-wrap items-start justify-between gap-4">
+<header class="pb-8">
+    <div class="mb-4 text-sm">
+        <a class="inline-flex items-center gap-1 rounded text-fg-muted outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)]" asp-controller="Workspaces" asp-action="Details" asp-route-id="@project.WorkspaceId">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+            Workspace
+        </a>
+    </div>
+    <div class="flex flex-wrap items-end justify-between gap-4">
         <div class="min-w-0">
-            <h1 class="text-3xl font-bold tracking-tight text-fg">@project.Name</h1>
-            <p class="mt-2 max-w-2xl text-fg-secondary">@project.Description</p>
+            <h1 class="font-headline mb-1 text-3xl font-extrabold tracking-tight text-fg">@project.Name</h1>
+            <p class="max-w-2xl text-sm font-medium text-fg-secondary">@project.Description</p>
             <div class="mt-4 flex flex-wrap gap-2">
-                <span class="rounded-full bg-raised px-3 py-1 text-xs font-medium text-fg-secondary">@project.Status</span>
-                <span class="rounded-full bg-raised px-3 py-1 text-xs text-fg-muted">Priority @project.Priority</span>
+                <span class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--color-secondary)] bg-[var(--color-secondary)]/10">@project.Status</span>
+                <span class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--color-tertiary)] bg-[var(--color-tertiary)]/10">Priority @project.Priority</span>
             </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             @if (activeBoard is not null)
             {
-                <a class="rounded-xl border-2 border-brand px-3 py-2 text-sm font-semibold text-brand outline-none transition-colors hover:bg-brand/10"
-                   asp-controller="Tasks" asp-action="Create" asp-route-projectId="@project.Id" asp-route-boardId="@activeBoard.Id">New task</a>
+                <a class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-95"
+                   asp-controller="Tasks" asp-action="Create" asp-route-projectId="@project.Id" asp-route-boardId="@activeBoard.Id">
+                    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+                    New task
+                </a>
             }
-            <a class="rounded-xl border border-fg-muted/20 px-3 py-2 text-sm text-fg-secondary hover:bg-raised"
-               asp-controller="TaskStatusDefinitions" asp-action="Manage" asp-route-projectId="@project.Id">@T["crud.statuses.manage_link"]</a>
+            <a class="flex items-center gap-2 rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]"
+               asp-controller="TaskStatusDefinitions" asp-action="Manage" asp-route-projectId="@project.Id">
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">tune</span>
+                @T["crud.statuses.manage_link"]
+            </a>
             <form method="post" asp-action="Delete" asp-route-id="@project.Id" class="inline" onsubmit="return confirm('Delete this project and all tasks?');">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="rounded-xl border border-brand-warn/40 px-3 py-2 text-sm font-medium text-brand-warn hover:bg-brand-warn/10">@T["crud.projects.delete"]</button>
+                <button type="submit" class="flex items-center gap-2 rounded-full border border-[var(--color-error)] px-4 py-2 text-sm font-semibold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-error)]/20">
+                    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
+                    @T["crud.projects.delete"]
+                </button>
             </form>
         </div>
-    </div>
-    <div class="mt-4 text-sm">
-        <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Workspaces" asp-action="Details" asp-route-id="@project.WorkspaceId"><span aria-hidden="true">← </span>Organization</a>
     </div>
 </header>
 
 @if (Model.BoardsOrdered.Count == 0)
 {
-    <p class="mt-8 rounded-xl border border-dashed border-fg-muted/30 bg-card p-8 text-center text-fg-muted">No board on this project yet.</p>
+    <p class="mt-8 rounded-2xl border border-dashed border-border bg-raised/30 p-10 text-center text-fg-muted">No board on this project yet.</p>
 }
 else
 {
-    <div class="mt-6 flex flex-wrap gap-1 border-b border-fg-muted/15 pb-px" role="tablist" aria-label="Boards">
+    <div class="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Boards">
         @foreach (var b in Model.BoardsOrdered)
         {
             var isActive = Model.ActiveBoard?.Id == b.Id;
             <a role="tab"
                aria-selected="@(isActive ? "true" : "false")"
-               class="rounded-t-lg px-4 py-2.5 text-sm font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(isActive ? "border-b-2 border-brand bg-raised/60 text-fg" : "text-fg-secondary hover:bg-raised/40 hover:text-fg")"
+               class="font-headline rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)] @(isActive ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-sm" : "border border-border bg-[var(--color-surface)] text-fg hover:bg-[var(--color-surface-container)]")"
                asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" asp-route-boardId="@b.Id">@b.Name</a>
         }
     </div>
@@ -54,5 +66,16 @@ else
     @if (Model.ActiveBoard is { } board)
     {
         <partial name="_BoardKanban" model="board"/>
+    }
+}
+
+@section Fab {
+    @if (activeBoard is not null)
+    {
+        <a class="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-secondary)] text-white shadow-2xl shadow-[var(--color-secondary)]/30 transition-transform hover:scale-110 active:scale-95"
+           asp-controller="Tasks" asp-action="Create" asp-route-projectId="@project.Id" asp-route-boardId="@activeBoard.Id" title="New task">
+            <span class="material-symbols-outlined text-2xl" aria-hidden="true">add</span>
+            <span class="sr-only">New task</span>
+        </a>
     }
 }

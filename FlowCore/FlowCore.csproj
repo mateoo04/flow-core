@@ -12,4 +12,9 @@
         </Content>
     </ItemGroup>
 
+    <!-- Keeps wwwroot/css/tailwind.css in sync when building from Rider/VS (requires Node + npm install at repo root). -->
+    <Target Name="TailwindBuild" BeforeTargets="BeforeBuild" Condition="Exists('$(MSBuildProjectDirectory)\..\package.json')">
+        <Exec WorkingDirectory="$(MSBuildProjectDirectory)\.." Command="npm run build:css" ContinueOnError="true"/>
+    </Target>
+
 </Project>
