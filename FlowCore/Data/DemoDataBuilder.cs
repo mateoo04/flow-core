@@ -78,8 +78,10 @@ public static class DemoDataBuilder
             CreatedAt = now.AddDays(-90),
             ArchivedAt = null,
             Visibility = WorkspaceVisibility.Team,
-            OwnerUserId = ownerAlex.Id
+            OwnerUserId = ownerAlex.Id,
+            Owner = ownerAlex
         };
+        ownerAlex.OwnedWorkspaces.Add(organization);
 
         var statuses = ProjectBlueprint.CreateWorkspaceStatuses(organization.Id, now, Ng);
         foreach (var s in statuses.All)

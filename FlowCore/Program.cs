@@ -2,6 +2,7 @@ using FlowCore.Data;
 using FlowCore.Repositories;
 using FlowCore.Repositories.InMemory;
 using FlowCore.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,9 @@ builder.Services.AddSingleton<IBoardRepository, InMemoryBoardRepository>();
 builder.Services.AddSingleton<ICommentRepository, InMemoryCommentRepository>();
 builder.Services.AddSingleton<IBreadcrumbTrailBuilder, BreadcrumbTrailBuilder>();
 builder.Services.AddSingleton<UiText>();
+
+builder.Services.AddDbContext<ClientManagerDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("ClientManagerDbContext")));
 
 var app = builder.Build();
 Console.WriteLine("Starting application... is development: " + app.Environment.IsDevelopment());
