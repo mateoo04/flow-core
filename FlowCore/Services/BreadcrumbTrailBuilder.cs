@@ -30,6 +30,9 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
     private string? Path(string controller, string action, object? values = null) =>
         _links.GetPathByAction(action, controller, values);
 
+    private string? Named(string routeName, object? values = null) =>
+        _links.GetPathByName(routeName, values);
+
     private BreadcrumbItem ProjectsIndex() => new("Projects", Path("Projects", "Index"));
 
     public IReadOnlyList<BreadcrumbItem> ForWorkspace(Workspace w) =>
@@ -50,7 +53,7 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
         return
         [
             ProjectsIndex(),
-            new(project.Name, Path("Projects", "Details", new { id = project.Id })),
+            new(project.Name, Named("project-details", new { id = project.Id })),
             new(b.Name, null)
         ];
     }
@@ -66,8 +69,8 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
         return
         [
             ProjectsIndex(),
-            new(project.Name, Path("Projects", "Details", new { id = project.Id })),
-            new(board.Name, Path("Projects", "Details", new { id = project.Id, boardId = board.Id }))
+            new(project.Name, Named("project-details", new { id = project.Id })),
+            new(board.Name, Named("project-board-details", new { id = project.Id, boardId = board.Id }))
         ];
     }
 
