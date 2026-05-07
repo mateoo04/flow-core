@@ -1,45 +1,48 @@
 using FlowCore.Data;
 using FlowCore.Repositories;
-using FlowCore.Repositories.InMemory;
+using FlowCore.Repositories.EntityFramework;
 using FlowCore.Services;
+using FlowCore.Services.Domain;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddSingleton<DemoDataGraph>(_ => DemoDataBuilder.CreateSampleGraph());
-builder.Services.AddSingleton(sp => new InMemoryDataStore(sp.GetRequiredService<DemoDataGraph>()));
-builder.Services.AddSingleton<IWorkspaceRepository, InMemoryWorkspaceRepository>();
-builder.Services.AddSingleton<IProjectRepository, InMemoryProjectRepository>();
-builder.Services.AddSingleton<ITaskRepository, InMemoryTaskRepository>();
-builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
-builder.Services.AddSingleton<ITagRepository, InMemoryTagRepository>();
-builder.Services.AddSingleton<IBoardRepository, InMemoryBoardRepository>();
-builder.Services.AddSingleton<ICommentRepository, InMemoryCommentRepository>();
+builder.Services.Configure<RouteOptions>(opts =>
+{
+    opts.LowercaseUrls = true;
+    opts.LowercaseQueryStrings = true;
+});
+
+builder.Services.AddDbContext<FlowCoreDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("FlowCoreDbContext"),
+        npg => npg.EnableRetryOnFailure()));
+
+builder.Services.AddScoped<IWorkspaceRepository, EfWorkspaceRepository>();
+builder.Services.AddScoped<IProjectRepository, EfProjectRepository>();
+builder.Services.AddScoped<ITaskRepository, EfTaskRepository>();
+builder.Services.AddScoped<IUserRepository, EfUserRepository>();
+builder.Services.AddScoped<ITagRepository, EfTagRepository>();
+builder.Services.AddScoped<IBoardRepository, EfBoardRepository>();
+builder.Services.AddScoped<ICommentRepository, EfCommentRepository>();
+builder.Services.AddScoped<IStatusRepository, EfStatusRepository>();
+
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+
 builder.Services.AddSingleton<IBreadcrumbTrailBuilder, BreadcrumbTrailBuilder>();
 builder.Services.AddSingleton<UiText>();
 
-builder.Services.AddDbContext<ClientManagerDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("ClientManagerDbContext")));
-
 var app = builder.Build();
-Console.WriteLine("Starting application... is development: " + app.Environment.IsDevelopment());
+
 if (app.Environment.IsDevelopment())
 {
-    var store = app.Services.GetRequiredService<InMemoryDataStore>();
-
-    var projectCount = store.Workspaces.Sum(w => w.Projects.Count);
-    var taskCount = DemoDataLinqExamples.AllTasks(store.Workspaces).Count();
-
-    Console.WriteLine(
-        $"[DemoData] Organizations={store.Workspaces.Count}, Projects={projectCount}, " +
-        $"TaskItems={taskCount}, Users={store.Users.Count}, Tags={store.Tags.Count}");
-
-    DemoDataLinqExamples.WriteDevelopmentQuerySample(store.Workspaces, store.Users);
+    await app.Services.SeedDevelopmentDataAsync();
 }
-
-if (!app.Environment.IsDevelopment())
+else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();

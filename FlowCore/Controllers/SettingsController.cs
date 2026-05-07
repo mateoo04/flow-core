@@ -2,43 +2,50 @@ using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowCore.Controllers;
 
+[Route("/workspaces/{workspaceId:guid}/settings")]
 public class SettingsController : Controller
 {
-    private readonly InMemoryDataStore _store;
+    private readonly FlowCoreDbContext _db;
     private readonly IWorkspaceRepository _workspaces;
 
-    public SettingsController(InMemoryDataStore store, IWorkspaceRepository workspaces)
+    public SettingsController(FlowCoreDbContext db, IWorkspaceRepository workspaces)
     {
-        _store = store;
+        _db = db;
         _workspaces = workspaces;
     }
 
-    public IActionResult Index(Guid? workspaceId)
+    [HttpGet("", Name = "workspace-settings")]
+    public async Task<IActionResult> Index(Guid? workspaceId, CancellationToken ct)
     {
-        Workspace? ws;
-        List<TaskStatusDefinition> statuses;
-        lock (_store.Sync)
-        {
-            ws = workspaceId is { } wid
-                ? _store.FindWorkspace(wid)
-                : _store.Workspaces.FirstOrDefault();
-            if (ws is null)
-                return NotFound();
-            statuses = ws.TaskStatusDefinitions.OrderBy(s => s.Position).ToList();
-        }
+        var ws = workspaceId is { } wid
+            ? await _db.Workspaces
+                .AsNoTracking()
+                .Include(w => w.TaskStatusDefinitions)
+                .FirstOrDefaultAsync(w => w.Id == wid, ct)
+            : await _db.Workspaces
+                .AsNoTracking()
+                .Include(w => w.TaskStatusDefinitions)
+                .OrderBy(w => w.Name)
+                .FirstOrDefaultAsync(ct);
+        if (ws is null)
+            return NotFound();
+
+        var statuses = ws.TaskStatusDefinitions.OrderBy(s => s.Position).ToList();
+        var allWorkspaces = await _workspaces.GetAllAsync(ct);
 
         ViewData["ActiveWorkspaceId"] = ws.Id;
-        var vm = new SettingsIndexVm(ws, statuses, _store.Workspaces.OrderBy(w => w.Name).ToList());
+        var vm = new SettingsIndexVm(ws, statuses, allWorkspaces.OrderBy(w => w.Name).ToList());
         return View(vm);
     }
 
-    [HttpPost]
+    [HttpPost("statuses")]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Guid workspaceId, TaskStatusFormVm model)
+    public async Task<IActionResult> Create(Guid workspaceId, TaskStatusFormVm model, CancellationToken ct)
     {
         if (!ModelState.IsValid || string.IsNullOrWhiteSpace(model.Name))
         {
@@ -46,33 +53,32 @@ public class SettingsController : Controller
             return RedirectToAction(nameof(Index), new { workspaceId });
         }
 
-        lock (_store.Sync)
-        {
-            var ws = _store.FindWorkspace(workspaceId);
-            if (ws is null)
-                return NotFound();
+        var ws = await _db.Workspaces
+            .Include(w => w.TaskStatusDefinitions)
+            .FirstOrDefaultAsync(w => w.Id == workspaceId, ct);
+        if (ws is null)
+            return NotFound();
 
-            var nextPos = ws.TaskStatusDefinitions.Count == 0
-                ? 0
-                : ws.TaskStatusDefinitions.Max(s => s.Position) + 1;
-            ws.TaskStatusDefinitions.Add(new TaskStatusDefinition
-            {
-                Id = Guid.NewGuid(),
-                WorkspaceId = ws.Id,
-                Workspace = ws,
-                Name = model.Name.Trim(),
-                ColorHex = string.IsNullOrWhiteSpace(model.ColorHex) ? "#94A3B8" : model.ColorHex.Trim(),
-                Position = nextPos,
-                IsDoneState = model.IsDoneState,
-                CreatedAt = DateTime.UtcNow
-            });
-        }
+        var nextPos = ws.TaskStatusDefinitions.Count == 0
+            ? 0
+            : ws.TaskStatusDefinitions.Max(s => s.Position) + 1;
+        _db.TaskStatusDefinitions.Add(new TaskStatusDefinition
+        {
+            Id = Guid.NewGuid(),
+            WorkspaceId = ws.Id,
+            Name = model.Name.Trim(),
+            ColorHex = string.IsNullOrWhiteSpace(model.ColorHex) ? "#94A3B8" : model.ColorHex.Trim(),
+            Position = nextPos,
+            IsDoneState = model.IsDoneState,
+            CreatedAt = DateTime.UtcNow
+        });
+        await _db.SaveChangesAsync(ct);
         return RedirectToAction(nameof(Index), new { workspaceId });
     }
 
-    [HttpPost]
+    [HttpPost("statuses/{id:guid}")]
     [ValidateAntiForgeryToken]
-    public IActionResult Update(Guid workspaceId, Guid id, TaskStatusFormVm model)
+    public async Task<IActionResult> Update(Guid workspaceId, Guid id, TaskStatusFormVm model, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(model.Name))
         {
@@ -80,70 +86,64 @@ public class SettingsController : Controller
             return RedirectToAction(nameof(Index), new { workspaceId });
         }
 
-        lock (_store.Sync)
-        {
-            var ws = _store.FindWorkspace(workspaceId);
-            if (ws is null)
-                return NotFound();
-            var s = ws.TaskStatusDefinitions.FirstOrDefault(x => x.Id == id);
-            if (s is null)
-                return NotFound();
-            s.Name = model.Name.Trim();
-            s.ColorHex = string.IsNullOrWhiteSpace(model.ColorHex) ? "#94A3B8" : model.ColorHex.Trim();
-            s.IsDoneState = model.IsDoneState;
-        }
+        var s = await _db.TaskStatusDefinitions
+            .FirstOrDefaultAsync(x => x.WorkspaceId == workspaceId && x.Id == id, ct);
+        if (s is null)
+            return NotFound();
+        s.Name = model.Name.Trim();
+        s.ColorHex = string.IsNullOrWhiteSpace(model.ColorHex) ? "#94A3B8" : model.ColorHex.Trim();
+        s.IsDoneState = model.IsDoneState;
+        await _db.SaveChangesAsync(ct);
         return RedirectToAction(nameof(Index), new { workspaceId });
     }
 
-    [HttpPost]
+    [HttpPost("statuses/{id:guid}/reorder")]
     [ValidateAntiForgeryToken]
-    public IActionResult Reorder(Guid workspaceId, Guid id, int direction)
+    public async Task<IActionResult> Reorder(Guid workspaceId, Guid id, int direction, CancellationToken ct)
     {
-        lock (_store.Sync)
-        {
-            var ws = _store.FindWorkspace(workspaceId);
-            if (ws is null)
-                return NotFound();
-            var ordered = ws.TaskStatusDefinitions.OrderBy(s => s.Position).ToList();
-            var idx = ordered.FindIndex(s => s.Id == id);
-            if (idx < 0)
-                return NotFound();
-            var swap = idx + (direction < 0 ? -1 : 1);
-            if (swap < 0 || swap >= ordered.Count)
-                return RedirectToAction(nameof(Index), new { workspaceId });
+        var ordered = await _db.TaskStatusDefinitions
+            .Where(s => s.WorkspaceId == workspaceId)
+            .OrderBy(s => s.Position)
+            .ToListAsync(ct);
+        var idx = ordered.FindIndex(s => s.Id == id);
+        if (idx < 0)
+            return NotFound();
+        var swap = idx + (direction < 0 ? -1 : 1);
+        if (swap < 0 || swap >= ordered.Count)
+            return RedirectToAction(nameof(Index), new { workspaceId });
 
-            (ordered[idx].Position, ordered[swap].Position) = (ordered[swap].Position, ordered[idx].Position);
-        }
+        (ordered[idx].Position, ordered[swap].Position) = (ordered[swap].Position, ordered[idx].Position);
+        await _db.SaveChangesAsync(ct);
         return RedirectToAction(nameof(Index), new { workspaceId });
     }
 
-    [HttpPost]
+    [HttpPost("statuses/{id:guid}/delete")]
     [ValidateAntiForgeryToken]
-    public IActionResult Delete(Guid workspaceId, Guid id)
+    public async Task<IActionResult> Delete(Guid workspaceId, Guid id, CancellationToken ct)
     {
-        lock (_store.Sync)
+        var statuses = await _db.TaskStatusDefinitions
+            .Where(x => x.WorkspaceId == workspaceId)
+            .OrderBy(x => x.Position)
+            .ToListAsync(ct);
+        var s = statuses.FirstOrDefault(x => x.Id == id);
+        if (s is null)
+            return NotFound();
+
+        if (statuses.Count <= 1)
         {
-            var ws = _store.FindWorkspace(workspaceId);
-            if (ws is null)
-                return NotFound();
-            var s = ws.TaskStatusDefinitions.FirstOrDefault(x => x.Id == id);
-            if (s is null)
-                return NotFound();
-
-            if (ws.TaskStatusDefinitions.Count <= 1)
-            {
-                TempData["SettingsError"] = "At least one status must remain.";
-                return RedirectToAction(nameof(Index), new { workspaceId });
-            }
-
-            if (s.TaskItems.Count > 0)
-            {
-                TempData["SettingsError"] = $"Cannot delete \"{s.Name}\" — {s.TaskItems.Count} task(s) still use it. Reassign them first.";
-                return RedirectToAction(nameof(Index), new { workspaceId });
-            }
-
-            ws.TaskStatusDefinitions.Remove(s);
+            TempData["SettingsError"] = "At least one status must remain.";
+            return RedirectToAction(nameof(Index), new { workspaceId });
         }
+
+        var usedCount = await _db.TaskItems.CountAsync(t => t.TaskStatusDefinitionId == id, ct);
+        if (usedCount > 0)
+        {
+            TempData["SettingsError"] = $"Cannot delete \"{s.Name}\" — {usedCount} task(s) still use it. Reassign them first.";
+            return RedirectToAction(nameof(Index), new { workspaceId });
+        }
+
+        _db.TaskStatusDefinitions.Remove(s);
+        await _db.SaveChangesAsync(ct);
         return RedirectToAction(nameof(Index), new { workspaceId });
     }
 }

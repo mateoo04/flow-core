@@ -16,17 +16,19 @@ public class WorkspacesController : BaseController
         _breadcrumbs = breadcrumbs;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken ct)
     {
-        var rows = _workspaces.GetAll()
+        var workspaces = await _workspaces.GetAllAsync(ct);
+        var rows = workspaces
             .Select(w => new WorkspaceListRow(w.Id, w.Name, w.Visibility, w.Projects.Count))
             .ToList();
         return View(rows);
     }
 
-    public IActionResult Details(Guid id)
+    [HttpGet("/workspaces/{id:guid}", Name = "workspace-details")]
+    public async Task<IActionResult> Details(Guid id, CancellationToken ct)
     {
-        var entity = _workspaces.GetById(id);
+        var entity = await _workspaces.GetByIdAsync(id, ct);
         if (entity is not null)
             SetNav(entity.Id);
         return ViewDetails(entity, _breadcrumbs.ForWorkspace);

@@ -1,7 +1,9 @@
+using FlowCore.Common;
 using FlowCore.Models;
 using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
 using FlowCore.Services;
+using FlowCore.Services.Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowCore.Controllers;
@@ -10,23 +12,26 @@ public class ProjectsController : BaseController
 {
     private readonly IProjectRepository _projects;
     private readonly IWorkspaceRepository _workspaces;
+    private readonly IProjectService _projectService;
     private readonly IBreadcrumbTrailBuilder _breadcrumbs;
 
     public ProjectsController(
         IProjectRepository projects,
         IWorkspaceRepository workspaces,
+        IProjectService projectService,
         IBreadcrumbTrailBuilder breadcrumbs)
     {
         _projects = projects;
         _workspaces = workspaces;
+        _projectService = projectService;
         _breadcrumbs = breadcrumbs;
     }
 
-    public IActionResult Index(Guid? workspaceId)
+    public async Task<IActionResult> Index(Guid? workspaceId, CancellationToken ct)
     {
         var list = workspaceId is null
-            ? _projects.GetAll()
-            : _projects.GetByWorkspaceId(workspaceId.Value);
+            ? await _projects.GetAllAsync(ct)
+            : await _projects.GetByWorkspaceIdAsync(workspaceId.Value, ct);
         var rows = list
             .Select(p => new ProjectListRow(p.Id, p.Name, p.WorkspaceId, p.Status))
             .ToList();
@@ -37,9 +42,9 @@ public class ProjectsController : BaseController
     }
 
     [HttpGet]
-    public IActionResult Create(Guid? workspaceId)
+    public async Task<IActionResult> Create(Guid? workspaceId, CancellationToken ct)
     {
-        var workspaces = _workspaces.GetAll();
+        var workspaces = await _workspaces.GetAllAsync(ct);
         if (workspaces.Count == 0)
             return NotFound();
 
@@ -57,35 +62,38 @@ public class ProjectsController : BaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(ProjectCreateFormVm model)
+    public async Task<IActionResult> Create(ProjectCreateFormVm model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
         {
-            ViewBag.Workspaces = _workspaces.GetAll();
+            ViewBag.Workspaces = await _workspaces.GetAllAsync(ct);
             return View(model);
         }
 
-        try
-        {
-            var project = _projects.CreateInWorkspace(
-                model.WorkspaceId,
-                model.Name,
-                model.Description,
-                model.Status,
-                model.Priority);
-            return RedirectToAction(nameof(Details), new { id = project.Id });
-        }
-        catch (InvalidOperationException)
-        {
-            ModelState.AddModelError(string.Empty, "Could not create project.");
-            ViewBag.Workspaces = _workspaces.GetAll();
-            return View(model);
-        }
+        var result = await _projectService.CreateInWorkspaceAsync(
+            model.WorkspaceId,
+            model.Name,
+            model.Description,
+            model.Status,
+            model.Priority,
+            ct);
+
+        if (result.IsSuccess)
+            return RedirectToAction(nameof(Details), new { id = result.Value!.Id });
+
+        if (result.Error!.Value.Kind == ErrorKind.NotFound)
+            return NotFound();
+
+        ModelState.AddModelError(string.Empty, result.Error.Value.Message);
+        ViewBag.Workspaces = await _workspaces.GetAllAsync(ct);
+        return View(model);
     }
 
-    public IActionResult Details(Guid id, Guid? boardId)
+    [HttpGet("/projects/{id:guid}", Name = "project-details")]
+    [HttpGet("/projects/{id:guid}/boards/{boardId:guid}", Name = "project-board-details")]
+    public async Task<IActionResult> Details(Guid id, Guid? boardId, CancellationToken ct)
     {
-        var entity = _projects.GetById(id);
+        var entity = await _projects.GetByIdAsync(id, ct);
         if (entity is null)
             return NotFound();
 
@@ -110,9 +118,9 @@ public class ProjectsController : BaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        if (!_projects.TryDelete(id))
+        if (!await _projects.TryDeleteAsync(id, ct))
             return NotFound();
         return RedirectToAction(nameof(Index));
     }

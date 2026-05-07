@@ -4,7 +4,7 @@ namespace FlowCore.Repositories;
 
 public interface IUserRepository
 {
-    IReadOnlyList<User> GetAll();
+    Task<IReadOnlyList<User>> GetAllAsync(CancellationToken ct = default);
 
-    User? GetById(Guid id);
+    Task<User?> GetByIdAsync(Guid id, CancellationToken ct = default);
 }

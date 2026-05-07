@@ -1,0 +1,57 @@
+@model IReadOnlyList<StatusListRow>
+@{
+    ViewData["Title"] = "Statuses";
+    var groups = Model.GroupBy(r => (r.WorkspaceId, r.WorkspaceName)).ToList();
+}
+<h1 class="text-3xl font-bold tracking-tight text-fg">Statuses</h1>
+<p class="mt-2 text-fg-secondary">Workflow columns defined per workspace. Each task uses one of these as its status.</p>
+
+@if (Model.Count == 0)
+{
+    <div class="mt-8 rounded-xl border border-fg-muted/15 bg-card p-6 text-center text-fg-muted shadow-card">
+        No statuses defined yet.
+    </div>
+}
+else
+{
+    <div class="mt-8 space-y-8">
+        @foreach (var group in groups)
+        {
+            <section>
+                <header class="mb-3 flex items-baseline justify-between gap-3">
+                    <h2 class="text-sm font-semibold uppercase tracking-wide text-fg-muted">@group.Key.WorkspaceName</h2>
+                    <a class="text-xs text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app"
+                       asp-controller="Settings" asp-action="Index" asp-route-workspaceId="@group.Key.WorkspaceId">Manage →</a>
+                </header>
+                <div class="overflow-hidden rounded-xl border border-fg-muted/15 shadow-card">
+                    <table class="w-full border-collapse text-left text-sm">
+                        <thead class="bg-raised/60 text-xs font-semibold uppercase tracking-wide text-fg-muted">
+                        <tr>
+                            <th class="px-4 py-3" scope="col">Position</th>
+                            <th class="px-4 py-3" scope="col">Name</th>
+                            <th class="px-4 py-3" scope="col">Color</th>
+                            <th class="px-4 py-3" scope="col">Done?</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-fg-muted/10 bg-card">
+                        @foreach (var row in group.OrderBy(r => r.Position))
+                        {
+                            <tr class="transition-colors duration-150 hover:bg-raised/40">
+                                <td class="px-4 py-3 text-fg-muted">@row.Position</td>
+                                <td class="px-4 py-3 font-medium text-fg">@row.Name</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center gap-2 text-fg-secondary">
+                                        <span class="h-3 w-3 rounded-full border border-fg-muted/30" style="background-color: @row.ColorHex" aria-hidden="true"></span>
+                                        <code class="text-xs">@row.ColorHex</code>
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-fg-muted">@(row.IsDoneState ? "Yes" : "No")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        }
+    </div>
+}

@@ -4,9 +4,9 @@ namespace FlowCore.Repositories;
 
 public interface IBoardRepository
 {
-    IReadOnlyList<Board> GetAll();
+    Task<IReadOnlyList<Board>> GetAllAsync(CancellationToken ct = default);
 
-    IReadOnlyList<Board> GetByProjectId(Guid projectId);
+    Task<IReadOnlyList<Board>> GetByProjectIdAsync(Guid projectId, CancellationToken ct = default);
 
-    Board? GetById(Guid id);
+    Task<Board?> GetByIdAsync(Guid id, CancellationToken ct = default);
 }

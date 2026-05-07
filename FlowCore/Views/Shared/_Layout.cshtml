@@ -5,14 +5,15 @@
 @inject IUserRepository UserRepo
 @inject FlowCore.Services.UiText T
 @{
-    var workspaces = WorkspaceRepo.GetAll().ToList();
-    var allProjects = ProjectRepo.GetAll().ToList();
+    var workspaces = (await WorkspaceRepo.GetAllAsync()).ToList();
+    var allProjects = (await ProjectRepo.GetAllAsync()).ToList();
     var activeWs = ViewData["ActiveWorkspaceId"] as Guid?;
     var activeProject = ViewData["ActiveProjectId"] as Guid?;
     var sidebarProjects = activeWs is { } w
         ? allProjects.Where(p => p.WorkspaceId == w).OrderBy(p => p.Name).Take(12).ToList()
         : allProjects.OrderBy(p => p.Name).Take(8).ToList();
-    var profileUser = UserRepo.GetById(DemoSeedIds.UserAlex) ?? UserRepo.GetAll().FirstOrDefault();
+    var profileUser = await UserRepo.GetByIdAsync(DemoSeedIds.UserAlex)
+                      ?? (await UserRepo.GetAllAsync()).FirstOrDefault();
     var initials = profileUser is { FullName: var fn } && fn.Length > 0
         ? string.Concat(fn.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(s => char.ToUpperInvariant(s[0])))
         : "?";
@@ -132,6 +133,7 @@
                     <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Boards" asp-action="Index">Boards</a>
                     <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Users" asp-action="Index">Users</a>
                     <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Tags" asp-action="Index">Tags</a>
+                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Statuses" asp-action="Index">Statuses</a>
                 </div>
             </details>
         </nav>

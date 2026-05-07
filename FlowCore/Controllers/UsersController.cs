@@ -16,17 +16,18 @@ public class UsersController : BaseController
         _breadcrumbs = breadcrumbs;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken ct)
     {
-        var rows = _users.GetAll()
+        var users = await _users.GetAllAsync(ct);
+        var rows = users
             .Select(u => new UserListRow(u.Id, u.FullName, u.Email, u.IsActive))
             .ToList();
         return View(rows);
     }
 
-    public IActionResult Details(Guid id)
+    public async Task<IActionResult> Details(Guid id, CancellationToken ct)
     {
-        var entity = _users.GetById(id);
+        var entity = await _users.GetByIdAsync(id, ct);
         return ViewDetails(entity, _breadcrumbs.ForUser);
     }
 }

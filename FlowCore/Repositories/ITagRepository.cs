@@ -4,7 +4,7 @@ namespace FlowCore.Repositories;
 
 public interface ITagRepository
 {
-    IReadOnlyList<Tag> GetAll();
+    Task<IReadOnlyList<Tag>> GetAllAsync(CancellationToken ct = default);
 
-    Tag? GetById(Guid id);
+    Task<Tag?> GetByIdAsync(Guid id, CancellationToken ct = default);
 }

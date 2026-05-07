@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.ViewModels;
+using FlowCore.Repositories;
 using FlowCore.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,21 +9,21 @@ namespace FlowCore.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly DemoDataGraph _graph;
+    private readonly ITaskRepository _tasks;
+    private readonly IUserRepository _users;
 
-    public HomeController(DemoDataGraph graph)
+    public HomeController(ITaskRepository tasks, IUserRepository users)
     {
-        _graph = graph;
+        _tasks = tasks;
+        _users = users;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken ct)
     {
-        var currentUserId = DemoSeedIds.UserAlex;
-        var user = _graph.Users.FirstOrDefault(u => u.Id == currentUserId);
+        var currentUserId = Data.DemoSeedIds.UserAlex;
+        var user = await _users.GetByIdAsync(currentUserId, ct);
 
-        var tasks = DemoDataLinqExamples.AllTasks(_graph.Workspaces)
-            .Where(t => t.TaskAssignments.Any(a => a.UserId == currentUserId && a.Role == TaskRole.Assignee))
-            .ToList();
+        var tasks = await _tasks.GetAssignedToUserAsync(currentUserId, ct);
 
         var groups = tasks
             .GroupBy(t => t.TaskStatusDefinition?.Name ?? "Unknown")

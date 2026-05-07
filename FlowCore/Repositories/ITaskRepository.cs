@@ -4,13 +4,15 @@ namespace FlowCore.Repositories;
 
 public interface ITaskRepository
 {
-    IReadOnlyList<TaskItem> GetAll();
+    Task<IReadOnlyList<TaskItem>> GetAllAsync(CancellationToken ct = default);
 
-    IReadOnlyList<TaskItem> GetByBoardId(Guid boardId);
+    Task<IReadOnlyList<TaskItem>> GetByBoardIdAsync(Guid boardId, CancellationToken ct = default);
 
-    TaskItem? GetById(Guid id);
+    Task<IReadOnlyList<TaskItem>> GetAssignedToUserAsync(Guid userId, CancellationToken ct = default);
 
-    TaskItem? Create(CreateTaskRequest request);
+    Task<TaskItem?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
-    bool TryDelete(Guid id);
+    Task<TaskItem> AddAsync(TaskItem task, CancellationToken ct = default);
+
+    Task<bool> TryDeleteAsync(Guid id, CancellationToken ct = default);
 }

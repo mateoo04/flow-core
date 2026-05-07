@@ -1,5 +1,6 @@
 using FlowCore.Models;
 using FlowCore.Models.ViewModels;
+using Microsoft.AspNetCore.Routing;
 
 namespace FlowCore.Services;
 
@@ -22,7 +23,14 @@ public interface IBreadcrumbTrailBuilder
 
 public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
 {
-    private static BreadcrumbItem ProjectsIndex() => new("Projects", "/Projects/Index");
+    private readonly LinkGenerator _links;
+
+    public BreadcrumbTrailBuilder(LinkGenerator links) => _links = links;
+
+    private string? Path(string controller, string action, object? values = null) =>
+        _links.GetPathByAction(action, controller, values);
+
+    private BreadcrumbItem ProjectsIndex() => new("Projects", Path("Projects", "Index"));
 
     public IReadOnlyList<BreadcrumbItem> ForWorkspace(Workspace w) =>
         Array.Empty<BreadcrumbItem>();
@@ -37,12 +45,12 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
     {
         var project = b.Project;
         if (project is null)
-            return [new("Boards", "/Boards/Index"), new(b.Name, null)];
+            return [new("Boards", Path("Boards", "Index")), new(b.Name, null)];
 
         return
         [
             ProjectsIndex(),
-            new(project.Name, $"/Projects/Details/{project.Id:D}"),
+            new(project.Name, Path("Projects", "Details", new { id = project.Id })),
             new(b.Name, null)
         ];
     }
@@ -53,31 +61,31 @@ public sealed class BreadcrumbTrailBuilder : IBreadcrumbTrailBuilder
         var project = board?.Project;
 
         if (project is null || board is null)
-            return [new("Tasks", "/Tasks/Index")];
+            return [new("Tasks", Path("Tasks", "Index"))];
 
         return
         [
             ProjectsIndex(),
-            new(project.Name, $"/Projects/Details/{project.Id:D}"),
-            new(board.Name, $"/Projects/Details/{project.Id:D}?boardId={board.Id:D}")
+            new(project.Name, Path("Projects", "Details", new { id = project.Id })),
+            new(board.Name, Path("Projects", "Details", new { id = project.Id, boardId = board.Id }))
         ];
     }
 
     public IReadOnlyList<BreadcrumbItem> ForUser(User u) =>
     [
-        new("Users", "/Users/Index"),
+        new("Users", Path("Users", "Index")),
         new(u.FullName, null)
     ];
 
     public IReadOnlyList<BreadcrumbItem> ForTag(Tag t) =>
     [
-        new("Tags", "/Tags/Index"),
+        new("Tags", Path("Tags", "Index")),
         new(t.Name, null)
     ];
 
     public IReadOnlyList<BreadcrumbItem> ForComment(Comment c, string taskTitle) =>
     [
-        new("Comments", "/Comments/Index"),
+        new("Comments", Path("Comments", "Index")),
         new("Comment", null)
     ];
 }

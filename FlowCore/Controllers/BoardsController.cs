@@ -14,17 +14,18 @@ public class BoardsController : BaseController
         _boards = boards;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken ct)
     {
-        var rows = _boards.GetAll()
+        var boards = await _boards.GetAllAsync(ct);
+        var rows = boards
             .Select(b => new BoardListRow(b.Id, b.Name, b.ProjectId, b.IsDefault, b.Tasks.Count))
             .ToList();
         return View(rows);
     }
 
-    public IActionResult Details(Guid id)
+    public async Task<IActionResult> Details(Guid id, CancellationToken ct)
     {
-        var entity = _boards.GetById(id);
+        var entity = await _boards.GetByIdAsync(id, ct);
         if (entity is null)
             return NotFound();
 

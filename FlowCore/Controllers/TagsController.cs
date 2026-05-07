@@ -16,17 +16,18 @@ public class TagsController : BaseController
         _breadcrumbs = breadcrumbs;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken ct)
     {
-        var rows = _tags.GetAll()
+        var tags = await _tags.GetAllAsync(ct);
+        var rows = tags
             .Select(t => new TagListRow(t.Id, t.Name, t.ColorHex))
             .ToList();
         return View(rows);
     }
 
-    public IActionResult Details(Guid id)
+    public async Task<IActionResult> Details(Guid id, CancellationToken ct)
     {
-        var entity = _tags.GetById(id);
+        var entity = await _tags.GetByIdAsync(id, ct);
         return ViewDetails(entity, _breadcrumbs.ForTag);
     }
 }

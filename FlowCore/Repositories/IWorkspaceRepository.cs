@@ -4,7 +4,7 @@ namespace FlowCore.Repositories;
 
 public interface IWorkspaceRepository
 {
-    IReadOnlyList<Workspace> GetAll();
+    Task<IReadOnlyList<Workspace>> GetAllAsync(CancellationToken ct = default);
 
-    Workspace? GetById(Guid id);
+    Task<Workspace?> GetByIdAsync(Guid id, CancellationToken ct = default);
 }

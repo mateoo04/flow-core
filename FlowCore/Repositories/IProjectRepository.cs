@@ -4,18 +4,13 @@ namespace FlowCore.Repositories;
 
 public interface IProjectRepository
 {
-    IReadOnlyList<Project> GetAll();
+    Task<IReadOnlyList<Project>> GetAllAsync(CancellationToken ct = default);
 
-    IReadOnlyList<Project> GetByWorkspaceId(Guid workspaceId);
+    Task<IReadOnlyList<Project>> GetByWorkspaceIdAsync(Guid workspaceId, CancellationToken ct = default);
 
-    Project? GetById(Guid id);
+    Task<Project?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
-    Project CreateInWorkspace(
-        Guid workspaceId,
-        string name,
-        string description,
-        ProjectStatus status,
-        ProjectPriority priority);
+    Task<Project> AddAsync(Project project, CancellationToken ct = default);
 
-    bool TryDelete(Guid id);
+    Task<bool> TryDeleteAsync(Guid id, CancellationToken ct = default);
 }

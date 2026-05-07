@@ -24,10 +24,12 @@ public class CommentsController : BaseController
         _breadcrumbs = breadcrumbs;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken ct)
     {
-        var userMap = _users.GetAll().ToDictionary(u => u.Id);
-        var rows = _comments.GetAll()
+        var users = await _users.GetAllAsync(ct);
+        var userMap = users.ToDictionary(u => u.Id);
+        var comments = await _comments.GetAllAsync(ct);
+        var rows = comments
             .Select(c =>
             {
                 var author = userMap.TryGetValue(c.AuthorUserId, out var u) ? u.FullName : "(unknown)";
@@ -39,13 +41,13 @@ public class CommentsController : BaseController
         return View(rows);
     }
 
-    public IActionResult Details(Guid id)
+    public async Task<IActionResult> Details(Guid id, CancellationToken ct)
     {
-        var entity = _comments.GetById(id);
-        return ViewDetails(entity, e =>
-        {
-            var task = _tasks.GetById(e.TaskItemId);
-            return _breadcrumbs.ForComment(e, task?.Title ?? "(task)");
-        });
+        var entity = await _comments.GetByIdAsync(id, ct);
+        if (entity is null)
+            return NotFound();
+        var task = await _tasks.GetByIdAsync(entity.TaskItemId, ct);
+        ViewBag.Breadcrumbs = _breadcrumbs.ForComment(entity, task?.Title ?? "(task)");
+        return View(entity);
     }
 }

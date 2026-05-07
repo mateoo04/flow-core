@@ -1,8 +1,9 @@
+using FlowCore.Common;
 using FlowCore.Data;
-using FlowCore.Models;
 using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
 using FlowCore.Services;
+using FlowCore.Services.Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowCore.Controllers;
@@ -11,37 +12,38 @@ public class TasksController : BaseController
 {
     private readonly ITaskRepository _tasks;
     private readonly IProjectRepository _projects;
-    private readonly ICommentRepository _comments;
+    private readonly ITaskService _taskService;
+    private readonly ICommentService _commentService;
     private readonly IBreadcrumbTrailBuilder _breadcrumbs;
-    private readonly InMemoryDataStore _store;
 
     public TasksController(
         ITaskRepository tasks,
         IProjectRepository projects,
-        ICommentRepository comments,
-        IBreadcrumbTrailBuilder breadcrumbs,
-        InMemoryDataStore store)
+        ITaskService taskService,
+        ICommentService commentService,
+        IBreadcrumbTrailBuilder breadcrumbs)
     {
         _tasks = tasks;
         _projects = projects;
-        _comments = comments;
+        _taskService = taskService;
+        _commentService = commentService;
         _breadcrumbs = breadcrumbs;
-        _store = store;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken ct)
     {
-        var rows = _tasks.GetAll()
+        var tasks = await _tasks.GetAllAsync(ct);
+        var rows = tasks
             .Select(t => new TaskListRow(t.Id, t.Title, t.Priority, t.BoardId, t.ParentTaskItemId))
             .OrderBy(r => r.Title)
             .ToList();
         return View(rows);
     }
 
-    [HttpGet]
-    public IActionResult Create(Guid projectId, Guid? boardId, Guid? parentTaskItemId)
+    [HttpGet("/projects/{projectId:guid}/tasks/new", Name = "task-create-form")]
+    public async Task<IActionResult> Create(Guid projectId, Guid? boardId, Guid? parentTaskItemId, CancellationToken ct)
     {
-        var project = _projects.GetById(projectId);
+        var project = await _projects.GetByIdAsync(projectId, ct);
         if (project is null)
             return NotFound();
 
@@ -53,7 +55,7 @@ public class TasksController : BaseController
         if (board is null)
             return NotFound();
 
-        var workspace = project.Workspace ?? _store.FindWorkspace(project.WorkspaceId);
+        var workspace = project.Workspace;
         if (workspace is null)
             return NotFound();
         var statuses = workspace.TaskStatusDefinitions.OrderBy(s => s.Position).ToList();
@@ -76,27 +78,21 @@ public class TasksController : BaseController
         return View(vm);
     }
 
-    [HttpPost]
+    [HttpPost("/projects/{projectId:guid}/tasks")]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(TaskCreateFormVm model)
+    public async Task<IActionResult> Create(Guid projectId, TaskCreateFormVm model, CancellationToken ct)
     {
-        var project = _projects.GetById(model.ProjectId);
+        model.ProjectId = projectId;
+        var project = await _projects.GetByIdAsync(projectId, ct);
         if (project is null)
             return NotFound();
 
-        var workspace = project.Workspace ?? _store.FindWorkspace(project.WorkspaceId);
+        var workspace = project.Workspace;
         var statuses = workspace?.TaskStatusDefinitions.OrderBy(s => s.Position).ToList()
-                       ?? new List<TaskStatusDefinition>();
+                       ?? new List<Models.TaskStatusDefinition>();
 
         if (!ModelState.IsValid)
-        {
-            var board = project.Boards.FirstOrDefault(b => b.Id == model.BoardId)
-                        ?? project.Boards.OrderBy(b => b.Position).First();
-            ViewBag.Project = project;
-            ViewBag.Board = board;
-            ViewBag.Statuses = statuses;
-            return View(model);
-        }
+            return RenderForm(project, model, statuses);
 
         var req = new CreateTaskRequest(
             model.BoardId,
@@ -108,59 +104,66 @@ public class TasksController : BaseController
             model.ParentTaskItemId,
             model.DueDate);
 
-        var task = _tasks.Create(req);
-        if (task is null)
-        {
-            ModelState.AddModelError(string.Empty, "Could not create task.");
-            var board = project.Boards.FirstOrDefault(b => b.Id == model.BoardId)
-                        ?? project.Boards.OrderBy(b => b.Position).First();
-            ViewBag.Project = project;
-            ViewBag.Board = board;
-            ViewBag.Statuses = statuses;
-            return View(model);
-        }
+        var result = await _taskService.CreateAsync(req, ct);
+        if (result.IsSuccess)
+            return RedirectToAction(nameof(Details), new { id = result.Value!.Id });
 
-        return RedirectToAction(nameof(Details), new { id = task.Id });
+        if (result.Error!.Value.Kind == ErrorKind.NotFound)
+            return NotFound();
+
+        ModelState.AddModelError(string.Empty, result.Error.Value.Message);
+        return RenderForm(project, model, statuses);
     }
 
-    public IActionResult Details(Guid id)
+    [HttpGet("/tasks/{id:guid}", Name = "task-details")]
+    public async Task<IActionResult> Details(Guid id, CancellationToken ct)
     {
-        var entity = _tasks.GetById(id);
+        var entity = await _tasks.GetByIdAsync(id, ct);
         var project = entity?.Board?.Project;
         if (project is not null)
             SetNav(project.WorkspaceId, project.Id);
         return ViewDetails(entity, _breadcrumbs.ForTask);
     }
 
-    [HttpPost]
+    [HttpPost("/tasks/{id:guid}/comments")]
     [ValidateAntiForgeryToken]
-    public IActionResult AddComment(Guid id, CommentFormVm model)
+    public async Task<IActionResult> AddComment(Guid id, CommentFormVm model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
             return RedirectToAction(nameof(Details), new { id });
 
-        var comment = _comments.Create(id, DemoSeedIds.UserAlex, model.Body);
-        if (comment is null)
+        var result = await _commentService.CreateAsync(id, DemoSeedIds.UserAlex, model.Body, ct);
+        if (result.Error?.Kind == ErrorKind.NotFound)
             return NotFound();
 
         return RedirectToAction(nameof(Details), new { id });
     }
 
-    [HttpPost]
+    [HttpPost("/tasks/{id:guid}/delete")]
     [ValidateAntiForgeryToken]
-    public IActionResult Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        var entity = _tasks.GetById(id);
+        var entity = await _tasks.GetByIdAsync(id, ct);
         if (entity is null)
             return NotFound();
 
         var projectId = entity.Board?.ProjectId;
-        if (!_tasks.TryDelete(id))
+        if (!await _tasks.TryDeleteAsync(id, ct))
             return NotFound();
 
         if (projectId is { } pid)
             return RedirectToAction(nameof(ProjectsController.Details), "Projects", new { id = pid });
 
         return RedirectToAction(nameof(Index));
+    }
+
+    private IActionResult RenderForm(Models.Project project, TaskCreateFormVm model, IReadOnlyList<Models.TaskStatusDefinition> statuses)
+    {
+        var board = project.Boards.FirstOrDefault(b => b.Id == model.BoardId)
+                    ?? project.Boards.OrderBy(b => b.Position).First();
+        ViewBag.Project = project;
+        ViewBag.Board = board;
+        ViewBag.Statuses = statuses;
+        return View(model);
     }
 }

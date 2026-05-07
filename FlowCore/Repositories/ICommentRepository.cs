@@ -4,13 +4,13 @@ namespace FlowCore.Repositories;
 
 public interface ICommentRepository
 {
-    IReadOnlyList<Comment> GetAll();
+    Task<IReadOnlyList<Comment>> GetAllAsync(CancellationToken ct = default);
 
-    IReadOnlyList<Comment> GetByTaskItemId(Guid taskItemId);
+    Task<IReadOnlyList<Comment>> GetByTaskItemIdAsync(Guid taskItemId, CancellationToken ct = default);
 
-    Comment? GetById(Guid id);
+    Task<Comment?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
-    Comment? Create(Guid taskItemId, Guid authorUserId, string body);
+    Task<Comment> AddAsync(Comment comment, CancellationToken ct = default);
 
-    bool TryDelete(Guid id);
+    Task<bool> TryDeleteAsync(Guid id, CancellationToken ct = default);
 }
