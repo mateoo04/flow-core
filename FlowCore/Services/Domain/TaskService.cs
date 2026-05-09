@@ -64,4 +64,48 @@ public sealed class TaskService : ITaskService
 
         return Result.Ok(await _tasks.AddAsync(task, ct));
     }
+
+    public async Task<Result<bool>> MoveAsync(
+        Guid taskId,
+        Guid destinationStatusId,
+        int position,
+        CancellationToken ct = default)
+    {
+        if (position < 0)
+            return Result.Validation<bool>("Position must be non-negative.");
+
+        var outcome = await _tasks.MoveAsync(taskId, destinationStatusId, position, ct);
+        return outcome switch
+        {
+            MoveResult.Moved => Result.Ok(true),
+            MoveResult.TaskNotFound => Result.NotFound<bool>("Task not found."),
+            MoveResult.StatusNotFound => Result.NotFound<bool>("Status not found."),
+            MoveResult.StatusInDifferentWorkspace =>
+                Result.Conflict<bool>("Status does not belong to this task's workspace."),
+            _ => Result.Validation<bool>("Unknown move result.")
+        };
+    }
+
+    public async Task<Result<bool>> MoveOnHomeAsync(
+        Guid currentUserId,
+        Guid taskId,
+        string destinationStatusName,
+        int position,
+        CancellationToken ct = default)
+    {
+        if (position < 0)
+            return Result.Validation<bool>("Position must be non-negative.");
+        if (string.IsNullOrWhiteSpace(destinationStatusName))
+            return Result.Validation<bool>("Destination status name is required.");
+
+        var outcome = await _tasks.MoveOnHomeAsync(currentUserId, taskId, destinationStatusName, position, ct);
+        return outcome switch
+        {
+            MoveResult.Moved => Result.Ok(true),
+            MoveResult.TaskNotFound => Result.NotFound<bool>("Task not found."),
+            MoveResult.StatusNotFound =>
+                Result.Conflict<bool>($"Workspace has no status named '{destinationStatusName}'."),
+            _ => Result.Validation<bool>("Unknown move result.")
+        };
+    }
 }

@@ -3,6 +3,7 @@ using System;
 using FlowCore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FlowCore.Migrations
 {
     [DbContext(typeof(FlowCoreDbContext))]
-    partial class FlowCoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260507211950_AddTaskPositionAndUserTaskOrder")]
+    partial class AddTaskPositionAndUserTaskOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -306,6 +309,8 @@ namespace FlowCore.Migrations
                     b.HasKey("UserId", "TaskItemId");
 
                     b.HasIndex("TaskItemId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserTaskOrders");
                 });

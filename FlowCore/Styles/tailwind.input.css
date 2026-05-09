@@ -119,3 +119,7 @@ html.dark {
     }
   }
 }
+
+.fc-dnd-ghost {
+    opacity: 0.4;
+}

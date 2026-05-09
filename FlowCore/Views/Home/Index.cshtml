@@ -56,16 +56,20 @@ else
                     </div>
                     @if (group.Tasks.Count == 0)
                     {
-                        <p class="rounded-xl border border-dashed border-border bg-raised/20 p-6 text-center text-xs text-fg-muted">No tasks.</p>
+                        <div class="space-y-4" data-home-dnd-column data-status-name="@group.StatusName" data-status-color="@stripe">
+                            <p class="rounded-xl border border-dashed border-border bg-raised/20 p-6 text-center text-xs text-fg-muted">No tasks.</p>
+                        </div>
                     }
                     else if (isDone)
                     {
-                        <div class="space-y-3">
+                        <div class="space-y-3" data-home-dnd-column data-status-name="@group.StatusName" data-status-color="@stripe">
                             @foreach (var card in group.Tasks)
                             {
                                 <a asp-controller="Tasks" asp-action="Details" asp-route-id="@card.TaskId"
                                    class="flex items-center gap-4 rounded-xl border-l-4 bg-card p-4 shadow-sm transition-all hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tertiary)]"
-                                   style="border-left-color: @stripe">
+                                   style="border-left-color: @stripe"
+                                   data-task-id="@card.TaskId">
+                                    <span class="material-symbols-outlined shrink-0 text-[14px] leading-none text-fg-muted opacity-0 transition-opacity group-hover:opacity-60 select-none" aria-hidden="true">drag_indicator</span>
                                     <span class="material-symbols-outlined text-[var(--color-tertiary)]" aria-hidden="true">check_circle</span>
                                     <div class="min-w-0 flex-1">
                                         <h3 class="truncate text-sm font-semibold text-fg-muted line-through decoration-fg-muted/40">@card.Title</h3>
@@ -81,15 +85,16 @@ else
                     }
                     else
                     {
-                        <div class="space-y-4">
+                        <div class="space-y-4" data-home-dnd-column data-status-name="@group.StatusName" data-status-color="@stripe">
                             @foreach (var card in group.Tasks)
                             {
                                 <a asp-controller="Tasks" asp-action="Details" asp-route-id="@card.TaskId"
                                    class="fc-task-avatar-ring fc-task-avatar-ring--card group block rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
-                                   style="border-left-color: @stripe">
-                                    <div class="mb-3 flex items-start justify-between">
+                                   style="border-left-color: @stripe"
+                                   data-task-id="@card.TaskId">
+                                    <div class="mb-3 flex min-w-0 items-center gap-2">
+                                        <span class="material-symbols-outlined shrink-0 text-[14px] leading-none text-fg-muted opacity-0 transition-opacity group-hover:opacity-60 select-none" aria-hidden="true">drag_indicator</span>
                                         <span class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--color-secondary)] bg-[var(--color-secondary)]/10">@card.ProjectName</span>
-                                        <span class="material-symbols-outlined text-sm text-fg-muted opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true">more_horiz</span>
                                     </div>
                                     <h3 class="mb-4 line-clamp-2 text-[15px] font-semibold leading-snug text-fg">@card.Title</h3>
                                     <div class="flex items-center justify-between gap-2">
@@ -120,3 +125,9 @@ else
     <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Settings" asp-action="Index">Statuses</a>
     <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Comments" asp-action="Index">Comments</a>
 </section>
+
+@section Scripts {
+    @Html.AntiForgeryToken()
+    <script src="~/lib/sortablejs/Sortable.min.js" asp-append-version="true"></script>
+    <script src="~/js/home-dnd.js" asp-append-version="true"></script>
+}

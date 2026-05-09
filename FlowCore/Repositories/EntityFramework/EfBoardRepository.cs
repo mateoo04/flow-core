@@ -32,7 +32,7 @@ public sealed class EfBoardRepository : IBoardRepository
     public Task<Board?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return _db.Boards
-            .AsNoTracking()
+            .AsNoTrackingWithIdentityResolution()
             .AsSplitQuery()
             .Include(b => b.Project)
             .ThenInclude(p => p!.Workspace)

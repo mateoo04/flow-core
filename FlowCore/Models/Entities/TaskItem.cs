@@ -20,6 +20,8 @@ public class TaskItem
     public TaskPriority Priority { get; set; }
     public int StoryPoints { get; set; }
 
+    public int Position { get; set; }
+
     [ForeignKey(nameof(ParentTaskItem))]
     public Guid? ParentTaskItemId { get; set; }
 

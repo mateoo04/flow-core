@@ -35,7 +35,7 @@
     {
         var status = group.Key;
         var accent = AccentHex(status);
-        var tasksInStatus = group.OrderBy(t => t.Title).ToList();
+        var tasksInStatus = group.OrderBy(t => t.Position).ThenBy(t => t.Title).ToList();
         <section class="w-80 shrink-0 space-y-6">
             <div class="flex items-center justify-between px-2">
                 <div class="flex items-center gap-3">
@@ -44,7 +44,7 @@
                     <span class="rounded-md bg-[var(--color-primary)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-fg/70">@tasksInStatus.Count</span>
                 </div>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-4" data-board-dnd-column data-status-id="@status.Id" data-status-color="@accent">
                 @foreach (var task in tasksInStatus)
                 {
                     var assignees = TaskAssigneeStackBuilder.FromTask(task);
@@ -53,10 +53,14 @@
                     var dueLabel = task.DueDate is { } d ? d.ToString("MMM d", CultureInfo.InvariantCulture) : null;
                     <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id"
                        class="fc-task-avatar-ring fc-task-avatar-ring--card group block cursor-pointer rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
-                       style="border-left-color: @accent">
+                       style="border-left-color: @accent"
+                       data-task-id="@task.Id">
                         <span class="sr-only">Status: @status.Name.</span>
-                        <div class="flex justify-between gap-1">
-                            <h3 class="mb-4 line-clamp-2 text-[15px] font-semibold leading-snug text-fg">@task.Title</h3>
+                        <div class="mb-4 flex items-start justify-between gap-2">
+                            <div class="flex min-w-0 items-start gap-2">
+                                <span class="material-symbols-outlined shrink-0 text-[14px] leading-none text-fg-muted opacity-0 transition-opacity group-hover:opacity-60 select-none" aria-hidden="true">drag_indicator</span>
+                                <h3 class="line-clamp-2 text-[15px] font-semibold leading-snug text-fg">@task.Title</h3>
+                            </div>
                             @if (subCount > 0)
                             {
                                 <div class="flex items-start justify-end">

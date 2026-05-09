@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
 
 builder.Services.Configure<RouteOptions>(opts =>
 {

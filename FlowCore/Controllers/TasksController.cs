@@ -157,6 +157,26 @@ public class TasksController : BaseController
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost("/tasks/{id:guid}/move")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Move(
+        Guid id,
+        [FromBody] MoveTaskRequest body,
+        CancellationToken ct)
+    {
+        if (body is null) return BadRequest();
+
+        var result = await _taskService.MoveAsync(id, body.StatusId, body.Position, ct);
+        if (result.IsSuccess) return NoContent();
+
+        return result.Error!.Value.Kind switch
+        {
+            ErrorKind.NotFound => NotFound(),
+            ErrorKind.Conflict => Conflict(result.Error.Value.Message),
+            _ => BadRequest(result.Error.Value.Message)
+        };
+    }
+
     private IActionResult RenderForm(Models.Project project, TaskCreateFormVm model, IReadOnlyList<Models.TaskStatusDefinition> statuses)
     {
         var board = project.Boards.FirstOrDefault(b => b.Id == model.BoardId)

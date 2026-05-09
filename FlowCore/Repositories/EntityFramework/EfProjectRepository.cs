@@ -32,7 +32,7 @@ public sealed class EfProjectRepository : IProjectRepository
     public Task<Project?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return _db.Projects
-            .AsNoTracking()
+            .AsNoTrackingWithIdentityResolution()
             .AsSplitQuery()
             .Include(p => p.Workspace)
             .ThenInclude(w => w!.TaskStatusDefinitions)
