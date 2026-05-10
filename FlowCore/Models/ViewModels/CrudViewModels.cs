@@ -16,6 +16,10 @@ public sealed class ProjectCreateFormVm
     public ProjectStatus Status { get; set; } = ProjectStatus.Planning;
 
     public ProjectPriority Priority { get; set; } = ProjectPriority.Medium;
+
+    public DateTime? StartDate { get; set; }
+
+    public DateTime? DueDate { get; set; }
 }
 
 public sealed class TaskCreateFormVm

@@ -76,6 +76,8 @@ public class ProjectsController : BaseController
             model.Description,
             model.Status,
             model.Priority,
+            model.StartDate,
+            model.DueDate,
             ct);
 
         if (result.IsSuccess)

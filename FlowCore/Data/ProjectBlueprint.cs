@@ -82,7 +82,9 @@ public static class ProjectBlueprint
         string name,
         string description,
         ProjectStatus status,
-        ProjectPriority priority)
+        ProjectPriority priority,
+        DateTime? startDate = null,
+        DateTime? dueDate = null)
     {
         var project = new Project
         {
@@ -90,8 +92,8 @@ public static class ProjectBlueprint
             WorkspaceId = ws.Id,
             Name = name,
             Description = description,
-            StartDate = now.AddDays(-21),
-            DueDate = now.AddMonths(3),
+            StartDate = startDate ?? now.AddDays(-21),
+            DueDate = dueDate ?? now.AddMonths(3),
             Status = status,
             Priority = priority
         };

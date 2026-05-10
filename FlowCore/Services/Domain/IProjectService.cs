@@ -11,5 +11,7 @@ public interface IProjectService
         string description,
         ProjectStatus status,
         ProjectPriority priority,
+        DateTime? startDate,
+        DateTime? dueDate,
         CancellationToken ct = default);
 }

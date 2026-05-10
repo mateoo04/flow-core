@@ -33,6 +33,18 @@
         <label asp-for="Priority" class="block text-sm font-medium text-fg-secondary">Priority</label>
         <select asp-for="Priority" asp-items="Html.GetEnumSelectList<ProjectPriority>()" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></select>
     </div>
+    <div>
+        <label asp-for="StartDate" class="block text-sm font-medium text-fg-secondary">Start date (optional)</label>
+        <div class="mt-1">
+            <partial name="_DateTimePicker" model="@(new DateTimePickerModel { FieldName = nameof(Model.StartDate), Value = Model.StartDate, Placeholder = "Pick a date and time" })"/>
+        </div>
+    </div>
+    <div>
+        <label asp-for="DueDate" class="block text-sm font-medium text-fg-secondary">Due (optional)</label>
+        <div class="mt-1">
+            <partial name="_DateTimePicker" model="@(new DateTimePickerModel { FieldName = nameof(Model.DueDate), Value = Model.DueDate, Placeholder = "Pick a date and time" })"/>
+        </div>
+    </div>
     <div class="flex gap-3">
         <button type="submit" class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
             <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>

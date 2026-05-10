@@ -1,8 +1,11 @@
+using System.Globalization;
 using FlowCore.Data;
 using FlowCore.Repositories;
 using FlowCore.Repositories.EntityFramework;
 using FlowCore.Services;
 using FlowCore.Services.Domain;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +54,18 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+var supportedCultures = new[]
+{
+    new CultureInfo("hr-HR"),
+    new CultureInfo("en-US")
+};
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("hr-HR"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+});
 
 app.UseAuthorization();
 

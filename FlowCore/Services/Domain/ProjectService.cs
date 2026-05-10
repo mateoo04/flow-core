@@ -23,6 +23,8 @@ public sealed class ProjectService : IProjectService
         string description,
         ProjectStatus status,
         ProjectPriority priority,
+        DateTime? startDate,
+        DateTime? dueDate,
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -54,8 +56,17 @@ public sealed class ProjectService : IProjectService
             name.Trim(),
             description?.Trim() ?? "",
             status,
-            priority);
+            priority,
+            NormalizeUtc(startDate),
+            NormalizeUtc(dueDate));
 
         return Result.Ok(await _projects.AddAsync(ctx.Project, ct));
     }
+
+    private static DateTime? NormalizeUtc(DateTime? value) => value switch
+    {
+        null => null,
+        { Kind: DateTimeKind.Utc } v => v,
+        var v => DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)
+    };
 }

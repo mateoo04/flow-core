@@ -19,7 +19,7 @@
         : "?";
 }
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="@System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName" class="h-full">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -41,6 +41,7 @@
     <link rel="stylesheet" href="~/css/tailwind.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/FlowCore.styles.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/lib/flatpickr/flatpickr.min.css" asp-append-version="true"/>
 </head>
 <body class="antialiased">
 <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-fg focus:shadow-card focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-brand"
@@ -175,6 +176,12 @@
 }
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/lib/flatpickr/flatpickr.min.js" asp-append-version="true"></script>
+@if (System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "hr")
+{
+    <script src="~/lib/flatpickr/l10n/hr.js" asp-append-version="true"></script>
+}
+<script src="~/js/datepicker.js" asp-append-version="true"></script>
 <script src="~/js/autocomplete.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>

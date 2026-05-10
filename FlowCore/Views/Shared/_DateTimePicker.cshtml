@@ -1,0 +1,12 @@
+@model DateTimePickerModel
+@{
+    var iso = Model.Value?.ToString("yyyy-MM-dd HH:mm");
+}
+<input type="text"
+       name="@Model.FieldName"
+       value="@iso"
+       data-datetime-picker
+       autocomplete="off"
+       placeholder="@(Model.Placeholder ?? "")"
+       @(Model.Required ? "required" : "")
+       class="w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"/>
