@@ -2,7 +2,16 @@
 @{
     ViewData["Title"] = Model.Name;
 }
-<h1 class="text-3xl font-bold tracking-tight text-fg"><span class="text-fg-muted">#</span>@Model.Name</h1>
+<div class="flex flex-wrap items-baseline justify-between gap-3">
+    <h1 class="text-3xl font-bold tracking-tight text-fg"><span class="text-fg-muted">#</span>@Model.Name</h1>
+    <div class="flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="rounded-lg border border-border px-3 py-2 text-sm font-medium text-fg hover:bg-[var(--color-surface-container)]">Edit</a>
+        <form method="post" asp-action="Delete" asp-route-id="@Model.Id" onsubmit="return confirm('Delete this tag?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="rounded-lg border border-brand-warn/40 px-3 py-2 text-sm font-medium text-brand-warn hover:bg-brand-warn/10">Delete</button>
+        </form>
+    </div>
+</div>
 <dl class="mt-6 grid gap-3 text-sm sm:grid-cols-[8rem_1fr]">
     <dt class="text-fg-muted">Color</dt><dd class="font-mono text-fg">@Model.ColorHex</dd>
     <dt class="text-fg-muted">Linked tasks</dt>

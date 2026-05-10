@@ -91,6 +91,54 @@ public class ProjectsController : BaseController
         return View(model);
     }
 
+    [HttpGet("/projects/{id:guid}/edit", Name = "project-edit-form")]
+    public async Task<IActionResult> Edit(Guid id, CancellationToken ct)
+    {
+        var entity = await _projects.GetByIdAsync(id, ct);
+        if (entity is null) return NotFound();
+
+        SetNav(entity.WorkspaceId, entity.Id);
+
+        return View(new ProjectEditFormVm
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            Description = entity.Description,
+            Status = entity.Status,
+            Priority = entity.Priority,
+            StartDate = entity.StartDate,
+            DueDate = entity.DueDate
+        });
+    }
+
+    [HttpPost("/projects/{id:guid}/edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, ProjectEditFormVm model, CancellationToken ct)
+    {
+        model.Id = id;
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var result = await _projectService.UpdateAsync(
+            id,
+            model.Name,
+            model.Description,
+            model.Status,
+            model.Priority,
+            model.StartDate,
+            model.DueDate,
+            ct);
+
+        if (result.IsSuccess)
+            return RedirectToAction(nameof(Details), new { id });
+
+        if (result.Error!.Value.Kind == ErrorKind.NotFound)
+            return NotFound();
+
+        ModelState.AddModelError(string.Empty, result.Error.Value.Message);
+        return View(model);
+    }
+
     [HttpGet("/projects/{id:guid}", Name = "project-details")]
     [HttpGet("/projects/{id:guid}/boards/{boardId:guid}", Name = "project-board-details")]
     public async Task<IActionResult> Details(Guid id, Guid? boardId, CancellationToken ct)

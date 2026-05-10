@@ -7,19 +7,21 @@
     return "default";
   }
 
-  function altFormat(locale) {
-    return locale === "hr" ? "d.m.Y H:i" : "M j, Y H:i";
+  function altFormat(locale, includeTime) {
+    if (locale === "hr") return includeTime ? "d.m.Y H:i" : "d.m.Y";
+    return includeTime ? "M j, Y H:i" : "M j, Y";
   }
 
   function init(el) {
     if (el._flatpickrBound) return;
     var locale = pickLocale();
+    var includeTime = el.getAttribute("data-include-time") !== "false";
     flatpickr(el, {
-      enableTime: true,
+      enableTime: includeTime,
       time_24hr: true,
-      dateFormat: "Y-m-d H:i",
+      dateFormat: includeTime ? "Y-m-d H:i" : "Y-m-d",
       altInput: true,
-      altFormat: altFormat(locale),
+      altFormat: altFormat(locale, includeTime),
       altInputClass: el.className,
       defaultHour: 9,
       defaultMinute: 0,

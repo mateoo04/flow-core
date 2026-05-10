@@ -22,6 +22,24 @@ public sealed class ProjectCreateFormVm
     public DateTime? DueDate { get; set; }
 }
 
+public sealed class ProjectEditFormVm
+{
+    public Guid Id { get; set; }
+
+    [Required]
+    public string Name { get; set; } = "";
+
+    public string Description { get; set; } = "";
+
+    public ProjectStatus Status { get; set; } = ProjectStatus.Planning;
+
+    public ProjectPriority Priority { get; set; } = ProjectPriority.Medium;
+
+    public DateTime? StartDate { get; set; }
+
+    public DateTime? DueDate { get; set; }
+}
+
 public sealed class TaskCreateFormVm
 {
     [Required]
@@ -77,6 +95,17 @@ public sealed class CommentFormVm
 {
     [Required]
     public string Body { get; set; } = "";
+}
+
+public sealed class TagFormVm
+{
+    public Guid? Id { get; set; }
+
+    [Required, StringLength(50, MinimumLength = 1)]
+    public string Name { get; set; } = "";
+
+    [Required, RegularExpression(@"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", ErrorMessage = "Color must be a hex like #f00 or #ff0000.")]
+    public string ColorHex { get; set; } = "#94A3B8";
 }
 
 public sealed class TaskStatusFormVm

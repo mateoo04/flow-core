@@ -56,6 +56,30 @@ public sealed class EfProjectRepository : IProjectRepository
         return project;
     }
 
+    public async Task<Project?> UpdateAsync(
+        Guid id,
+        string name,
+        string description,
+        ProjectStatus status,
+        ProjectPriority priority,
+        DateTime? startDate,
+        DateTime? dueDate,
+        CancellationToken ct = default)
+    {
+        var project = await _db.Projects.FirstOrDefaultAsync(p => p.Id == id, ct);
+        if (project is null) return null;
+
+        project.Name = name;
+        project.Description = description;
+        project.Status = status;
+        project.Priority = priority;
+        if (startDate is { } sd) project.StartDate = sd;
+        project.DueDate = dueDate;
+
+        await _db.SaveChangesAsync(ct);
+        return project;
+    }
+
     public async Task<bool> TryDeleteAsync(Guid id, CancellationToken ct = default)
     {
         var project = await _db.Projects.FirstOrDefaultAsync(p => p.Id == id, ct);

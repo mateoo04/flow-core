@@ -63,6 +63,35 @@ public sealed class ProjectService : IProjectService
         return Result.Ok(await _projects.AddAsync(ctx.Project, ct));
     }
 
+    public async Task<Result<Project>> UpdateAsync(
+        Guid id,
+        string name,
+        string description,
+        ProjectStatus status,
+        ProjectPriority priority,
+        DateTime? startDate,
+        DateTime? dueDate,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Validation<Project>("Project name is required.");
+
+        var updated = await _projects.UpdateAsync(
+            id,
+            name.Trim(),
+            description?.Trim() ?? "",
+            status,
+            priority,
+            NormalizeUtc(startDate),
+            NormalizeUtc(dueDate),
+            ct);
+
+        if (updated is null)
+            return Result.NotFound<Project>("Project not found.");
+
+        return Result.Ok(updated);
+    }
+
     private static DateTime? NormalizeUtc(DateTime? value) => value switch
     {
         null => null,

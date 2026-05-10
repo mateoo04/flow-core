@@ -14,4 +14,14 @@ public interface IProjectService
         DateTime? startDate,
         DateTime? dueDate,
         CancellationToken ct = default);
+
+    Task<Result<Project>> UpdateAsync(
+        Guid id,
+        string name,
+        string description,
+        ProjectStatus status,
+        ProjectPriority priority,
+        DateTime? startDate,
+        DateTime? dueDate,
+        CancellationToken ct = default);
 }
