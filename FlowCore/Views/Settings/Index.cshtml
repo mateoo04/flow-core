@@ -54,15 +54,14 @@
                 <li class="rounded-2xl border border-border bg-card p-4 shadow-sm">
                     <form method="post" asp-action="Update" asp-route-workspaceId="@ws.Id" asp-route-id="@s.Id" class="flex flex-wrap items-center gap-3">
                         @Html.AntiForgeryToken()
-                        <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border" style="background-color: @s.ColorHex" aria-hidden="true"></span>
                         <input type="text" name="Name" value="@s.Name" required
                                class="min-w-0 flex-1 rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 text-sm text-fg outline-none focus:border-[var(--color-secondary)] focus:ring-1 focus:ring-[var(--color-secondary)]"
                                aria-label="Status name"/>
-                        <input type="text" name="ColorHex" value="@s.ColorHex"
-                               class="w-28 rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 font-mono text-xs text-fg outline-none focus:border-[var(--color-secondary)] focus:ring-1 focus:ring-[var(--color-secondary)]"
-                               aria-label="Status color hex"/>
+                        <input type="color" name="ColorHex" value="@s.ColorHex"
+                               class="h-8 w-8 cursor-pointer rounded-full border border-border"
+                               aria-label="Status color"/>
                         <label class="inline-flex items-center gap-2 text-xs text-fg-secondary">
-                            <input type="checkbox" name="IsDoneState" value="true" @(s.IsDoneState ? "checked" : "")/>
+                            <input type="checkbox" name="IsDoneState" value="true" @(s.IsDoneState ? "checked" : "") class="h-4 w-4 cursor-pointer rounded border border-border accent-[var(--color-secondary)]"/>
                             Done state
                         </label>
                         <span class="text-[10px] font-semibold uppercase tracking-wider text-fg-muted">@s.TaskItems.Count tasks</span>
@@ -110,12 +109,12 @@
                    class="mt-1 w-full rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 text-sm text-fg outline-none focus:border-[var(--color-secondary)] focus:ring-1 focus:ring-[var(--color-secondary)]"/>
         </div>
         <div>
-            <label for="new-status-color" class="block text-xs font-semibold uppercase tracking-wider text-fg-muted">Color (hex)</label>
-            <input id="new-status-color" type="text" name="ColorHex" value="#94A3B8"
-                   class="mt-1 w-full rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 font-mono text-sm text-fg outline-none focus:border-[var(--color-secondary)] focus:ring-1 focus:ring-[var(--color-secondary)]"/>
+            <label for="new-status-color" class="block text-xs font-semibold uppercase tracking-wider text-fg-muted">Color</label>
+            <input id="new-status-color" type="color" name="ColorHex" value="#94a3b8"
+                   class="mt-1 h-10 w-10 cursor-pointer rounded-full border border-border"/>
         </div>
         <label class="inline-flex items-center gap-2 text-sm text-fg-secondary">
-            <input type="checkbox" name="IsDoneState" value="true"/>
+            <input type="checkbox" name="IsDoneState" value="true" class="h-4 w-4 cursor-pointer rounded border border-border accent-[var(--color-secondary)]"/>
             Mark as done state
         </label>
         <div>

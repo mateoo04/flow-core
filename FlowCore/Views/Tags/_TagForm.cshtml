@@ -8,7 +8,7 @@
 <div>
     <label asp-for="ColorHex" class="block text-sm font-medium text-fg-secondary">Color</label>
     <div class="mt-1 flex items-center gap-3">
-        <input asp-for="ColorHex" type="color" class="h-10 w-14 cursor-pointer rounded-md border border-border bg-[var(--color-surface)] p-1" data-tag-color/>
+        <input asp-for="ColorHex" type="color" class="h-10 w-10 cursor-pointer rounded-full border border-border" data-tag-color/>
         <span class="font-mono text-sm text-fg-muted" data-tag-color-display>@Model.ColorHex</span>
     </div>
     <span asp-validation-for="ColorHex" class="mt-1 block text-xs text-[var(--color-error)]"></span>
