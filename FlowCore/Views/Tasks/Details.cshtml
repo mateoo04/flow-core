@@ -1,10 +1,17 @@
 @model TaskItem
 @using FlowCore.Models
+@using FlowCore.Services
 @inject FlowCore.Services.UiText T
 @{
     ViewData["Title"] = Model.Title;
     var project = Model.Board?.Project;
     var board = Model.Board;
+    var assignees = Model.TaskAssignments
+        .Where(a => a.User is not null)
+        .Select(a => a.User!)
+        .DistinctBy(u => u.Id)
+        .OrderBy(u => u.FullName)
+        .ToList();
 }
 <div class="lg:grid lg:grid-cols-3 lg:gap-8">
     <article class="lg:col-span-2">
@@ -133,6 +140,22 @@
                         <dt class="text-fg-muted">Project</dt>
                         <dd class="mt-0.5">
                             <a class="rounded text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card" asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">@project.Name</a>
+                        </dd>
+                    </div>
+                }
+                @if (assignees.Count > 0)
+                {
+                    <div>
+                        <dt class="text-fg-muted">Assignees</dt>
+                        <dd class="mt-0.5 flex flex-col gap-1.5">
+                            @foreach (var u in assignees)
+                            {
+                                <a asp-controller="Users" asp-action="Details" asp-route-id="@u.Id"
+                                   class="inline-flex items-center gap-2 rounded-full border border-fg-muted/15 bg-raised/60 py-0.5 pl-0.5 pr-2.5 text-xs font-medium text-fg outline-none transition-colors hover:border-brand/40 hover:bg-raised focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card">
+                                    <span class="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white" style="background:@UserDisplayHelper.BackgroundColorForUser(u.Id)">@UserDisplayHelper.GetInitials(u.FullName)</span>
+                                    <span>@u.FullName</span>
+                                </a>
+                            }
                         </dd>
                     </div>
                 }

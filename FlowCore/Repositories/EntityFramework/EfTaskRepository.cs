@@ -67,6 +67,8 @@ public sealed class EfTaskRepository : ITaskRepository
             .ThenInclude(c => c.Author)
             .Include(t => t.TaskTags)
             .ThenInclude(tt => tt.Tag)
+            .Include(t => t.TaskAssignments)
+            .ThenInclude(a => a.User)
             .FirstOrDefaultAsync(t => t.Id == id, ct);
     }
 
