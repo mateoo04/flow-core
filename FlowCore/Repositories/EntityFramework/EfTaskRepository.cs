@@ -39,7 +39,7 @@ public sealed class EfTaskRepository : ITaskRepository
                 .ThenInclude(b => b!.Project)
             .Include(t => t.TaskAssignments)
                 .ThenInclude(a => a.User)
-            .Where(t => t.TaskAssignments.Any(a => a.UserId == userId && a.Role == TaskRole.Assignee))
+            .Where(t => t.TaskAssignments.Any(a => a.UserId == userId))
             .ToListAsync(ct);
 
         var userOrderByTaskId = await _db.UserTaskOrders
@@ -67,6 +67,20 @@ public sealed class EfTaskRepository : ITaskRepository
             .ThenInclude(c => c.Author)
             .Include(t => t.TaskTags)
             .ThenInclude(tt => tt.Tag)
+            .FirstOrDefaultAsync(t => t.Id == id, ct);
+    }
+
+    public Task<TaskItem?> GetForEditAsync(Guid id, CancellationToken ct = default)
+    {
+        return _db.TaskItems
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(t => t.Board)
+                .ThenInclude(b => b!.Project)
+                    .ThenInclude(p => p!.Workspace)
+                        .ThenInclude(w => w!.TaskStatusDefinitions)
+            .Include(t => t.TaskAssignments)
+                .ThenInclude(a => a.User)
             .FirstOrDefaultAsync(t => t.Id == id, ct);
     }
 
@@ -205,7 +219,7 @@ public sealed class EfTaskRepository : ITaskRepository
 
             var siblings = await _db.TaskItems
                 .Where(t =>
-                    t.TaskAssignments.Any(a => a.UserId == currentUserId && a.Role == TaskRole.Assignee) &&
+                    t.TaskAssignments.Any(a => a.UserId == currentUserId) &&
                     t.TaskStatusDefinition!.Name == destinationStatusName &&
                     t.Id != taskId)
                 .Select(t => new { t.Id, t.Title })

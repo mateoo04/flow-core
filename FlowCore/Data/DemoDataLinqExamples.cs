@@ -53,7 +53,6 @@ public static class DemoDataLinqExamples
         from task in AllTasks(workspaces)
         from assignment in task.TaskAssignments
         join user in users on assignment.UserId equals user.Id
-        where assignment.Role == TaskRole.Assignee
         select (task.Title, user.FullName);
 
     public static TaskItem? FindTaskByTitleSubstring(IEnumerable<Workspace> workspaces, string substring) =>

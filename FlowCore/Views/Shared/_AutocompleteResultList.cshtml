@@ -1,0 +1,12 @@
+@model AutocompleteResultListVm
+@if (Model.Items.Count == 0)
+{
+    <div class="px-3 py-2 text-sm text-fg-muted">@Model.EmptyMessage</div>
+}
+else
+{
+    foreach (var chipVm in Model.Items)
+    {
+        <partial name="_AutocompleteResultRow" model="@chipVm"/>
+    }
+}

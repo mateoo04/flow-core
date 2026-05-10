@@ -12,6 +12,8 @@ public interface ITaskRepository
 
     Task<TaskItem?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
+    Task<TaskItem?> GetForEditAsync(Guid id, CancellationToken ct = default);
+
     Task<TaskItem> AddAsync(TaskItem task, CancellationToken ct = default);
 
     Task<bool> TryDeleteAsync(Guid id, CancellationToken ct = default);

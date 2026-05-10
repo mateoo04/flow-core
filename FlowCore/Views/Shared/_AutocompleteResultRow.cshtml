@@ -1,0 +1,16 @@
+@model AutocompleteChipVm
+@{
+    var item = Model.Item;
+}
+<button type="button" data-ac-result data-id="@item.Id" role="option"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-[var(--color-surface-container)]">
+    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white" style="background:@item.BackgroundHex">@item.Initials</span>
+    <span class="min-w-0 flex-1">
+        <span class="block truncate text-sm font-medium text-fg">@item.Label</span>
+        @if (!string.IsNullOrEmpty(item.Sublabel))
+        {
+            <span class="block truncate text-xs text-fg-muted">@item.Sublabel</span>
+        }
+    </span>
+    <template data-ac-chip-template><partial name="_AutocompleteChip" model="@Model"/></template>
+</button>

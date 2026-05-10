@@ -10,7 +10,6 @@ public static class TaskAssigneeStackBuilder
     public static TaskAssigneeStackVm FromTask(TaskItem task)
     {
         var assignees = task.TaskAssignments
-            .Where(a => a.Role == TaskRole.Assignee)
             .Select(a => a.User)
             .Where(u => u is not null)
             .Cast<User>()

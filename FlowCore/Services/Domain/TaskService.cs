@@ -46,6 +46,8 @@ public sealed class TaskService : ITaskService
             boardId = request.BoardId;
         }
 
+        var validAssigneeIds = await ResolveValidAssigneeIdsAsync(request.AssigneeIds, ct);
+
         var now = DateTime.UtcNow;
         var task = new TaskItem
         {
@@ -59,10 +61,81 @@ public sealed class TaskService : ITaskService
             ParentTaskItemId = parentId,
             CreatedAt = now,
             UpdatedAt = now,
-            DueDate = request.DueDate
+            DueDate = NormalizeUtc(request.DueDate)
         };
 
+        foreach (var userId in validAssigneeIds)
+        {
+            task.TaskAssignments.Add(new TaskAssignment
+            {
+                TaskItemId = task.Id,
+                UserId = userId,
+                AssignedAt = now
+            });
+        }
+
         return Result.Ok(await _tasks.AddAsync(task, ct));
+    }
+
+    public async Task<Result<TaskItem>> UpdateAsync(UpdateTaskRequest request, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.Title))
+            return Result.Validation<TaskItem>("Title is required.");
+
+        var task = await _db.TaskItems
+            .Include(t => t.TaskAssignments)
+            .FirstOrDefaultAsync(t => t.Id == request.Id, ct);
+        if (task is null)
+            return Result.NotFound<TaskItem>("Task not found.");
+
+        if (!await _db.TaskStatusDefinitions.AnyAsync(s => s.Id == request.TaskStatusDefinitionId, ct))
+            return Result.NotFound<TaskItem>("Task status not found.");
+
+        task.Title = request.Title.Trim();
+        task.Description = request.Description?.Trim() ?? "";
+        task.TaskStatusDefinitionId = request.TaskStatusDefinitionId;
+        task.Priority = request.Priority;
+        task.StoryPoints = Math.Max(0, request.StoryPoints);
+        task.DueDate = NormalizeUtc(request.DueDate);
+        task.UpdatedAt = DateTime.UtcNow;
+
+        var validAssigneeIds = (await ResolveValidAssigneeIdsAsync(request.AssigneeIds, ct)).ToHashSet();
+
+        var toRemove = task.TaskAssignments.Where(a => !validAssigneeIds.Contains(a.UserId)).ToList();
+        foreach (var a in toRemove)
+            _db.Remove(a);
+
+        var existing = task.TaskAssignments.Select(a => a.UserId).ToHashSet();
+        foreach (var userId in validAssigneeIds)
+        {
+            if (existing.Contains(userId)) continue;
+            task.TaskAssignments.Add(new TaskAssignment
+            {
+                TaskItemId = task.Id,
+                UserId = userId,
+                AssignedAt = DateTime.UtcNow
+            });
+        }
+
+        await _db.SaveChangesAsync(ct);
+        return Result.Ok(task);
+    }
+
+    private static DateTime? NormalizeUtc(DateTime? value) => value switch
+    {
+        null => null,
+        { Kind: DateTimeKind.Utc } v => v,
+        var v => DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)
+    };
+
+    private async Task<List<Guid>> ResolveValidAssigneeIdsAsync(IReadOnlyCollection<Guid> requested, CancellationToken ct)
+    {
+        if (requested.Count == 0) return new List<Guid>();
+        var distinct = requested.Distinct().ToList();
+        return await _db.Users
+            .Where(u => u.IsActive && distinct.Contains(u.Id))
+            .Select(u => u.Id)
+            .ToListAsync(ct);
     }
 
     public async Task<Result<bool>> MoveAsync(

@@ -201,13 +201,12 @@ public static class DemoDataBuilder
         return t;
     }
 
-    private static void Assign(TaskItem task, User user, TaskRole role, DateTime at)
+    private static void Assign(TaskItem task, User user, DateTime at)
     {
         var a = new TaskAssignment
         {
             TaskItemId = task.Id,
             UserId = user.Id,
-            Role = role,
             AssignedAt = at,
             TaskItem = task,
             User = user
@@ -219,7 +218,7 @@ public static class DemoDataBuilder
     private static void AssignMany(TaskItem task, DateTime baseAt, params User[] assignees)
     {
         for (var i = 0; i < assignees.Length; i++)
-            Assign(task, assignees[i], TaskRole.Assignee, baseAt.AddHours(-i));
+            Assign(task, assignees[i], baseAt.AddHours(-i));
     }
 
     private static void LinkTag(TaskItem task, Tag tag, DateTime at)
@@ -288,7 +287,7 @@ public static class DemoDataBuilder
             now,
             null,
             epicIa);
-        Assign(subIa1, sam, TaskRole.Assignee, now.AddDays(-10));
+        Assign(subIa1, sam, now.AddDays(-10));
 
         var subIa2 = NewTask(
             ng,
@@ -356,7 +355,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(11),
             parent: null);
-        Assign(epicTrust, sam, TaskRole.Assignee, now.AddDays(-6));
+        Assign(epicTrust, sam, now.AddDays(-6));
 
         NewTask(
             ng,
@@ -424,7 +423,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(13),
             parent: null);
-        Assign(analytics, alex, TaskRole.Assignee, now.AddDays(-2));
+        Assign(analytics, alex, now.AddDays(-2));
 
         var safari = NewTask(
             ng,
@@ -518,7 +517,7 @@ public static class DemoDataBuilder
             now,
             null,
             epicOnboard);
-        Assign(subSplash, alex, TaskRole.Assignee, now.AddDays(-8));
+        Assign(subSplash, alex, now.AddDays(-8));
 
         var subBio = NewTask(
             ng,
@@ -627,7 +626,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(8),
             parent: null);
-        Assign(saveForLater, alex, TaskRole.Assignee, now.AddDays(-4));
+        Assign(saveForLater, alex, now.AddDays(-4));
 
         NewTask(
             ng,
@@ -770,7 +769,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(21),
             parent: null);
-        Assign(audit, sam, TaskRole.Assignee, now.AddDays(-3));
+        Assign(audit, sam, now.AddDays(-3));
 
         NewTask(
             ng,
@@ -909,7 +908,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(20),
             parent: null);
-        Assign(okta, alex, TaskRole.Assignee, now.AddDays(-4));
+        Assign(okta, alex, now.AddDays(-4));
 
         NewTask(
             ng,

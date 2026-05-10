@@ -1,0 +1,23 @@
+@model AutocompleteMultiModel
+<div class="fc-autocomplete-multi" data-autocomplete-multi
+     data-search-url="@Model.SearchUrl"
+     data-field-name="@Model.FieldName">
+    <div class="flex min-h-[44px] flex-wrap items-center gap-1.5 rounded-xl border border-border bg-[var(--color-surface)] px-2 py-1.5 focus-within:border-[var(--color-secondary)] focus-within:ring-1 focus-within:ring-[var(--color-secondary)]"
+         data-ac-control>
+        <div class="contents" data-ac-chips>
+            @foreach (var item in Model.Selected)
+            {
+                <partial name="_AutocompleteChip" model="@(new AutocompleteChipVm(item, Model.FieldName))"/>
+            }
+        </div>
+        <input type="text" autocomplete="off"
+               class="flex-1 min-w-[8rem] border-0 bg-transparent px-1.5 py-1 text-sm text-fg outline-none placeholder:text-fg-muted focus:outline-none focus:ring-0"
+               placeholder="@Model.Placeholder"
+               data-ac-input/>
+    </div>
+    <div class="relative">
+        <div class="absolute left-0 right-0 z-20 mt-1 hidden max-h-72 overflow-auto rounded-xl border border-border bg-[var(--color-surface)] shadow-lg" data-ac-results role="listbox">
+        </div>
+    </div>
+    <p class="mt-1 text-xs text-fg-muted">@Model.EmptyHint</p>
+</div>

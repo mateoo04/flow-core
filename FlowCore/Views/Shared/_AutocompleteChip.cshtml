@@ -1,0 +1,12 @@
+@model AutocompleteChipVm
+@{
+    var item = Model.Item;
+}
+<span data-ac-chip data-id="@item.Id" class="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-surface-container)] py-0.5 pl-0.5 pr-2 text-xs font-medium text-fg">
+    <span class="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white" style="background:@item.BackgroundHex">@item.Initials</span>
+    <span>@item.Label</span>
+    <button type="button" class="ml-0.5 -mr-1 flex h-4 w-4 items-center justify-center rounded-full text-fg-muted hover:bg-[var(--color-surface)] hover:text-fg" data-ac-remove aria-label="Remove">
+        <span class="material-symbols-outlined text-[14px]" aria-hidden="true">close</span>
+    </button>
+    <input type="hidden" name="@Model.FieldName" value="@item.Id"/>
+</span>

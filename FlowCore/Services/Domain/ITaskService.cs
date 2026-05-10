@@ -8,6 +8,8 @@ public interface ITaskService
 {
     Task<Result<TaskItem>> CreateAsync(CreateTaskRequest request, CancellationToken ct = default);
 
+    Task<Result<TaskItem>> UpdateAsync(UpdateTaskRequest request, CancellationToken ct = default);
+
     Task<Result<bool>> MoveAsync(
         Guid taskId,
         Guid destinationStatusId,

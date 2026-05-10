@@ -152,10 +152,13 @@
             </dl>
             @if (project is not null)
             {
-                <form method="post" asp-action="Delete" asp-route-id="@Model.Id" class="mt-6 border-t border-fg-muted/15 pt-4" onsubmit="return confirm('Delete this task and its subtasks?');">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="w-full rounded-lg border border-brand-warn/40 px-3 py-2 text-sm font-medium text-brand-warn hover:bg-brand-warn/10">@T["crud.tasks.delete"]</button>
-                </form>
+                <div class="mt-6 border-t border-fg-muted/15 pt-4 space-y-2">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="block w-full rounded-lg border border-border px-3 py-2 text-center text-sm font-medium text-fg hover:bg-[var(--color-surface-container)]">Edit task</a>
+                    <form method="post" asp-action="Delete" asp-route-id="@Model.Id" onsubmit="return confirm('Delete this task and its subtasks?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="w-full rounded-lg border border-brand-warn/40 px-3 py-2 text-sm font-medium text-brand-warn hover:bg-brand-warn/10">@T["crud.tasks.delete"]</button>
+                    </form>
+                </div>
             }
         </div>
     </aside>

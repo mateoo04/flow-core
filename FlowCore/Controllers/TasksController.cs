@@ -12,6 +12,7 @@ public class TasksController : BaseController
 {
     private readonly ITaskRepository _tasks;
     private readonly IProjectRepository _projects;
+    private readonly IUserRepository _users;
     private readonly ITaskService _taskService;
     private readonly ICommentService _commentService;
     private readonly IBreadcrumbTrailBuilder _breadcrumbs;
@@ -19,12 +20,14 @@ public class TasksController : BaseController
     public TasksController(
         ITaskRepository tasks,
         IProjectRepository projects,
+        IUserRepository users,
         ITaskService taskService,
         ICommentService commentService,
         IBreadcrumbTrailBuilder breadcrumbs)
     {
         _tasks = tasks;
         _projects = projects;
+        _users = users;
         _taskService = taskService;
         _commentService = commentService;
         _breadcrumbs = breadcrumbs;
@@ -102,7 +105,8 @@ public class TasksController : BaseController
             model.Priority,
             model.StoryPoints,
             model.ParentTaskItemId,
-            model.DueDate);
+            model.DueDate,
+            model.AssigneeIds);
 
         var result = await _taskService.CreateAsync(req, ct);
         if (result.IsSuccess)
@@ -113,6 +117,57 @@ public class TasksController : BaseController
 
         ModelState.AddModelError(string.Empty, result.Error.Value.Message);
         return RenderForm(project, model, statuses);
+    }
+
+    [HttpGet("/tasks/{id:guid}/edit", Name = "task-edit-form")]
+    public async Task<IActionResult> Edit(Guid id, CancellationToken ct)
+    {
+        var task = await _tasks.GetForEditAsync(id, ct);
+        if (task is null) return NotFound();
+
+        var project = task.Board?.Project;
+        var workspace = project?.Workspace;
+        if (project is null || workspace is null) return NotFound();
+
+        var statuses = workspace.TaskStatusDefinitions.OrderBy(s => s.Position).ToList();
+        SetNav(project.WorkspaceId, project.Id);
+
+        var vm = BuildEditVm(task);
+
+        ViewBag.Project = project;
+        ViewBag.Board = task.Board;
+        ViewBag.Statuses = statuses;
+        return View(vm);
+    }
+
+    [HttpPost("/tasks/{id:guid}/edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, TaskEditFormVm model, CancellationToken ct)
+    {
+        model.Id = id;
+
+        if (!ModelState.IsValid)
+            return await RenderEditFormAsync(id, model, ct);
+
+        var req = new UpdateTaskRequest(
+            id,
+            model.TaskStatusDefinitionId,
+            model.Title,
+            model.Description,
+            model.Priority,
+            model.StoryPoints,
+            model.DueDate,
+            model.AssigneeIds);
+
+        var result = await _taskService.UpdateAsync(req, ct);
+        if (result.IsSuccess)
+            return RedirectToAction(nameof(Details), new { id });
+
+        if (result.Error!.Value.Kind == ErrorKind.NotFound)
+            return NotFound();
+
+        ModelState.AddModelError(string.Empty, result.Error.Value.Message);
+        return await RenderEditFormAsync(id, model, ct);
     }
 
     [HttpGet("/tasks/{id:guid}", Name = "task-details")]
@@ -185,5 +240,63 @@ public class TasksController : BaseController
         ViewBag.Board = board;
         ViewBag.Statuses = statuses;
         return View(model);
+    }
+
+    private async Task<IActionResult> RenderEditFormAsync(Guid id, TaskEditFormVm model, CancellationToken ct)
+    {
+        var task = await _tasks.GetForEditAsync(id, ct);
+        if (task is null) return NotFound();
+
+        var project = task.Board?.Project;
+        var workspace = project?.Workspace;
+        if (project is null || workspace is null) return NotFound();
+
+        var statuses = workspace.TaskStatusDefinitions.OrderBy(s => s.Position).ToList();
+        SetNav(project.WorkspaceId, project.Id);
+
+        var users = await _users.GetByIdsAsync(model.AssigneeIds, ct);
+        model.SelectedAssignees = users
+            .Select(u => new AutocompleteItem(
+                u.Id,
+                u.FullName,
+                u.Email,
+                UserDisplayHelper.GetInitials(u.FullName),
+                UserDisplayHelper.BackgroundColorForUser(u.Id)))
+            .ToList();
+
+        ViewBag.Project = project;
+        ViewBag.Board = task.Board;
+        ViewBag.Statuses = statuses;
+        return View(model);
+    }
+
+    private static TaskEditFormVm BuildEditVm(Models.TaskItem task)
+    {
+        var assignees = task.TaskAssignments
+            .Where(a => a.User is not null)
+            .Select(a => a.User!)
+            .DistinctBy(u => u.Id)
+            .OrderBy(u => u.FullName)
+            .ToList();
+
+        return new TaskEditFormVm
+        {
+            Id = task.Id,
+            Title = task.Title,
+            Description = task.Description,
+            TaskStatusDefinitionId = task.TaskStatusDefinitionId,
+            Priority = task.Priority,
+            StoryPoints = task.StoryPoints,
+            DueDate = task.DueDate,
+            AssigneeIds = assignees.Select(u => u.Id).ToList(),
+            SelectedAssignees = assignees
+                .Select(u => new AutocompleteItem(
+                    u.Id,
+                    u.FullName,
+                    u.Email,
+                    UserDisplayHelper.GetInitials(u.FullName),
+                    UserDisplayHelper.BackgroundColorForUser(u.Id)))
+                .ToList()
+        };
     }
 }

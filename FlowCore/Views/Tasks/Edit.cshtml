@@ -1,7 +1,7 @@
-@model TaskCreateFormVm
+@model TaskEditFormVm
 @inject FlowCore.Services.UiText T
 @{
-    ViewData["Title"] = T["crud.tasks.create_title"];
+    ViewData["Title"] = "Edit task";
     var project = ViewBag.Project as Project;
     var board = ViewBag.Board as Board;
     var statuses = ViewBag.Statuses as IReadOnlyList<TaskStatusDefinition> ?? Array.Empty<TaskStatusDefinition>();
@@ -10,17 +10,10 @@
         throw new InvalidOperationException("Project and board are required.");
     }
 }
-<h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg">@T["crud.tasks.create_title"]</h1>
+<h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg">Edit task</h1>
 <p class="mt-2 text-sm font-medium text-fg-secondary">@project.Name — @board.Name</p>
-@if (Model.ParentTaskItemId is { } pid)
-{
-    <p class="mt-2 text-sm text-fg-muted">Parent task ID: <span class="font-mono">@pid</span></p>
-}
-<form method="post" action="/projects/@project.Id/tasks" class="mt-8 max-w-xl space-y-5">
+<form method="post" asp-action="Edit" asp-route-id="@Model.Id" class="mt-8 max-w-xl space-y-5">
     @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="ProjectId"/>
-    <input type="hidden" asp-for="BoardId"/>
-    <input type="hidden" asp-for="ParentTaskItemId"/>
     <div asp-validation-summary="All" class="text-sm text-[var(--color-error)]"></div>
     <div>
         <label asp-for="Title" class="block text-sm font-medium text-fg-secondary">Title</label>
@@ -54,14 +47,14 @@
     <div>
         <label class="block text-sm font-medium text-fg-secondary">Assignees</label>
         <div class="mt-1">
-            <partial name="_AutocompleteMulti" model="@(new AutocompleteMultiModel { FieldName = nameof(Model.AssigneeIds), SearchUrl = "/users/autocomplete", Placeholder = "Add assignees…", EmptyHint = "Search by name or email" })"/>
+            <partial name="_AutocompleteMulti" model="@(new AutocompleteMultiModel { FieldName = nameof(Model.AssigneeIds), SearchUrl = "/users/autocomplete", Placeholder = "Add assignees…", EmptyHint = "Search by name or email", Selected = Model.SelectedAssignees })"/>
         </div>
     </div>
     <div class="flex gap-3">
         <button type="submit" class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
-            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
-            @T["crud.tasks.create_submit"]
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">save</span>
+            Save changes
         </button>
-        <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" asp-route-boardId="@board.Id" class="rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]">Cancel</a>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]">Cancel</a>
     </div>
 </form>

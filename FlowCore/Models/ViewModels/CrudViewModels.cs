@@ -41,6 +41,32 @@ public sealed class TaskCreateFormVm
     public Guid? ParentTaskItemId { get; set; }
 
     public DateTime? DueDate { get; set; }
+
+    public List<Guid> AssigneeIds { get; set; } = new();
+}
+
+public sealed class TaskEditFormVm
+{
+    [Required]
+    public Guid Id { get; set; }
+
+    [Required]
+    public Guid TaskStatusDefinitionId { get; set; }
+
+    [Required]
+    public string Title { get; set; } = "";
+
+    public string? Description { get; set; }
+
+    public TaskPriority Priority { get; set; } = TaskPriority.Medium;
+
+    public int StoryPoints { get; set; }
+
+    public DateTime? DueDate { get; set; }
+
+    public List<Guid> AssigneeIds { get; set; } = new();
+
+    public IReadOnlyList<AutocompleteItem> SelectedAssignees { get; set; } = Array.Empty<AutocompleteItem>();
 }
 
 public sealed class CommentFormVm

@@ -12,7 +12,6 @@ public class TaskAssignment
     [ForeignKey("User")]
     public Guid UserId { get; set; }
 
-    public TaskRole Role { get; set; }
     public DateTime AssignedAt { get; set; }
 
     public virtual TaskItem? TaskItem { get; set; }
