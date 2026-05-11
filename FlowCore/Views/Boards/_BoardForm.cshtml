@@ -1,0 +1,11 @@
+@model BoardFormVm
+<div asp-validation-summary="ModelOnly" class="text-sm text-[var(--color-error)]"></div>
+<div>
+    <label asp-for="Name" class="block text-sm font-medium text-fg-secondary">Name</label>
+    <input asp-for="Name" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]" required maxlength="60" autocomplete="off"/>
+    <span asp-validation-for="Name" class="mt-1 block text-xs text-[var(--color-error)]"></span>
+</div>
+<label class="inline-flex items-center gap-2 text-sm text-fg-secondary">
+    <input asp-for="IsDefault" class="h-4 w-4 cursor-pointer rounded border border-border accent-[var(--color-secondary)]"/>
+    Make this the default board
+</label>

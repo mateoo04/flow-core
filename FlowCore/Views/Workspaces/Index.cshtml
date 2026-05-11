@@ -2,8 +2,16 @@
 @{
     ViewData["Title"] = "Organizations";
 }
-<h1 class="text-3xl font-bold tracking-tight text-fg">Organizations</h1>
-<p class="mt-2 text-fg-secondary">Each workspace is one organization. Open one to see its projects and boards.</p>
+<div class="flex flex-wrap items-baseline justify-between gap-3">
+    <div>
+        <h1 class="text-3xl font-bold tracking-tight text-fg">Organizations</h1>
+        <p class="mt-2 text-fg-secondary">Each workspace is one organization. Open one to see its projects and boards.</p>
+    </div>
+    <a asp-action="Create" class="inline-flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+        New workspace
+    </a>
+</div>
 
 <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     @foreach (var row in Model)

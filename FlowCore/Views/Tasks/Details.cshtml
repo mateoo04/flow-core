@@ -94,6 +94,17 @@
                                         <time datetime="@c.CreatedAt.ToString("O")">@c.CreatedAt.ToString("g")</time>
                                     </div>
                                     <p class="mt-2 whitespace-pre-wrap text-sm text-fg-secondary">@c.Body</p>
+                                    @if (c.EditedAt is { } edited)
+                                    {
+                                        <p class="mt-1 text-[10px] italic text-fg-muted">edited @edited.ToString("g")</p>
+                                    }
+                                    <div class="mt-3 flex gap-2 text-xs">
+                                        <a asp-controller="Comments" asp-action="Edit" asp-route-id="@c.Id" class="rounded-md border border-border px-2 py-1 text-fg-secondary hover:bg-[var(--color-surface-container)]">Edit</a>
+                                        <form method="post" asp-controller="Comments" asp-action="Delete" asp-route-id="@c.Id" class="inline" onsubmit="return confirm('Delete this comment?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="rounded-md border border-brand-warn/40 px-2 py-1 text-brand-warn hover:bg-brand-warn/10">Delete</button>
+                                        </form>
+                                    </div>
                                 </div>
                             </li>
                         }

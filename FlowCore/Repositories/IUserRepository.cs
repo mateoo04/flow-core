@@ -15,4 +15,12 @@ public interface IUserRepository
         CancellationToken ct = default);
 
     Task<IReadOnlyList<User>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct = default);
+
+    Task<User> AddAsync(User user, CancellationToken ct = default);
+
+    Task<User?> UpdateAsync(Guid id, string fullName, string email, bool isActive, CancellationToken ct = default);
+
+    Task<User?> DeactivateAsync(Guid id, CancellationToken ct = default);
+
+    Task<bool> EmailExistsAsync(string email, Guid? excludeId, CancellationToken ct = default);
 }

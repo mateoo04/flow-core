@@ -2,7 +2,25 @@
 @{
     ViewData["Title"] = Model.FullName;
 }
-<h1 class="text-3xl font-bold tracking-tight text-fg">@Model.FullName</h1>
+<div class="flex flex-wrap items-baseline justify-between gap-3">
+    <h1 class="text-3xl font-bold tracking-tight text-fg">
+        @Model.FullName
+        @if (!Model.IsActive)
+        {
+            <span class="ml-2 align-middle rounded-full bg-fg-muted/20 px-2 py-0.5 text-xs font-medium text-fg-muted">Inactive</span>
+        }
+    </h1>
+    <div class="flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="rounded-lg border border-border px-3 py-2 text-sm font-medium text-fg hover:bg-[var(--color-surface-container)]">Edit</a>
+        @if (Model.IsActive)
+        {
+            <form method="post" asp-action="Delete" asp-route-id="@Model.Id" onsubmit="return confirm('Deactivate this user? Their assignments and comments are preserved.');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="rounded-lg border border-brand-warn/40 px-3 py-2 text-sm font-medium text-brand-warn hover:bg-brand-warn/10">Deactivate</button>
+            </form>
+        }
+    </div>
+</div>
 <dl class="mt-6 grid gap-3 text-sm sm:grid-cols-[8rem_1fr]">
     <dt class="text-fg-muted">Email</dt><dd class="text-fg">@Model.Email</dd>
     <dt class="text-fg-muted">Joined</dt><dd class="text-fg-secondary">@Model.JoinedAt.ToString("u")</dd>

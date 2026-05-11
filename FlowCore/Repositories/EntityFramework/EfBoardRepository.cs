@@ -46,6 +46,73 @@ public sealed class EfBoardRepository : IBoardRepository
             .FirstOrDefaultAsync(b => b.Id == id, ct);
     }
 
+    public async Task<Board> AddAsync(Guid projectId, string name, bool isDefault, CancellationToken ct = default)
+    {
+        var now = DateTime.UtcNow;
+        var maxPos = await _db.Boards
+            .Where(b => b.ProjectId == projectId)
+            .Select(b => (int?)b.Position)
+            .MaxAsync(ct) ?? -1;
+
+        if (isDefault)
+            await ClearDefaultsAsync(projectId, excludeId: null, ct);
+
+        var board = new Board
+        {
+            Id = Guid.NewGuid(),
+            ProjectId = projectId,
+            Name = name,
+            Position = maxPos + 1,
+            IsDefault = isDefault,
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+        _db.Boards.Add(board);
+        await _db.SaveChangesAsync(ct);
+        return board;
+    }
+
+    public async Task<Board?> UpdateAsync(Guid id, string name, bool isDefault, CancellationToken ct = default)
+    {
+        var board = await _db.Boards.FirstOrDefaultAsync(b => b.Id == id, ct);
+        if (board is null) return null;
+
+        if (isDefault && !board.IsDefault)
+            await ClearDefaultsAsync(board.ProjectId, excludeId: id, ct);
+
+        board.Name = name;
+        board.IsDefault = isDefault;
+        board.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
+        return board;
+    }
+
+    public async Task<bool> TryDeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        var board = await _db.Boards.FirstOrDefaultAsync(b => b.Id == id, ct);
+        if (board is null) return false;
+        _db.Boards.Remove(board);
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
+
+    public Task<bool> NameExistsInProjectAsync(Guid projectId, string name, Guid? excludeId, CancellationToken ct = default)
+    {
+        var trimmed = name.Trim();
+        return _db.Boards.AnyAsync(b =>
+            b.ProjectId == projectId
+            && b.Name == trimmed
+            && (excludeId == null || b.Id != excludeId), ct);
+    }
+
+    private async Task ClearDefaultsAsync(Guid projectId, Guid? excludeId, CancellationToken ct)
+    {
+        var siblings = await _db.Boards
+            .Where(b => b.ProjectId == projectId && b.IsDefault && (excludeId == null || b.Id != excludeId))
+            .ToListAsync(ct);
+        foreach (var s in siblings) s.IsDefault = false;
+    }
+
     private static async Task<IReadOnlyList<T>> AsReadOnly<T>(IQueryable<T> q, CancellationToken ct)
     {
         return await q.ToListAsync(ct);

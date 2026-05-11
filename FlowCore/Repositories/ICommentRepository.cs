@@ -12,5 +12,7 @@ public interface ICommentRepository
 
     Task<Comment> AddAsync(Comment comment, CancellationToken ct = default);
 
+    Task<Comment?> UpdateBodyAsync(Guid id, string body, CancellationToken ct = default);
+
     Task<bool> TryDeleteAsync(Guid id, CancellationToken ct = default);
 }

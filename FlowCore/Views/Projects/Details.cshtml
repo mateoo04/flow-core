@@ -51,7 +51,7 @@
 }
 else
 {
-    <div class="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Boards">
+    <div class="mt-8 flex flex-wrap items-center gap-2" role="tablist" aria-label="Boards">
         @foreach (var b in Model.BoardsOrdered)
         {
             var isActive = Model.ActiveBoard?.Id == b.Id;
@@ -59,6 +59,27 @@ else
                aria-selected="@(isActive ? "true" : "false")"
                class="font-headline rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)] @(isActive ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-sm" : "border border-border bg-[var(--color-surface)] text-fg hover:bg-[var(--color-surface-container)]")"
                asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" asp-route-boardId="@b.Id">@b.Name</a>
+        }
+        <a asp-controller="Boards" asp-action="Create" asp-route-projectId="@project.Id"
+           class="font-headline inline-flex items-center gap-1 rounded-full border border-dashed border-border px-4 py-2 text-sm font-semibold text-fg-secondary transition-colors hover:bg-[var(--color-surface-container)] hover:text-fg">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+            New board
+        </a>
+        @if (Model.ActiveBoard is { } activeForActions)
+        {
+            <span class="mx-2 hidden h-6 w-px bg-border sm:inline-block" aria-hidden="true"></span>
+            <a asp-controller="Boards" asp-action="Edit" asp-route-id="@activeForActions.Id"
+               class="inline-flex items-center gap-1 rounded-full border border-border bg-[var(--color-surface)] px-3 py-1.5 text-xs font-semibold text-fg-secondary transition-colors hover:bg-[var(--color-surface-container)]">
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true">edit</span>
+                Edit board
+            </a>
+            <form method="post" asp-controller="Boards" asp-action="Delete" asp-route-id="@activeForActions.Id" class="inline" onsubmit="return confirm('Delete this board and its tasks?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="inline-flex items-center gap-1 rounded-full border border-[var(--color-error)]/40 px-3 py-1.5 text-xs font-semibold text-[var(--color-error)] transition-colors hover:bg-[var(--color-error)]/10">
+                    <span class="material-symbols-outlined text-[16px]" aria-hidden="true">delete</span>
+                    Delete board
+                </button>
+            </form>
         }
     </div>
 

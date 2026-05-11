@@ -43,6 +43,16 @@ public sealed class EfCommentRepository : ICommentRepository
         return comment;
     }
 
+    public async Task<Comment?> UpdateBodyAsync(Guid id, string body, CancellationToken ct = default)
+    {
+        var comment = await _db.Comments.FirstOrDefaultAsync(c => c.Id == id, ct);
+        if (comment is null) return null;
+        comment.Body = body;
+        comment.EditedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
+        return comment;
+    }
+
     public async Task<bool> TryDeleteAsync(Guid id, CancellationToken ct = default)
     {
         var comment = await _db.Comments.FirstOrDefaultAsync(c => c.Id == id, ct);

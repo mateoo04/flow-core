@@ -1,0 +1,16 @@
+@model WorkspaceFormVm
+@{
+    ViewData["Title"] = "New workspace";
+}
+<h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg">New workspace</h1>
+<form method="post" asp-action="Create" class="mt-8 max-w-xl space-y-5">
+    @Html.AntiForgeryToken()
+    <partial name="_WorkspaceForm" model="Model"/>
+    <div class="flex gap-3">
+        <button type="submit" class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+            Create workspace
+        </button>
+        <a asp-action="Index" class="rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]">Cancel</a>
+    </div>
+</form>

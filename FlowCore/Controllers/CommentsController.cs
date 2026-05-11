@@ -50,4 +50,51 @@ public class CommentsController : BaseController
         ViewBag.Breadcrumbs = _breadcrumbs.ForComment(entity, task?.Title ?? "(task)");
         return View(entity);
     }
+
+    // TODO: restrict to author once auth lands.
+    [HttpGet("/comments/{id:guid}/edit", Name = "comment-edit-form")]
+    public async Task<IActionResult> Edit(Guid id, CancellationToken ct)
+    {
+        var entity = await _comments.GetByIdAsync(id, ct);
+        if (entity is null) return NotFound();
+
+        ViewBag.TaskTitle = entity.TaskItem?.Title;
+        ViewBag.TaskId = entity.TaskItemId;
+        return View(new CommentFormVm { Body = entity.Body });
+    }
+
+    // TODO: restrict to author once auth lands.
+    [HttpPost("/comments/{id:guid}/edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, CommentFormVm model, CancellationToken ct)
+    {
+        var entity = await _comments.GetByIdAsync(id, ct);
+        if (entity is null) return NotFound();
+
+        if (!ModelState.IsValid)
+        {
+            ViewBag.TaskTitle = entity.TaskItem?.Title;
+            ViewBag.TaskId = entity.TaskItemId;
+            return View(model);
+        }
+
+        var updated = await _comments.UpdateBodyAsync(id, model.Body.Trim(), ct);
+        if (updated is null) return NotFound();
+
+        return RedirectToAction("Details", "Tasks", new { id = entity.TaskItemId });
+    }
+
+    // TODO: restrict to author once auth lands.
+    [HttpPost("/comments/{id:guid}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        var entity = await _comments.GetByIdAsync(id, ct);
+        if (entity is null) return NotFound();
+
+        var taskId = entity.TaskItemId;
+        if (!await _comments.TryDeleteAsync(id, ct)) return NotFound();
+
+        return RedirectToAction("Details", "Tasks", new { id = taskId });
+    }
 }

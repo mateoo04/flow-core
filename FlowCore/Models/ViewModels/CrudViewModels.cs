@@ -97,6 +97,44 @@ public sealed class CommentFormVm
     public string Body { get; set; } = "";
 }
 
+public sealed class UserFormVm
+{
+    public Guid? Id { get; set; }
+
+    [Required, StringLength(100, MinimumLength = 1)]
+    public string FullName { get; set; } = "";
+
+    [Required, EmailAddress, StringLength(200)]
+    public string Email { get; set; } = "";
+
+    public bool IsActive { get; set; } = true;
+}
+
+public sealed class WorkspaceFormVm
+{
+    public Guid? Id { get; set; }
+
+    [Required, StringLength(80, MinimumLength = 1)]
+    public string Name { get; set; } = "";
+
+    public string Description { get; set; } = "";
+
+    public WorkspaceVisibility Visibility { get; set; } = WorkspaceVisibility.Private;
+}
+
+public sealed class BoardFormVm
+{
+    public Guid? Id { get; set; }
+
+    [Required]
+    public Guid ProjectId { get; set; }
+
+    [Required, StringLength(60, MinimumLength = 1)]
+    public string Name { get; set; } = "";
+
+    public bool IsDefault { get; set; }
+}
+
 public sealed class TagFormVm
 {
     public Guid? Id { get; set; }

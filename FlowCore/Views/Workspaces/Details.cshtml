@@ -1,8 +1,24 @@
 @model Workspace
 @{
     ViewData["Title"] = Model.Name;
+    var error = TempData["WorkspaceError"] as string;
 }
-<h1 class="text-3xl font-bold tracking-tight text-fg">@Model.Name</h1>
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="mb-6 rounded-2xl border border-[var(--color-error)]/40 bg-[var(--color-error)]/10 px-5 py-3 text-sm text-fg">
+        @error
+    </div>
+}
+<div class="flex flex-wrap items-baseline justify-between gap-3">
+    <h1 class="text-3xl font-bold tracking-tight text-fg">@Model.Name</h1>
+    <div class="flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="rounded-lg border border-border px-3 py-2 text-sm font-medium text-fg hover:bg-[var(--color-surface-container)]">Edit</a>
+        <form method="post" asp-action="Delete" asp-route-id="@Model.Id" onsubmit="return confirm('Delete this workspace?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="rounded-lg border border-brand-warn/40 px-3 py-2 text-sm font-medium text-brand-warn hover:bg-brand-warn/10">Delete</button>
+        </form>
+    </div>
+</div>
 <p class="mt-2 max-w-3xl text-fg-secondary">@Model.Description</p>
 
 <dl class="mt-6 grid gap-3 text-sm sm:grid-cols-[8rem_1fr]">

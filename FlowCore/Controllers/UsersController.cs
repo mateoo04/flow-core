@@ -31,6 +31,74 @@ public class UsersController : BaseController
         return ViewDetails(entity, _breadcrumbs.ForUser);
     }
 
+    [HttpGet("/users/create", Name = "user-create-form")]
+    public IActionResult Create() => View(new UserFormVm());
+
+    [HttpPost("/users/create")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(UserFormVm model, CancellationToken ct)
+    {
+        await ValidateAsync(model, excludeId: null, ct);
+        if (!ModelState.IsValid) return View(model);
+
+        var user = await _users.AddAsync(new Models.User
+        {
+            Id = Guid.NewGuid(),
+            FullName = model.FullName.Trim(),
+            Email = model.Email.Trim(),
+            IsActive = model.IsActive,
+            JoinedAt = DateTime.UtcNow
+        }, ct);
+
+        return RedirectToAction(nameof(Details), new { id = user.Id });
+    }
+
+    [HttpGet("/users/{id:guid}/edit", Name = "user-edit-form")]
+    public async Task<IActionResult> Edit(Guid id, CancellationToken ct)
+    {
+        var entity = await _users.GetByIdAsync(id, ct);
+        if (entity is null) return NotFound();
+
+        return View(new UserFormVm
+        {
+            Id = entity.Id,
+            FullName = entity.FullName,
+            Email = entity.Email,
+            IsActive = entity.IsActive
+        });
+    }
+
+    [HttpPost("/users/{id:guid}/edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, UserFormVm model, CancellationToken ct)
+    {
+        model.Id = id;
+        await ValidateAsync(model, excludeId: id, ct);
+        if (!ModelState.IsValid) return View(model);
+
+        var updated = await _users.UpdateAsync(id, model.FullName.Trim(), model.Email.Trim(), model.IsActive, ct);
+        if (updated is null) return NotFound();
+
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    // Soft delete: deactivates the user but preserves history (TaskAssignments, Comments, OwnedWorkspaces).
+    [HttpPost("/users/{id:guid}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        var user = await _users.DeactivateAsync(id, ct);
+        if (user is null) return NotFound();
+        return RedirectToAction(nameof(Index));
+    }
+
+    private async Task ValidateAsync(UserFormVm model, Guid? excludeId, CancellationToken ct)
+    {
+        if (!string.IsNullOrWhiteSpace(model.Email)
+            && await _users.EmailExistsAsync(model.Email, excludeId, ct))
+            ModelState.AddModelError(nameof(UserFormVm.Email), "A user with this email already exists.");
+    }
+
     [HttpGet("/users/autocomplete")]
     public async Task<IActionResult> Autocomplete(
         [FromQuery] string? q,

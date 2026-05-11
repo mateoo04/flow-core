@@ -1,0 +1,16 @@
+@model UserFormVm
+@{
+    ViewData["Title"] = "Edit user";
+}
+<h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg">Edit user</h1>
+<form method="post" asp-action="Edit" asp-route-id="@Model.Id" class="mt-8 max-w-xl space-y-5">
+    @Html.AntiForgeryToken()
+    <partial name="_UserForm" model="Model"/>
+    <div class="flex gap-3">
+        <button type="submit" class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">save</span>
+            Save changes
+        </button>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]">Cancel</a>
+    </div>
+</form>
