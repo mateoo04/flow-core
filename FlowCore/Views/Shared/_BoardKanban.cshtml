@@ -48,48 +48,20 @@
                 @foreach (var task in tasksInStatus)
                 {
                     var assignees = TaskAssigneeStackBuilder.FromTask(task);
-                    var subCount = task.Subtasks.Count;
-                    var pill = PriorityPillClass(task.Priority);
                     var dueLabel = task.DueDate is { } d ? d.ToString("MMM d", CultureInfo.InvariantCulture) : null;
-                    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id"
-                       class="fc-task-avatar-ring fc-task-avatar-ring--card group block cursor-pointer rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
-                       style="border-left-color: @accent"
-                       data-task-id="@task.Id">
-                        <span class="sr-only">Status: @status.Name.</span>
-                        <div class="mb-4 flex items-start justify-between gap-2">
-                            <div class="flex min-w-0 items-start gap-2">
-                                <span class="material-symbols-outlined shrink-0 text-[14px] leading-none text-fg-muted opacity-0 transition-opacity group-hover:opacity-60 select-none" aria-hidden="true">drag_indicator</span>
-                                <h3 class="line-clamp-2 text-[15px] font-semibold leading-snug text-fg">@task.Title</h3>
-                            </div>
-                            @if (subCount > 0)
-                            {
-                                <div class="flex items-start justify-end">
-                                    <span class="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium tabular-nums text-fg-muted" title="Subtasks">
-                                        <span class="material-symbols-outlined text-[14px]" aria-hidden="true">checklist</span>
-                                        0/@subCount
-                                    </span>
-                                </div>
-                            }
-                        </div>
-                        <div class="flex items-center justify-between gap-2">
-                            <div class="min-w-0 flex-1">
-                                @if (assignees.Shown.Count > 0 || assignees.ExtraCount > 0)
-                                {
-                                    <partial name="_AssigneeAvatarStack" model="assignees"/>
-                                }
-                            </div>
-                            <div class="flex shrink-0 items-center gap-3 text-fg-muted">
-                                @if (dueLabel is not null)
-                                {
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-medium">
-                                        <span class="material-symbols-outlined text-[14px]" aria-hidden="true">calendar_today</span>
-                                        @dueLabel
-                                    </span>
-                                }
-                                <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide @pill">@task.Priority</span>
-                            </div>
-                        </div>
-                    </a>
+                    <partial name="_TaskCard" model="new TaskCardVm {
+                        TaskId                    = task.Id,
+                        Title                     = task.Title,
+                        AccentHex                 = accent,
+                        Layout                    = TaskCardLayout.Board,
+                        Assignees                 = assignees,
+                        StatusNameForScreenReader = status.Name,
+                        SubtaskTotal              = task.Subtasks.Count,
+                        SubtaskDone               = 0,
+                        DueDateLabel              = dueLabel,
+                        PriorityLabel             = task.Priority.ToString(),
+                        PriorityPillClasses       = PriorityPillClass(task.Priority)
+                    }"/>
                 }
             </div>
         </section>

@@ -1,12 +1,5 @@
 (function () {
-  function debounce(fn, ms) {
-    var t;
-    return function () {
-      var ctx = this, args = arguments;
-      clearTimeout(t);
-      t = setTimeout(function () { fn.apply(ctx, args); }, ms);
-    };
-  }
+  var debounce = window.FlowCore.debounce;
 
   function init(root) {
     var searchUrl = root.getAttribute("data-search-url");

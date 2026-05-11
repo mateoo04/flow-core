@@ -65,21 +65,14 @@ else
                         <div class="space-y-3" data-home-dnd-column data-status-name="@group.StatusName" data-status-color="@stripe">
                             @foreach (var card in group.Tasks)
                             {
-                                <a asp-controller="Tasks" asp-action="Details" asp-route-id="@card.TaskId"
-                                   class="flex items-center gap-4 rounded-xl border-l-4 bg-card p-4 shadow-sm transition-all hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tertiary)]"
-                                   style="border-left-color: @stripe"
-                                   data-task-id="@card.TaskId">
-                                    <span class="material-symbols-outlined shrink-0 text-[14px] leading-none text-fg-muted opacity-0 transition-opacity group-hover:opacity-60 select-none" aria-hidden="true">drag_indicator</span>
-                                    <span class="material-symbols-outlined text-[var(--color-tertiary)]" aria-hidden="true">check_circle</span>
-                                    <div class="min-w-0 flex-1">
-                                        <h3 class="truncate text-sm font-semibold text-fg-muted line-through decoration-fg-muted/40">@card.Title</h3>
-                                        <span class="text-[10px] font-bold uppercase tracking-widest text-fg-muted">@card.ProjectName</span>
-                                    </div>
-                                    @if (card.Assignees.Shown.Count > 0 || card.Assignees.ExtraCount > 0)
-                                    {
-                                        <partial name="_AssigneeAvatarStack" model="card.Assignees"/>
-                                    }
-                                </a>
+                                <partial name="_TaskCard" model="new TaskCardVm {
+                                    TaskId      = card.TaskId,
+                                    Title       = card.Title,
+                                    AccentHex   = stripe,
+                                    Layout      = TaskCardLayout.MyTasksDone,
+                                    Assignees   = card.Assignees,
+                                    ProjectName = card.ProjectName
+                                }"/>
                             }
                         </div>
                     }
@@ -88,26 +81,14 @@ else
                         <div class="space-y-4" data-home-dnd-column data-status-name="@group.StatusName" data-status-color="@stripe">
                             @foreach (var card in group.Tasks)
                             {
-                                <a asp-controller="Tasks" asp-action="Details" asp-route-id="@card.TaskId"
-                                   class="fc-task-avatar-ring fc-task-avatar-ring--card group block rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
-                                   style="border-left-color: @stripe"
-                                   data-task-id="@card.TaskId">
-                                    <div class="mb-3 flex min-w-0 items-center gap-2">
-                                        <span class="material-symbols-outlined shrink-0 text-[14px] leading-none text-fg-muted opacity-0 transition-opacity group-hover:opacity-60 select-none" aria-hidden="true">drag_indicator</span>
-                                        <span class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--color-secondary)] bg-[var(--color-secondary)]/10">@card.ProjectName</span>
-                                    </div>
-                                    <h3 class="mb-4 line-clamp-2 text-[15px] font-semibold leading-snug text-fg">@card.Title</h3>
-                                    <div class="flex items-center justify-between gap-2">
-                                        @if (card.Assignees.Shown.Count > 0 || card.Assignees.ExtraCount > 0)
-                                        {
-                                            <partial name="_AssigneeAvatarStack" model="card.Assignees"/>
-                                        }
-                                        else
-                                        {
-                                            <span></span>
-                                        }
-                                    </div>
-                                </a>
+                                <partial name="_TaskCard" model="new TaskCardVm {
+                                    TaskId      = card.TaskId,
+                                    Title       = card.Title,
+                                    AccentHex   = stripe,
+                                    Layout      = TaskCardLayout.MyTasksActive,
+                                    Assignees   = card.Assignees,
+                                    ProjectName = card.ProjectName
+                                }"/>
                             }
                         </div>
                     }

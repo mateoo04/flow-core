@@ -1,0 +1,91 @@
+@model TaskCardVm
+
+@if (Model.Layout == TaskCardLayout.MyTasksDone)
+{
+    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@Model.TaskId"
+       class="group flex items-center gap-4 rounded-xl border-l-4 bg-card p-4 shadow-sm transition-all hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tertiary)]"
+       style="border-left-color: @Model.AccentHex"
+       data-task-id="@Model.TaskId">
+        <span class="material-symbols-outlined shrink-0 text-[14px] leading-none text-fg-muted opacity-30 transition-opacity group-hover:opacity-60 select-none" aria-hidden="true">drag_indicator</span>
+        <span class="material-symbols-outlined text-[var(--color-tertiary)]" aria-hidden="true">check_circle</span>
+        <div class="min-w-0 flex-1">
+            <h3 class="truncate text-sm font-semibold text-fg-muted line-through decoration-fg-muted/40">@Model.Title</h3>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-fg-muted">@Model.ProjectName</span>
+        </div>
+        @if (Model.Assignees.Shown.Count > 0 || Model.Assignees.ExtraCount > 0)
+        {
+            <partial name="_AssigneeAvatarStack" model="Model.Assignees"/>
+        }
+    </a>
+}
+else if (Model.Layout == TaskCardLayout.Board)
+{
+    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@Model.TaskId"
+       class="fc-task-avatar-ring fc-task-avatar-ring--card group block cursor-pointer rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
+       style="border-left-color: @Model.AccentHex"
+       data-task-id="@Model.TaskId">
+        @if (!string.IsNullOrEmpty(Model.StatusNameForScreenReader))
+        {
+            <span class="sr-only">Status: @Model.StatusNameForScreenReader.</span>
+        }
+        <div class="mb-4 flex items-start justify-between gap-2">
+            <div class="flex min-w-0 items-start gap-2">
+                <span class="material-symbols-outlined shrink-0 text-[14px] leading-none text-fg-muted opacity-30 transition-opacity group-hover:opacity-60 select-none" aria-hidden="true">drag_indicator</span>
+                <h3 class="line-clamp-2 text-[15px] font-semibold leading-snug text-fg">@Model.Title</h3>
+            </div>
+            @if (Model.SubtaskTotal > 0)
+            {
+                <div class="flex items-start justify-end">
+                    <span class="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium tabular-nums text-fg-muted" title="Subtasks">
+                        <span class="material-symbols-outlined text-[14px]" aria-hidden="true">checklist</span>
+                        @Model.SubtaskDone/@Model.SubtaskTotal
+                    </span>
+                </div>
+            }
+        </div>
+        <div class="flex items-center justify-between gap-2">
+            <div class="min-w-0 flex-1">
+                @if (Model.Assignees.Shown.Count > 0 || Model.Assignees.ExtraCount > 0)
+                {
+                    <partial name="_AssigneeAvatarStack" model="Model.Assignees"/>
+                }
+            </div>
+            <div class="flex shrink-0 items-center gap-3 text-fg-muted">
+                @if (!string.IsNullOrEmpty(Model.DueDateLabel))
+                {
+                    <span class="inline-flex items-center gap-1 text-[11px] font-medium">
+                        <span class="material-symbols-outlined text-[14px]" aria-hidden="true">calendar_today</span>
+                        @Model.DueDateLabel
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.PriorityLabel))
+                {
+                    <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide @Model.PriorityPillClasses">@Model.PriorityLabel</span>
+                }
+            </div>
+        </div>
+    </a>
+}
+else
+{
+    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@Model.TaskId"
+       class="fc-task-avatar-ring fc-task-avatar-ring--card group block rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
+       style="border-left-color: @Model.AccentHex"
+       data-task-id="@Model.TaskId">
+        <div class="mb-3 flex min-w-0 items-center gap-2">
+            <span class="material-symbols-outlined shrink-0 text-[14px] leading-none text-fg-muted opacity-30 transition-opacity group-hover:opacity-60 select-none" aria-hidden="true">drag_indicator</span>
+            <span class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--color-secondary)] bg-[var(--color-secondary)]/10">@Model.ProjectName</span>
+        </div>
+        <h3 class="mb-4 line-clamp-2 text-[15px] font-semibold leading-snug text-fg">@Model.Title</h3>
+        <div class="flex items-center justify-between gap-2">
+            @if (Model.Assignees.Shown.Count > 0 || Model.Assignees.ExtraCount > 0)
+            {
+                <partial name="_AssigneeAvatarStack" model="Model.Assignees"/>
+            }
+            else
+            {
+                <span></span>
+            }
+        </div>
+    </a>
+}
