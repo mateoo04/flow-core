@@ -17,6 +17,18 @@
     var initials = profileUser is { FullName: var fn } && fn.Length > 0
         ? string.Concat(fn.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(s => char.ToUpperInvariant(s[0])))
         : "?";
+
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var defaultSearchTab = (currentController, currentAction) switch
+    {
+        ("Projects", "Index") => SearchTab.Projects,
+        ("Projects", _) => SearchTab.Tasks,
+        ("Boards", _) => SearchTab.Tasks,
+        ("Tasks", _) => SearchTab.Tasks,
+        ("Users", _) => SearchTab.Users,
+        _ => SearchTab.Projects
+    };
 }
 <!DOCTYPE html>
 <html lang="@System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName" class="h-full">
@@ -66,14 +78,7 @@
                     </svg>
                 </button>
             </div>
-            <div class="relative">
-                <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-fg-muted" aria-hidden="true">
-                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
-                </span>
-                <input type="search" name="sidebar-search" autocomplete="off"
-                       class="w-full rounded-lg border border-border bg-app py-2 pl-9 pr-3 text-sm text-fg placeholder:text-fg-muted outline-none transition-shadow focus:border-brand focus:ring-1 focus:ring-brand dark:bg-raised/50"
-                       placeholder="@T["nav.search_placeholder"]"/>
-            </div>
+            <partial name="_SearchPanel" model="@(new SearchPanelRootVm(defaultSearchTab))"/>
         </div>
 
         <nav class="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 pb-2 text-sm" aria-label="Main">
@@ -184,6 +189,7 @@
 }
 <script src="~/js/datepicker.js" asp-append-version="true"></script>
 <script src="~/js/autocomplete.js" asp-append-version="true"></script>
+<script src="~/js/search.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

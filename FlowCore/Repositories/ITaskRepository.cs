@@ -10,6 +10,8 @@ public interface ITaskRepository
 
     Task<IReadOnlyList<TaskItem>> GetAssignedToUserAsync(Guid userId, CancellationToken ct = default);
 
+    Task<IReadOnlyList<TaskItem>> SearchAsync(string query, int take, CancellationToken ct = default);
+
     Task<TaskItem?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
     Task<TaskItem?> GetForEditAsync(Guid id, CancellationToken ct = default);

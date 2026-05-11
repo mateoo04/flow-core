@@ -29,6 +29,21 @@ public sealed class EfTaskRepository : ITaskRepository
             .ToListAsync(ct);
     }
 
+    public async Task<IReadOnlyList<TaskItem>> SearchAsync(string query, int take, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(query)) return Array.Empty<TaskItem>();
+        var pattern = $"%{query}%";
+        return await _db.TaskItems
+            .AsNoTracking()
+            .Include(t => t.Board)
+                .ThenInclude(b => b!.Project)
+            .Include(t => t.TaskStatusDefinition)
+            .Where(t => EF.Functions.ILike(t.Title, pattern))
+            .OrderBy(t => t.Title)
+            .Take(take)
+            .ToListAsync(ct);
+    }
+
     public async Task<IReadOnlyList<TaskItem>> GetAssignedToUserAsync(Guid userId, CancellationToken ct = default)
     {
         var tasks = await _db.TaskItems

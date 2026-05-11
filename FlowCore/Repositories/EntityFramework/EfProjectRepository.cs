@@ -29,6 +29,19 @@ public sealed class EfProjectRepository : IProjectRepository
             .ToListAsync(ct);
     }
 
+    public async Task<IReadOnlyList<Project>> SearchAsync(string query, int take, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(query)) return Array.Empty<Project>();
+        var pattern = $"%{query}%";
+        return await _db.Projects
+            .AsNoTracking()
+            .Include(p => p.Workspace)
+            .Where(p => EF.Functions.ILike(p.Name, pattern))
+            .OrderBy(p => p.Name)
+            .Take(take)
+            .ToListAsync(ct);
+    }
+
     public Task<Project?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return _db.Projects

@@ -8,6 +8,8 @@ public interface IProjectRepository
 
     Task<IReadOnlyList<Project>> GetByWorkspaceIdAsync(Guid workspaceId, CancellationToken ct = default);
 
+    Task<IReadOnlyList<Project>> SearchAsync(string query, int take, CancellationToken ct = default);
+
     Task<Project?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
     Task<Project> AddAsync(Project project, CancellationToken ct = default);

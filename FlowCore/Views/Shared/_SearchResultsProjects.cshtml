@@ -1,0 +1,29 @@
+@model SearchResultsVm<SearchProjectRow>
+@inject FlowCore.Services.UiText T
+@if (Model.Query.Length == 0)
+{
+    return;
+}
+@if (Model.Rows.Count == 0)
+{
+    <div class="px-3 py-3 text-sm text-fg-muted">
+        @string.Format(T["search.empty.projects"], Model.Query)
+    </div>
+}
+else
+{
+    foreach (var row in Model.Rows)
+    {
+        <a data-search-result href="@Url.Action("Details", "Projects", new { id = row.Id })"
+           class="flex items-center gap-3 px-3 py-2 text-sm text-fg no-underline transition-colors hover:bg-raised data-[highlight=true]:bg-[var(--color-surface-container)]">
+            <span class="material-symbols-outlined text-[18px] text-fg-muted" aria-hidden="true">folder</span>
+            <span class="min-w-0 flex-1">
+                <span class="block truncate font-medium">@row.Name</span>
+                @if (!string.IsNullOrWhiteSpace(row.WorkspaceName))
+                {
+                    <span class="block truncate text-xs text-fg-muted">@row.WorkspaceName</span>
+                }
+            </span>
+        </a>
+    }
+}
