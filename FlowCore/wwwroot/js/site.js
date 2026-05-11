@@ -59,3 +59,23 @@
     applyTheme(themeFromPreference(), false);
   });
 })();
+
+(function () {
+  function scrollToFirstError() {
+    var target = document.querySelector(".input-validation-error, .field-validation-error:not(:empty)");
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (target.matches("input, textarea, select")) {
+      target.focus({ preventScroll: true });
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", function () {
+    scrollToFirstError();
+    document.querySelectorAll("form").forEach(function (form) {
+      form.addEventListener("submit", function () {
+        setTimeout(scrollToFirstError, 0);
+      });
+    });
+  });
+})();

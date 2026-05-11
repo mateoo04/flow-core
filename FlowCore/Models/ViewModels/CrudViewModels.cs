@@ -11,6 +11,7 @@ public sealed class ProjectCreateFormVm
     [Required]
     public string Name { get; set; } = "";
 
+    [StringLength(2000)]
     public string Description { get; set; } = "";
 
     public ProjectStatus Status { get; set; } = ProjectStatus.Planning;
@@ -29,6 +30,7 @@ public sealed class ProjectEditFormVm
     [Required]
     public string Name { get; set; } = "";
 
+    [StringLength(2000)]
     public string Description { get; set; } = "";
 
     public ProjectStatus Status { get; set; } = ProjectStatus.Planning;
@@ -51,9 +53,10 @@ public sealed class TaskCreateFormVm
     [Required]
     public Guid TaskStatusDefinitionId { get; set; }
 
-    [Required]
+    [Required, StringLength(200, MinimumLength = 1)]
     public string Title { get; set; } = "";
 
+    [StringLength(2000)]
     public string? Description { get; set; }
 
     public TaskPriority Priority { get; set; } = TaskPriority.Medium;
@@ -75,9 +78,10 @@ public sealed class TaskEditFormVm
     [Required]
     public Guid TaskStatusDefinitionId { get; set; }
 
-    [Required]
+    [Required, StringLength(200, MinimumLength = 1)]
     public string Title { get; set; } = "";
 
+    [StringLength(2000)]
     public string? Description { get; set; }
 
     public TaskPriority Priority { get; set; } = TaskPriority.Medium;
@@ -93,7 +97,7 @@ public sealed class TaskEditFormVm
 
 public sealed class CommentFormVm
 {
-    [Required]
+    [Required, StringLength(4000)]
     public string Body { get; set; } = "";
 }
 
@@ -117,6 +121,7 @@ public sealed class WorkspaceFormVm
     [Required, StringLength(80, MinimumLength = 1)]
     public string Name { get; set; } = "";
 
+    [StringLength(2000)]
     public string Description { get; set; } = "";
 
     public WorkspaceVisibility Visibility { get; set; } = WorkspaceVisibility.Private;
@@ -151,6 +156,7 @@ public sealed class TaskStatusFormVm
     [Required]
     public string Name { get; set; } = "";
 
+    [Required, RegularExpression(@"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", ErrorMessage = "Color must be a hex like #f00 or #ff0000.")]
     public string ColorHex { get; set; } = "#94A3B8";
 
     public bool IsDoneState { get; set; }

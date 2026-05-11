@@ -2,12 +2,12 @@
 <div asp-validation-summary="ModelOnly" class="text-sm text-[var(--color-error)]"></div>
 <div>
     <label asp-for="FullName" class="block text-sm font-medium text-fg-secondary">Full name</label>
-    <input asp-for="FullName" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]" required maxlength="100" autocomplete="off"/>
+    <input asp-for="FullName" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]" maxlength="100" autocomplete="off"/>
     <span asp-validation-for="FullName" class="mt-1 block text-xs text-[var(--color-error)]"></span>
 </div>
 <div>
     <label asp-for="Email" class="block text-sm font-medium text-fg-secondary">Email</label>
-    <input asp-for="Email" type="email" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]" required maxlength="200" autocomplete="off"/>
+    <input asp-for="Email" type="email" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]" maxlength="200" autocomplete="off"/>
     <span asp-validation-for="Email" class="mt-1 block text-xs text-[var(--color-error)]"></span>
 </div>
 <label class="inline-flex items-center gap-2 text-sm text-fg-secondary">

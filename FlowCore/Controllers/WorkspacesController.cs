@@ -45,7 +45,6 @@ public class WorkspacesController : BaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(WorkspaceFormVm model, CancellationToken ct)
     {
-        await ValidateAsync(model, excludeId: null, ct);
         if (!ModelState.IsValid)
             return View(model);
 
@@ -86,7 +85,6 @@ public class WorkspacesController : BaseController
     public async Task<IActionResult> Edit(Guid id, WorkspaceFormVm model, CancellationToken ct)
     {
         model.Id = id;
-        await ValidateAsync(model, excludeId: id, ct);
         if (!ModelState.IsValid)
             return View(model);
 
@@ -115,12 +113,5 @@ public class WorkspacesController : BaseController
             return NotFound();
 
         return RedirectToAction(nameof(Index));
-    }
-
-    private async Task ValidateAsync(WorkspaceFormVm model, Guid? excludeId, CancellationToken ct)
-    {
-        if (!string.IsNullOrWhiteSpace(model.Name)
-            && await _workspaces.NameExistsAsync(model.Name, excludeId, ct))
-            ModelState.AddModelError(nameof(WorkspaceFormVm.Name), "A workspace with this name already exists.");
     }
 }

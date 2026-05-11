@@ -14,14 +14,16 @@
 <p class="mt-2 text-sm font-medium text-fg-secondary">@project.Name — @board.Name</p>
 <form method="post" asp-action="Edit" asp-route-id="@Model.Id" class="mt-8 max-w-xl space-y-5">
     @Html.AntiForgeryToken()
-    <div asp-validation-summary="All" class="text-sm text-[var(--color-error)]"></div>
+    <div asp-validation-summary="ModelOnly" class="text-sm text-[var(--color-error)]"></div>
     <div>
         <label asp-for="Title" class="block text-sm font-medium text-fg-secondary">Title</label>
-        <input asp-for="Title" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]" required/>
+        <input asp-for="Title" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"/>
+        <span asp-validation-for="Title" class="mt-1 block text-xs text-[var(--color-error)]"></span>
     </div>
     <div>
         <label asp-for="Description" class="block text-sm font-medium text-fg-secondary">Description</label>
         <textarea asp-for="Description" rows="4" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></textarea>
+        <span asp-validation-for="Description" class="mt-1 block text-xs text-[var(--color-error)]"></span>
     </div>
     <div>
         <label asp-for="TaskStatusDefinitionId" class="block text-sm font-medium text-fg-secondary">Status</label>
@@ -31,6 +33,7 @@
                 <option value="@s.Id">@s.Name</option>
             }
         </select>
+        <span asp-validation-for="TaskStatusDefinitionId" class="mt-1 block text-xs text-[var(--color-error)]"></span>
     </div>
     <div>
         <label asp-for="Priority" class="block text-sm font-medium text-fg-secondary">Priority</label>

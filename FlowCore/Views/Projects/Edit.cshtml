@@ -5,15 +5,16 @@
 <h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg">Edit project</h1>
 <form method="post" asp-action="Edit" asp-route-id="@Model.Id" class="mt-8 max-w-xl space-y-5">
     @Html.AntiForgeryToken()
-    <div asp-validation-summary="All" class="text-sm text-[var(--color-error)]"></div>
+    <div asp-validation-summary="ModelOnly" class="text-sm text-[var(--color-error)]"></div>
     <div>
         <label asp-for="Name" class="block text-sm font-medium text-fg-secondary">Name</label>
-        <input asp-for="Name" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]" required/>
+        <input asp-for="Name" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"/>
         <span asp-validation-for="Name" class="mt-1 block text-xs text-[var(--color-error)]"></span>
     </div>
     <div>
         <label asp-for="Description" class="block text-sm font-medium text-fg-secondary">Description</label>
         <textarea asp-for="Description" rows="4" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></textarea>
+        <span asp-validation-for="Description" class="mt-1 block text-xs text-[var(--color-error)]"></span>
     </div>
     <div>
         <label asp-for="Status" class="block text-sm font-medium text-fg-secondary">Status</label>
