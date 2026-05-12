@@ -15,7 +15,7 @@ else
     foreach (var row in Model.Rows)
     {
         <a data-search-result href="@Url.Action("Details", "Tasks", new { id = row.Id })"
-           class="flex items-center gap-3 px-3 py-2 text-sm text-fg no-underline transition-colors hover:bg-raised data-[highlight=true]:bg-[var(--color-surface-container)]">
+           class="flex items-center gap-3 border-l-2 border-transparent px-3 py-2 text-sm text-fg no-underline transition-colors hover:bg-raised data-[highlight=true]:border-[var(--color-primary)] data-[highlight=true]:bg-[var(--color-surface-container)]">
             @if (!string.IsNullOrWhiteSpace(row.StatusColorHex))
             {
                 <span class="h-2 w-2 shrink-0 rounded-full" style="background-color: @row.StatusColorHex" aria-hidden="true"></span>

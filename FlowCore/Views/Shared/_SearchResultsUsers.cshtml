@@ -15,7 +15,7 @@ else
     foreach (var row in Model.Rows)
     {
         <a data-search-result href="@Url.Action("Details", "Users", new { id = row.Id })"
-           class="flex items-center gap-3 px-3 py-2 text-sm text-fg no-underline transition-colors hover:bg-raised data-[highlight=true]:bg-[var(--color-surface-container)]">
+           class="flex items-center gap-3 border-l-2 border-transparent px-3 py-2 text-sm text-fg no-underline transition-colors hover:bg-raised data-[highlight=true]:border-[var(--color-primary)] data-[highlight=true]:bg-[var(--color-surface-container)]">
             <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
                   style="background-color: @row.AvatarColor" aria-hidden="true">@row.Initials</span>
             <span class="min-w-0 flex-1">
