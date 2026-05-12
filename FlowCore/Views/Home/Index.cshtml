@@ -1,17 +1,21 @@
 @model MyWorkViewModel
 @{
     ViewData["Title"] = "My tasks";
-}
-@{
     var totalTasks = Model.StatusGroups.Sum(g => g.Tasks.Count);
+    var workspaceCount = Model.StatusGroups
+        .SelectMany(g => g.Tasks)
+        .Select(t => t.ProjectId)
+        .Distinct()
+        .Count();
 }
-<div class="mb-10 flex flex-wrap items-end justify-between gap-4">
+<div class="-mx-6 mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-border px-6 pb-6 sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
     <div class="min-w-0">
-        <h1 class="font-headline mb-1 text-3xl font-extrabold tracking-tight text-fg">My Tasks</h1>
-        <p class="text-sm font-medium text-fg-secondary">
+        <p class="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-fg-muted">Board view</p>
+        <h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg">My Tasks</h1>
+        <p class="mt-1 text-sm font-medium text-fg-secondary">
             @if (totalTasks > 0)
             {
-                <text>You have @totalTasks task@(totalTasks == 1 ? "" : "s") assigned across your workspaces.</text>
+                <text>@totalTasks task@(totalTasks == 1 ? "" : "s") in progress across @workspaceCount project@(workspaceCount == 1 ? "" : "s").</text>
             }
             else
             {
@@ -19,15 +23,23 @@
             }
         </p>
     </div>
-    <div class="flex gap-2">
-        <button type="button" class="flex items-center gap-2 rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]">
-            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">filter_list</span>
+    <div class="flex items-center gap-1.5">
+        <button type="button"
+                class="group inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-[13px] font-medium text-fg-secondary transition-[background-color,border-color,color] duration-200 ease-out hover:border-fg-muted/40 hover:bg-[var(--color-surface-container-low)] hover:text-fg active:bg-[var(--color-surface-container)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+            <partial name="_Icon" model='new IconVm { Name = "funnel", Size = 14, CssClass = "text-fg-muted group-hover:text-fg-secondary transition-colors duration-200 ease-out" }'/>
             Filter
         </button>
-        <button type="button" class="flex items-center gap-2 rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]">
-            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">sort</span>
+        <button type="button"
+                class="group inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-[13px] font-medium text-fg-secondary transition-[background-color,border-color,color] duration-200 ease-out hover:border-fg-muted/40 hover:bg-[var(--color-surface-container-low)] hover:text-fg active:bg-[var(--color-surface-container)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+            <partial name="_Icon" model='new IconVm { Name = "bars-arrow-down", Size = 14, CssClass = "text-fg-muted group-hover:text-fg-secondary transition-colors duration-200 ease-out" }'/>
             Sort
         </button>
+        <span aria-hidden="true" class="mx-2 hidden h-5 w-px bg-border sm:block"></span>
+        <a asp-controller="Projects" asp-action="Create"
+           class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-primary)] text-[var(--color-on-primary)] transition-[background-color,box-shadow] duration-200 ease-out hover:bg-[#4a2034] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+           aria-label="New project">
+            <partial name="_Icon" model='new IconVm { Name = "plus", Size = 16, StrokeWidth = "2" }'/>
+        </a>
     </div>
 </div>
 
@@ -46,23 +58,23 @@ else
                 var headingId = $"status-heading-{gi}";
                 var nameLower = group.StatusName?.ToLowerInvariant() ?? "";
                 var isDone = nameLower.Contains("done") || nameLower.Contains("complete") || nameLower.Contains("closed");
-                <section class="w-80 shrink-0 space-y-6" aria-labelledby="@headingId">
-                    <div class="flex items-center justify-between px-2">
-                        <div class="flex items-center gap-3">
-                            <span class="h-2 w-2 shrink-0 rounded-full" style="background-color: @stripe" aria-hidden="true"></span>
-                            <h2 id="@headingId" class="font-headline text-lg font-bold tracking-tight text-fg">@group.StatusName</h2>
-                            <span class="rounded-md bg-[var(--color-primary)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-fg-secondary">@group.Tasks.Count</span>
+                <section class="flex w-[340px] shrink-0 flex-col" aria-labelledby="@headingId">
+                    <div class="mb-5 flex items-center justify-between px-1">
+                        <div class="flex items-center gap-2.5">
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full" style="background-color: @stripe" aria-hidden="true"></span>
+                            <h2 id="@headingId" class="font-headline text-[11px] font-bold uppercase tracking-[0.14em] text-fg-secondary">@group.StatusName</h2>
+                            <span class="text-[11px] font-medium tabular-nums text-fg-muted">@group.Tasks.Count</span>
                         </div>
                     </div>
                     @if (group.Tasks.Count == 0)
                     {
-                        <div class="space-y-4" data-home-dnd-column data-status-name="@group.StatusName" data-status-color="@stripe">
+                        <div class="space-y-3" data-home-dnd-column data-status-name="@group.StatusName" data-status-color="@stripe">
                             <p class="rounded-xl border border-dashed border-border bg-raised/20 p-6 text-center text-xs text-fg-muted">No tasks.</p>
                         </div>
                     }
                     else if (isDone)
                     {
-                        <div class="space-y-3" data-home-dnd-column data-status-name="@group.StatusName" data-status-color="@stripe">
+                        <div class="space-y-2" data-home-dnd-column data-status-name="@group.StatusName" data-status-color="@stripe">
                             @foreach (var card in group.Tasks)
                             {
                                 <partial name="_TaskCard" model="new TaskCardVm {
@@ -78,16 +90,20 @@ else
                     }
                     else
                     {
-                        <div class="space-y-4" data-home-dnd-column data-status-name="@group.StatusName" data-status-color="@stripe">
+                        <div class="space-y-3" data-home-dnd-column data-status-name="@group.StatusName" data-status-color="@stripe">
                             @foreach (var card in group.Tasks)
                             {
                                 <partial name="_TaskCard" model="new TaskCardVm {
-                                    TaskId      = card.TaskId,
-                                    Title       = card.Title,
-                                    AccentHex   = stripe,
-                                    Layout      = TaskCardLayout.MyTasksActive,
-                                    Assignees   = card.Assignees,
-                                    ProjectName = card.ProjectName
+                                    TaskId       = card.TaskId,
+                                    Title        = card.Title,
+                                    AccentHex    = stripe,
+                                    Layout       = TaskCardLayout.MyTasksActive,
+                                    Assignees    = card.Assignees,
+                                    ProjectName  = card.ProjectName,
+                                    DueDateLabel = card.DueDateLabel,
+                                    IsOverdue    = card.IsOverdue,
+                                    SubtaskTotal = card.SubtaskTotal,
+                                    SubtaskDone  = card.SubtaskDone
                                 }"/>
                             }
                         </div>
@@ -97,15 +113,6 @@ else
         </div>
     </div>
 }
-
-<section class="mt-10 flex flex-wrap gap-x-4 gap-y-2 text-sm text-fg-muted" aria-label="Additional directory links">
-    <span class="text-fg-secondary">More:</span>
-    <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Users" asp-action="Index">Users</a>
-    <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Tags" asp-action="Index">Tags</a>
-    <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Boards" asp-action="Index">Boards</a>
-    <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Settings" asp-action="Index">Statuses</a>
-    <a class="rounded text-brand outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app" asp-controller="Comments" asp-action="Index">Comments</a>
-</section>
 
 @section Scripts {
     @Html.AntiForgeryToken()

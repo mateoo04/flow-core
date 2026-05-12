@@ -3,25 +3,27 @@
 @if (Model.Layout == TaskCardLayout.MyTasksDone)
 {
     <a asp-controller="Tasks" asp-action="Details" asp-route-id="@Model.TaskId"
-       class="group flex items-center gap-4 rounded-xl border-l-4 bg-card p-4 shadow-sm transition-all hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tertiary)]"
-       style="border-left-color: @Model.AccentHex"
+       class="fc-card group flex items-start gap-3 rounded-lg border border-border bg-card p-3 hover:border-fg-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tertiary)]"
        data-task-id="@Model.TaskId">
-        <span class="material-symbols-outlined shrink-0 text-[14px] leading-none text-fg-muted opacity-30 transition-opacity group-hover:opacity-60 select-none" aria-hidden="true">drag_indicator</span>
-        <span class="material-symbols-outlined text-[var(--color-tertiary)]" aria-hidden="true">check_circle</span>
-        <div class="min-w-0 flex-1">
-            <h3 class="truncate text-sm font-semibold text-fg-muted line-through decoration-fg-muted/40">@Model.Title</h3>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-fg-muted">@Model.ProjectName</span>
+        <span class="mt-0.5 shrink-0 text-[var(--color-tertiary)]">
+            <partial name="_Icon" model='new IconVm { Name = "check-circle", Size = 18 }'/>
+        </span>
+        <div class="min-w-0">
+            <h3 class="mb-1 truncate text-sm font-semibold text-fg-secondary line-through decoration-fg-muted/40">@Model.Title</h3>
+            <div class="flex items-center justify-between gap-2">
+                <span class="truncate text-[9px] font-bold uppercase tracking-wider text-fg-muted">@Model.ProjectName</span>
+                @if (Model.Assignees.Shown.Count > 0 || Model.Assignees.ExtraCount > 0)
+                {
+                    <partial name="_AssigneeAvatarStack" model="Model.Assignees"/>
+                }
+            </div>
         </div>
-        @if (Model.Assignees.Shown.Count > 0 || Model.Assignees.ExtraCount > 0)
-        {
-            <partial name="_AssigneeAvatarStack" model="Model.Assignees"/>
-        }
     </a>
 }
 else if (Model.Layout == TaskCardLayout.Board)
 {
     <a asp-controller="Tasks" asp-action="Details" asp-route-id="@Model.TaskId"
-       class="fc-task-avatar-ring fc-task-avatar-ring--card group block cursor-pointer rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
+       class="fc-card fc-task-avatar-ring fc-task-avatar-ring--card group block cursor-pointer rounded-xl border-l-4 bg-card p-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
        style="border-left-color: @Model.AccentHex"
        data-task-id="@Model.TaskId">
         @if (!string.IsNullOrEmpty(Model.StatusNameForScreenReader))
@@ -44,7 +46,7 @@ else if (Model.Layout == TaskCardLayout.Board)
             }
         </div>
         <div class="flex items-center justify-between gap-2">
-            <div class="min-w-0 flex-1">
+            <div class="min-w-0">
                 @if (Model.Assignees.Shown.Count > 0 || Model.Assignees.ExtraCount > 0)
                 {
                     <partial name="_AssigneeAvatarStack" model="Model.Assignees"/>
@@ -68,24 +70,51 @@ else if (Model.Layout == TaskCardLayout.Board)
 }
 else
 {
+    var hasAssignees = Model.Assignees.Shown.Count > 0 || Model.Assignees.ExtraCount > 0;
+    var hasDue = !string.IsNullOrEmpty(Model.DueDateLabel);
+    var hasSubtasks = Model.SubtaskTotal > 0;
+    var showFooter = hasAssignees || hasDue || hasSubtasks;
     <a asp-controller="Tasks" asp-action="Details" asp-route-id="@Model.TaskId"
-       class="fc-task-avatar-ring fc-task-avatar-ring--card group block rounded-xl border-l-4 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-xl hover:shadow-[var(--color-primary)]/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
-       style="border-left-color: @Model.AccentHex"
+       class="fc-card fc-task-avatar-ring fc-task-avatar-ring--card group relative block rounded-lg border border-border bg-card p-4 hover:border-fg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
        data-task-id="@Model.TaskId">
-        <div class="mb-3 flex min-w-0 items-center gap-2">
-            <span class="material-symbols-outlined shrink-0 text-[14px] leading-none text-fg-muted opacity-30 transition-opacity group-hover:opacity-60 select-none" aria-hidden="true">drag_indicator</span>
-            <span class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--color-secondary)] bg-[var(--color-secondary)]/10">@Model.ProjectName</span>
+        <span class="pointer-events-none absolute left-1.5 top-1/2 hidden h-4 w-2 -translate-y-1/2 select-none rounded-[1px] opacity-0 transition-opacity duration-150 group-hover:opacity-60 sm:block"
+              style="background-image: radial-gradient(currentColor 1px, transparent 1px); background-size: 4px 4px; color: var(--color-fg-muted);"
+              aria-hidden="true"></span>
+        <div class="mb-2 flex items-start justify-between gap-2 pl-2">
+            <span class="inline-flex items-center rounded border border-[var(--color-secondary)]/20 bg-[var(--color-secondary)]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--color-secondary)]"
+                  style="border-color: color-mix(in oklab, @Model.AccentHex 25%, transparent); background-color: color-mix(in oklab, @Model.AccentHex 12%, transparent); color: @Model.AccentHex;">@Model.ProjectName</span>
         </div>
-        <h3 class="mb-4 line-clamp-2 text-[15px] font-semibold leading-snug text-fg">@Model.Title</h3>
-        <div class="flex items-center justify-between gap-2">
-            @if (Model.Assignees.Shown.Count > 0 || Model.Assignees.ExtraCount > 0)
-            {
-                <partial name="_AssigneeAvatarStack" model="Model.Assignees"/>
-            }
-            else
-            {
-                <span></span>
-            }
-        </div>
+        <h3 class="mb-3 line-clamp-2 pl-2 text-[15px] font-bold leading-snug text-fg">@Model.Title</h3>
+        @if (showFooter)
+        {
+            <div class="flex items-center justify-between gap-2 border-t border-fg-muted/15 pl-2 pt-3">
+                <div class="min-w-0">
+                    @if (hasAssignees)
+                    {
+                        <partial name="_AssigneeAvatarStack" model="Model.Assignees"/>
+                    }
+                </div>
+                @if (hasDue || hasSubtasks)
+                {
+                    <div class="flex shrink-0 items-center gap-3">
+                        @if (hasDue)
+                        {
+                            <span class="inline-flex items-center gap-1 text-[11px] font-semibold @(Model.IsOverdue ? "text-[var(--color-error)]" : "text-fg-muted")"
+                                  title="Due @Model.DueDateLabel">
+                                <partial name='_Icon' model='new IconVm { Name = "calendar-days", Size = 14 }'/>
+                                @Model.DueDateLabel
+                            </span>
+                        }
+                        @if (hasSubtasks)
+                        {
+                            <span class="inline-flex items-center gap-1 text-[11px] font-semibold tabular-nums text-fg-muted" title="Subtasks">
+                                <partial name='_Icon' model='new IconVm { Name = "list-checks", Size = 14 }'/>
+                                @Model.SubtaskDone/@Model.SubtaskTotal
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+        }
     </a>
 }

@@ -21,6 +21,7 @@ public sealed class TaskCardVm
     public int SubtaskTotal { get; init; }
     public int SubtaskDone { get; init; }
     public string? DueDateLabel { get; init; }
+    public bool IsOverdue { get; init; }
     public string? PriorityLabel { get; init; }
     public string PriorityPillClasses { get; init; } = "";
 }

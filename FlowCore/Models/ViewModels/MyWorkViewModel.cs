@@ -21,6 +21,10 @@ public sealed class MyTaskCardVm
     public Guid ProjectId { get; init; }
     public string ProjectName { get; init; } = "";
     public TaskAssigneeStackVm Assignees { get; init; } = new();
+    public string? DueDateLabel { get; init; }
+    public bool IsOverdue { get; init; }
+    public int SubtaskTotal { get; init; }
+    public int SubtaskDone { get; init; }
 }
 
 public sealed class TaskAssigneeStackVm

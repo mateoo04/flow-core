@@ -54,6 +54,8 @@ public sealed class EfTaskRepository : ITaskRepository
                 .ThenInclude(b => b!.Project)
             .Include(t => t.TaskAssignments)
                 .ThenInclude(a => a.User)
+            .Include(t => t.Subtasks)
+                .ThenInclude(s => s.TaskStatusDefinition)
             .Where(t => t.TaskAssignments.Any(a => a.UserId == userId))
             .ToListAsync(ct);
 

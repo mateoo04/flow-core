@@ -59,110 +59,118 @@
 <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-fg focus:shadow-card focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-brand"
    href="#main-content">Skip to main content</a>
 <div class="flex h-screen max-h-screen min-h-0 overflow-hidden">
-    <aside class="flex h-full min-h-0 w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-sidebar" aria-label="Site navigation">
-        <div class="shrink-0 space-y-4 p-4">
-            <div class="flex items-center justify-between gap-2">
-                <a class="font-headline truncate text-xl font-extrabold tracking-tight text-fg no-underline outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
-                   asp-controller="Home" asp-action="Index">FlowCore</a>
-                <button type="button"
-                        id="theme-toggle"
-                        class="cursor-pointer shrink-0 rounded-lg p-2 text-fg-muted transition-colors hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                        aria-label="Switch color theme"
-                        aria-pressed="false">
-                    <span class="sr-only">Toggle light / dark mode</span>
-                    <svg class="h-5 w-5 dark:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
-                    </svg>
-                    <svg class="hidden h-5 w-5 dark:block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-                    </svg>
-                </button>
-            </div>
-            <partial name="_SearchPanel" model="@(new SearchPanelRootVm(defaultSearchTab))"/>
+    @{
+        var onHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home";
+        var onProjectsIndex = ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" && ViewContext.RouteData.Values["action"]?.ToString() == "Index";
+        var settingsWsId = activeWs ?? workspaces.FirstOrDefault()?.Id;
+    }
+    <aside class="flex h-full min-h-0 w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-sidebar" aria-label="Site navigation" data-sidebar>
+        <div class="shrink-0 px-4 pt-6 pb-4">
+            <a class="group flex min-w-0 items-center gap-2 no-underline outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+               asp-controller="Home" asp-action="Index">
+                <span aria-hidden="true"
+                      class="font-headline flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--color-primary)] text-[13px] font-extrabold leading-none text-[var(--color-on-primary)] shadow-sm">F</span>
+                <span class="font-headline truncate text-xl font-extrabold tracking-tight text-fg">FlowCore</span>
+            </a>
         </div>
 
-        <nav class="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 pb-2 text-sm" aria-label="Main">
-            @{ var onHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home"; }
-            <a class="font-headline flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-semibold transition-colors @(onHome ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-sm" : "text-fg-secondary hover:bg-raised hover:text-fg")"
-               asp-controller="Home" asp-action="Index">
-                <span class="material-symbols-outlined text-[20px]" aria-hidden="true">assignment_turned_in</span>
-                <span>@T["nav.my_tasks"]</span>
-            </a>
+        @* Main view *@
+        <div data-sidebar-view="main" class="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div class="shrink-0 px-4 pb-4">
+                <partial name="_SearchPanel" model="@(new SearchPanelRootVm(defaultSearchTab))"/>
+            </div>
+            <div class="shrink-0 px-7 pb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-fg-muted">@T["nav.views"]</div>
+            <nav class="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pb-2 text-sm" aria-label="Main">
+                <a class="group flex items-center gap-3 rounded-md px-3 py-3 text-[13px] font-medium transition-[background-color,color] duration-200 ease-out @(onHome ? "bg-[var(--color-primary)] font-semibold text-[var(--color-on-primary)] fc-nav-active" : "text-fg-secondary hover:bg-[var(--color-surface-container)] hover:text-fg")"
+                   asp-controller="Home" asp-action="Index">
+                    <partial name="_Icon" model='new IconVm { Name = "clipboard-check", Size = 16, CssClass = "shrink-0" }'/>
+                    <span>@T["nav.my_tasks"]</span>
+                </a>
+                <button type="button" data-sidebar-open="workspaces"
+                        class="fc-nav-hover group flex w-full items-center justify-between rounded-md px-3 py-3 text-[13px] font-medium text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+                    <span class="flex items-center gap-3">
+                        <partial name="_Icon" model='new IconVm { Name = "squares-2x2", Size = 16, CssClass = "shrink-0 text-fg-muted transition-colors duration-200 ease-out group-hover:text-fg-secondary" }'/>
+                        <span>@T["nav.workspaces"]</span>
+                    </span>
+                    <partial name="_Icon" model='new IconVm { Name = "chevron-right", Size = 14, CssClass = "text-fg-muted/70 transition-colors duration-200 ease-out group-hover:text-fg-secondary" }'/>
+                </button>
+                <button type="button" data-sidebar-open="projects"
+                        class="fc-nav-hover group flex w-full items-center justify-between rounded-md px-3 py-3 text-[13px] font-medium text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+                    <span class="flex items-center gap-3">
+                        <partial name="_Icon" model='new IconVm { Name = "folder", Size = 16, CssClass = "shrink-0 text-fg-muted transition-colors duration-200 ease-out group-hover:text-fg-secondary" }'/>
+                        <span>@T["nav.projects"]</span>
+                    </span>
+                    <partial name="_Icon" model='new IconVm { Name = "chevron-right", Size = 14, CssClass = "text-fg-muted/70 transition-colors duration-200 ease-out group-hover:text-fg-secondary" }'/>
+                </button>
+            </nav>
 
-            <details class="group mt-4" @(activeWs is not null ? "open" : "")>
-                <summary class="flex cursor-pointer list-none items-center gap-3 rounded-lg px-4 py-2 text-fg-secondary transition-colors hover:bg-raised hover:text-fg marker:content-none [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-                    <span class="material-symbols-outlined text-[20px]" aria-hidden="true">grid_view</span>
-                    <span class="font-headline flex-1 text-sm font-semibold">@T["nav.workspaces"]</span>
-                    <span class="material-symbols-outlined text-[18px] text-fg-muted transition-transform group-open:rotate-180" aria-hidden="true">keyboard_arrow_down</span>
-                </summary>
-                <div class="mt-1 space-y-0.5 pl-3">
-                    @foreach (var ws in workspaces)
-                    {
-                        var wsActive = activeWs == ws.Id;
-                        <a class="block rounded-lg px-3 py-1.5 text-sm text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(wsActive ? "bg-raised font-medium text-fg" : "")"
-                           asp-controller="Workspaces" asp-action="Details" asp-route-id="@ws.Id">@ws.Name</a>
-                    }
-                </div>
-            </details>
+            <div class="shrink-0 border-t border-border/70 p-3">
+                <a class="flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-fg-secondary transition-[background-color,color] duration-200 ease-out hover:bg-[var(--color-surface-container)] hover:text-fg"
+                   asp-controller="Settings" asp-action="Index" asp-route-workspaceId="@settingsWsId">
+                    <partial name="_Icon" model='new IconVm { Name = "cog-6-tooth", Size = 16, CssClass = "shrink-0 text-fg-muted" }'/>
+                    @T["nav.settings"]
+                </a>
+                @if (profileUser is not null)
+                {
+                    <button type="button" class="mt-1 flex w-full items-center gap-3 rounded-md border border-transparent p-2 text-left transition-[background-color,border-color] duration-200 ease-out hover:border-border/60 hover:bg-[var(--color-surface-container-low)]">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border/70 bg-[var(--color-primary)]/10 text-[11px] font-semibold text-fg" aria-hidden="true">@initials</span>
+                        <span class="min-w-0 flex-1">
+                            <span class="block truncate text-[13px] font-semibold leading-tight text-fg">@profileUser.FullName</span>
+                            <span class="mt-0.5 block truncate text-[11px] leading-tight text-fg-muted">@(profileUser.Email)</span>
+                        </span>
+                        <partial name="_Icon" model='new IconVm { Name = "chevron-up-down", Size = 14, CssClass = "shrink-0 text-fg-muted" }'/>
+                    </button>
+                }
+            </div>
+        </div>
 
-            <details class="group mt-1" open>
-                <summary class="flex cursor-pointer list-none items-center gap-3 rounded-lg px-4 py-2 text-fg-secondary transition-colors hover:bg-raised hover:text-fg marker:content-none [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-                    <span class="material-symbols-outlined text-[20px]" aria-hidden="true">folder</span>
-                    <span class="font-headline flex-1 text-sm font-semibold">@T["nav.projects"]</span>
-                    <span class="material-symbols-outlined text-[18px] text-fg-muted transition-transform group-open:rotate-180" aria-hidden="true">keyboard_arrow_down</span>
-                </summary>
-                <div class="mt-1 space-y-0.5 pl-3">
-                    <a class="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold text-[var(--color-secondary)] transition-colors hover:bg-[var(--color-secondary)]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
-                       asp-controller="Projects" asp-action="Create">
-                        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
-                        New project
-                    </a>
-                    <a class="block rounded-lg px-3 py-1.5 text-sm text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "bg-raised font-medium text-fg" : "")"
-                       asp-controller="Projects" asp-action="Index">@T["nav.all_projects"]</a>
-                    @foreach (var p in sidebarProjects)
-                    {
-                        var pActive = activeProject == p.Id;
-                        <a class="block min-w-0 truncate rounded-lg px-3 py-1.5 text-sm text-fg-secondary transition-colors duration-150 hover:bg-raised hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(pActive ? "bg-raised font-medium text-fg" : "")"
-                           asp-controller="Projects" asp-action="Details" asp-route-id="@p.Id"
-                           title="@p.Name">@p.Name</a>
-                    }
-                </div>
-            </details>
+        @* Workspaces sub-panel *@
+        <div data-sidebar-view="workspaces" class="hidden min-h-0 flex-1 flex-col overflow-hidden">
+            <div class="shrink-0 px-3 pb-1">
+                <button type="button" data-sidebar-close
+                        class="fc-nav-hover group flex w-full items-center gap-2 rounded-md px-3 py-2 text-[13px] font-medium text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+                    <partial name="_Icon" model='new IconVm { Name = "chevron-left", Size = 16 }'/>
+                    Back
+                </button>
+            </div>
+            <div class="shrink-0 px-7 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-fg-muted">@T["nav.workspaces"]</div>
+            <div class="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-3 pb-3 text-sm">
+                @foreach (var ws in workspaces)
+                {
+                    var wsActive = activeWs == ws.Id;
+                    <a class="block truncate rounded-md px-3 py-2 text-sm text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(wsActive ? "bg-raised font-semibold text-fg" : "fc-nav-hover")"
+                       asp-controller="Workspaces" asp-action="Details" asp-route-id="@ws.Id"
+                       title="@ws.Name">@ws.Name</a>
+                }
+            </div>
+        </div>
 
-            <details class="mt-4 rounded-lg border border-border bg-app/40 open:bg-raised/40 dark:bg-raised/20">
-                <summary class="cursor-pointer list-none rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-fg-muted marker:content-none outline-none [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-                    @T["nav.more_sections"]
-                </summary>
-                <div class="flex flex-col gap-0.5 border-t border-border/60 p-2">
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Tasks" asp-action="Index">Tasks</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Comments" asp-action="Index">Comments</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Boards" asp-action="Index">Boards</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Users" asp-action="Index">Users</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Tags" asp-action="Index">Tags</a>
-                    <a class="rounded-md px-2 py-1.5 text-fg-muted transition-colors hover:bg-card hover:text-fg-secondary" asp-controller="Statuses" asp-action="Index">Statuses</a>
-                </div>
-            </details>
-        </nav>
-
-        <div class="sticky bottom-0 z-10 shrink-0 border-t border-border/60 bg-sidebar p-3">
-            @{
-                var settingsWsId = activeWs ?? workspaces.FirstOrDefault()?.Id;
-            }
-            <a class="font-headline flex items-center gap-3 rounded-lg px-4 py-2 text-sm text-fg-secondary transition-colors hover:bg-raised hover:text-fg"
-               asp-controller="Settings" asp-action="Index" asp-route-workspaceId="@settingsWsId">
-                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">settings</span>
-                @T["nav.settings"]
-            </a>
-            @if (profileUser is not null)
-            {
-                <div class="mt-4 flex items-center gap-3 rounded-xl border border-border/70 bg-[var(--color-surface-container-low)] px-4 py-3">
-                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-[var(--color-primary)]/10 text-xs font-semibold text-fg" aria-hidden="true">@initials</span>
-                    <div class="min-w-0 flex-1">
-                        <div class="truncate text-sm font-bold leading-none text-fg">@profileUser.FullName</div>
-                        <div class="mt-1 truncate text-[10px] leading-none text-fg-muted">@profileUser.Email</div>
-                    </div>
-                </div>
-            }
+        @* Projects sub-panel *@
+        <div data-sidebar-view="projects" class="hidden min-h-0 flex-1 flex-col overflow-hidden">
+            <div class="shrink-0 px-3 pb-1">
+                <button type="button" data-sidebar-close
+                        class="fc-nav-hover group flex w-full items-center gap-2 rounded-md px-3 py-2 text-[13px] font-medium text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+                    <partial name="_Icon" model='new IconVm { Name = "chevron-left", Size = 16 }'/>
+                    Back
+                </button>
+            </div>
+            <div class="shrink-0 px-7 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-fg-muted">@T["nav.projects"]</div>
+            <div class="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-3 pb-3 text-sm">
+                <a class="fc-nav-hover flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-[var(--color-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
+                   asp-controller="Projects" asp-action="Create">
+                    <partial name="_Icon" model='new IconVm { Name = "plus", Size = 16 }'/>
+                    New project
+                </a>
+                <a class="block rounded-md px-3 py-2 text-sm text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(onProjectsIndex ? "bg-raised font-semibold text-fg" : "fc-nav-hover")"
+                   asp-controller="Projects" asp-action="Index">@T["nav.all_projects"]</a>
+                @foreach (var p in sidebarProjects)
+                {
+                    var pActive = activeProject == p.Id;
+                    <a class="block min-w-0 truncate rounded-md px-3 py-2 text-sm text-fg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @(pActive ? "bg-raised font-semibold text-fg" : "fc-nav-hover")"
+                       asp-controller="Projects" asp-action="Details" asp-route-id="@p.Id"
+                       title="@p.Name">@p.Name</a>
+                }
+            </div>
         </div>
     </aside>
 

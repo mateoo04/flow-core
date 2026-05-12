@@ -61,6 +61,32 @@
 })();
 
 (function () {
+  function setSidebarPanel(aside, panel) {
+    aside.querySelectorAll("[data-sidebar-view]").forEach(function (view) {
+      var match = view.getAttribute("data-sidebar-view") === panel;
+      view.classList.toggle("hidden", !match);
+      view.classList.toggle("flex", match);
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    var openBtn = e.target.closest("[data-sidebar-open]");
+    if (openBtn) {
+      e.preventDefault();
+      var aside = openBtn.closest("[data-sidebar]");
+      if (aside) setSidebarPanel(aside, openBtn.getAttribute("data-sidebar-open"));
+      return;
+    }
+    var closeBtn = e.target.closest("[data-sidebar-close]");
+    if (closeBtn) {
+      e.preventDefault();
+      var aside2 = closeBtn.closest("[data-sidebar]");
+      if (aside2) setSidebarPanel(aside2, "main");
+    }
+  });
+})();
+
+(function () {
   function scrollToFirstError() {
     var target = document.querySelector(".input-validation-error, .field-validation-error:not(:empty)");
     if (!target) return;

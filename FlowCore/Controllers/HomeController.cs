@@ -29,6 +29,7 @@ public class HomeController : Controller
         var user = await _users.GetByIdAsync(currentUserId, ct);
 
         var tasks = await _tasks.GetAssignedToUserAsync(currentUserId, ct);
+        var today = DateTime.UtcNow.Date;
 
         var groups = tasks
             .GroupBy(t => t.TaskStatusDefinition?.Name ?? "Unknown")
@@ -40,13 +41,21 @@ public class HomeController : Controller
                     .Select(t =>
                     {
                         var project = t.Board?.Project;
+                        var due = t.DueDate;
+                        var dueLabel = due is { } d ? d.ToString("MMM d", System.Globalization.CultureInfo.InvariantCulture) : null;
+                        var isOverdue = due is { } d2 && d2.Date < today;
+                        var subtasks = t.Subtasks;
                         return new MyTaskCardVm
                         {
                             TaskId = t.Id,
                             Title = t.Title,
                             ProjectId = project?.Id ?? Guid.Empty,
                             ProjectName = project?.Name ?? "Project",
-                            Assignees = TaskAssigneeStackBuilder.FromTask(t)
+                            Assignees = TaskAssigneeStackBuilder.FromTask(t),
+                            DueDateLabel = dueLabel,
+                            IsOverdue = isOverdue,
+                            SubtaskTotal = subtasks?.Count ?? 0,
+                            SubtaskDone = subtasks?.Count(s => s.TaskStatusDefinition?.IsDoneState == true) ?? 0
                         };
                     })
                     .ToList();
