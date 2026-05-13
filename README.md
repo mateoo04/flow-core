@@ -30,7 +30,7 @@ The dev seed creates five demo users. All share the password `Admin6060!` — **
 | `jordan@flowcore.demo` | Member |
 | `morgan@flowcore.demo` | Member |
 
-You can also register a fresh account at `/account/register`.
+You can also sign up for an account at `/account/register`.
 
 ## Architecture
 

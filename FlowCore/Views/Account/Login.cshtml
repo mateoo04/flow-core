@@ -35,7 +35,20 @@
 
         <p class="text-sm text-fg-muted">
             Don't have an account?
-            <a asp-action="Register" class="text-[var(--color-secondary)] underline hover:opacity-80">Register</a>
+            <a asp-action="Register" class="text-[var(--color-secondary)] underline hover:opacity-80">Sign up</a>
         </p>
+    </form>
+
+    <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-border"></div></div>
+        <div class="relative flex justify-center text-xs"><span class="bg-bg px-2 text-fg-muted">or</span></div>
+    </div>
+
+    <form asp-action="Demo" method="post">
+        <button type="submit"
+                class="w-full rounded-full border border-border bg-transparent px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-hover)]">
+            Try the demo
+        </button>
+        <p class="mt-2 text-center text-xs text-fg-muted">No signup. Shared with other demo visitors.</p>
     </form>
 </div>

@@ -1,5 +1,6 @@
 @model FlowCore.Models.ViewModels.SettingsIndexVm
 @inject FlowCore.Services.UiText T
+@inject Microsoft.AspNetCore.Authorization.IAuthorizationService Authz
 @{
     ViewData["Title"] = "Settings";
     var error = TempData["SettingsError"] as string;
@@ -151,3 +152,23 @@
         </div>
     </form>
 </section>
+@{
+    var isDemoUser = (await Authz.AuthorizeAsync(User, null, "DemoUser")).Succeeded;
+}
+@if (isDemoUser)
+{
+    <section class="rounded-2xl border border-border bg-[var(--color-surface)] p-6 mt-8">
+        <h2 class="font-headline text-lg font-bold text-fg">Demo controls</h2>
+        <p class="text-sm text-fg-muted mt-1 mb-4">
+            Reset all demo workspaces, projects, tasks, and comments back to the original seed.
+            Real user accounts are not affected.
+        </p>
+        <form asp-controller="Account" asp-action="ResetDemo" method="post">
+            <button type="submit"
+                    onclick="return confirm('This wipes all demo workspaces and their data. Continue?');"
+                    class="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">
+                Reset demo data
+            </button>
+        </form>
+    </section>
+}

@@ -77,6 +77,8 @@ builder.Services.AddAuthorization(opts =>
         p => p.Requirements.Add(new WorkspaceMembershipRequirement(WorkspaceRole.Member)));
     opts.AddPolicy("WorkspaceOwner",
         p => p.Requirements.Add(new WorkspaceMembershipRequirement(WorkspaceRole.Owner)));
+    opts.AddPolicy("DemoUser",
+        p => p.Requirements.Add(new DemoUserRequirement()));
 });
 
 builder.Services.AddHttpContextAccessor();
@@ -95,7 +97,9 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 
 builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
+builder.Services.AddScoped<IDemoDataResetService, DemoDataResetService>();
 builder.Services.AddScoped<IAuthorizationHandler, WorkspaceMembershipHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, DemoUserHandler>();
 
 builder.Services.AddSingleton<IBreadcrumbTrailBuilder, BreadcrumbTrailBuilder>();
 builder.Services.AddSingleton<UiText>();

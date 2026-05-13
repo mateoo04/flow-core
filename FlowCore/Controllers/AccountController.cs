@@ -1,3 +1,4 @@
+using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +8,6 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace FlowCore.Controllers;
 
-[AllowAnonymous]
 [Route("/account")]
 public class AccountController : Controller
 {
@@ -21,9 +21,11 @@ public class AccountController : Controller
     }
 
     [HttpGet("register")]
+    [AllowAnonymous]
     public IActionResult Register() => View(new RegisterViewModel());
 
     [HttpPost("register")]
+    [AllowAnonymous]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("auth")]
     public async Task<IActionResult> Register(RegisterViewModel vm)
@@ -52,10 +54,12 @@ public class AccountController : Controller
     }
 
     [HttpGet("login")]
+    [AllowAnonymous]
     public IActionResult Login(string? returnUrl = null)
         => View(new LoginViewModel { ReturnUrl = returnUrl });
 
     [HttpPost("login")]
+    [AllowAnonymous]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("auth")]
     public async Task<IActionResult> Login(LoginViewModel vm)
@@ -90,6 +94,41 @@ public class AccountController : Controller
         return RedirectToAction(nameof(Login));
     }
 
+    [HttpPost("demo")]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("auth")]
+    public async Task<IActionResult> Demo()
+    {
+        var demo = await _userManager.FindByEmailAsync(DemoSeedIds.UserDemoEmail);
+        if (demo is null)
+        {
+            ModelState.AddModelError(string.Empty, "Demo account is not available.");
+            return View(nameof(Login), new LoginViewModel());
+        }
+        await _signInManager.SignInAsync(demo, isPersistent: false);
+        return RedirectToAction("Index", "Home");
+    }
+
+    [HttpPost("reset-demo")]
+    [Authorize(Policy = "DemoUser")]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("auth")]
+    public async Task<IActionResult> ResetDemo(
+        [FromServices] IDemoDataResetService reset,
+        CancellationToken ct)
+    {
+        await reset.ResetAsync(ct);
+
+        var demo = await _userManager.FindByEmailAsync(DemoSeedIds.UserDemoEmail);
+        if (demo is not null)
+            await _signInManager.RefreshSignInAsync(demo);
+
+        TempData["DemoInfo"] = "Demo data has been reset.";
+        return RedirectToAction("Index", "Home");
+    }
+
     [HttpGet("access-denied")]
+    [AllowAnonymous]
     public IActionResult AccessDenied() => View();
 }

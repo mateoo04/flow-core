@@ -8,6 +8,12 @@
         .Distinct()
         .Count();
 }
+@if (TempData["DemoInfo"] is string demoInfo)
+{
+    <div class="mb-6 rounded border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-700 dark:bg-green-950/40 dark:text-green-400">
+        @demoInfo
+    </div>
+}
 <div class="-mx-6 mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-border px-6 pb-6 sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
     <div class="min-w-0">
         <p class="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-fg-muted">Board view</p>

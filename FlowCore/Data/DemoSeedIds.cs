@@ -7,6 +7,8 @@ public static class DemoSeedIds
     public static readonly Guid UserCasey = Guid.Parse("a1000001-0000-4000-8000-000000000003");
     public static readonly Guid UserJordan = Guid.Parse("a1000001-0000-4000-8000-000000000004");
     public static readonly Guid UserMorgan = Guid.Parse("a1000001-0000-4000-8000-000000000005");
+    public static readonly Guid UserDemo = Guid.Parse("a1000001-0000-4000-8000-000000000006");
+    public const string UserDemoEmail = "demo@flowcore.demo";
 
     public static readonly Guid TagUi = Guid.Parse("a2000002-0000-4000-8000-000000000001");
     public static readonly Guid TagBug = Guid.Parse("a2000002-0000-4000-8000-000000000002");

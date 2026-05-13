@@ -103,7 +103,24 @@ public static class DemoDataBuilder
         };
         morgan.PasswordHash = hasher.HashPassword(morgan, "Admin6060!");
 
-        var users = new List<User> { ownerAlex, memberSam, casey, jordan, morgan };
+        var demoUser = new User
+        {
+            Id = DemoSeedIds.UserDemo,
+            FullName = "Demo User",
+            Email = DemoSeedIds.UserDemoEmail,
+            NormalizedEmail = DemoSeedIds.UserDemoEmail.ToUpperInvariant(),
+            UserName = DemoSeedIds.UserDemoEmail,
+            NormalizedUserName = DemoSeedIds.UserDemoEmail.ToUpperInvariant(),
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            LockoutEnabled = true,
+            JoinedAt = now,
+            IsActive = true
+        };
+        demoUser.PasswordHash = hasher.HashPassword(demoUser, "Admin6060!");
+
+        var users = new List<User> { ownerAlex, memberSam, casey, jordan, morgan, demoUser };
         var team = new Team(ownerAlex, memberSam, casey, jordan, morgan);
 
         var tagUi = new Tag { Id = DemoSeedIds.TagUi, Name = "ui", ColorHex = "#6366F1" };
@@ -114,7 +131,7 @@ public static class DemoDataBuilder
         {
             Id = DemoSeedIds.WorkspaceNorth,
             Name = "Acme Corporation",
-            Description = "Your company's workspace — projects group work by product, platform, or internal function.",
+            Description = "Your company's workspace: projects group work by product, platform, or internal function.",
             CreatedAt = now.AddDays(-90),
             ArchivedAt = null,
             Visibility = WorkspaceVisibility.Team,
@@ -132,7 +149,7 @@ public static class DemoDataBuilder
             Ng,
             now,
             statuses,
-            "Acme.com — marketing & sign-up",
+            "Acme.com: marketing & sign-up",
             "Public site, content, SEO, and self-serve trial checkout.",
             ProjectStatus.Active,
             ProjectPriority.High);
@@ -143,7 +160,7 @@ public static class DemoDataBuilder
             Ng,
             now,
             statuses,
-            "Acme Shop — mobile",
+            "Acme Shop: mobile",
             "Customer iOS/Android app: browse, cart, and order tracking.",
             ProjectStatus.Active,
             ProjectPriority.High);
@@ -154,7 +171,7 @@ public static class DemoDataBuilder
             Ng,
             now,
             statuses,
-            "Compass — design system",
+            "Compass: design system",
             "Figma kit, React primitives, and tokens shared across product surfaces.",
             ProjectStatus.Planning,
             ProjectPriority.Low);
@@ -165,7 +182,7 @@ public static class DemoDataBuilder
             Ng,
             now,
             statuses,
-            "Partner Hub — revenue integrations",
+            "Partner Hub: revenue integrations",
             "Wholesale portals, EDI hooks, and ERP-facing APIs for top partners.",
             ProjectStatus.Planning,
             ProjectPriority.Medium);
@@ -176,7 +193,7 @@ public static class DemoDataBuilder
             Ng,
             now,
             statuses,
-            "People tech — new hire experience",
+            "People tech: new hire experience",
             "Device prep, identity groups, and lightweight automations so week-one isn't helpdesk roulette.",
             ProjectStatus.Active,
             ProjectPriority.Low);
@@ -187,6 +204,8 @@ public static class DemoDataBuilder
         organization.Projects.Add(designSys.Project);
         organization.Projects.Add(partnerIntegrations.Project);
         organization.Projects.Add(peopleTech.Project);
+
+        ApplyDemoGraphRandomization(organization, users, demoUser, statuses, now, Ng);
 
         var workspaces = new List<Workspace> { organization };
 
@@ -208,6 +227,7 @@ public static class DemoDataBuilder
 
         // Owners: whoever was the previous OwnerUserId becomes the Owner WorkspaceMember.
         AddMember(DemoSeedIds.WorkspaceNorth, DemoSeedIds.UserAlex, WorkspaceRole.Owner);
+        AddMember(DemoSeedIds.WorkspaceNorth, DemoSeedIds.UserDemo, WorkspaceRole.Member);
 
         // Members: anyone with a TaskAssignment to a task in workspace W is at least a Member of W.
         // Walk the already-built graph: workspace -> projects -> boards -> tasks -> assignments.
@@ -327,7 +347,7 @@ public static class DemoDataBuilder
             ctx.Board,
             ctx.Todo,
             "Primary nav & URL scheme (pre-build)",
-            "Lock IA before eng cuts templates—pricing, solutions, and docs need stable paths.",
+            "Lock IA before eng cuts templates: pricing, solutions, and docs need stable paths.",
             TaskPriority.High,
             8,
             now.AddDays(-14),
@@ -361,8 +381,9 @@ public static class DemoDataBuilder
             2,
             now.AddDays(-10),
             now,
-            null,
+            now.AddDays(12),
             epicIa);
+        AssignMany(subIa2, now.AddDays(-10), jordan, morgan, casey);
 
         var epicCheckout = NewTask(
             ng,
@@ -402,14 +423,15 @@ public static class DemoDataBuilder
             2,
             now.AddDays(-4),
             now,
-            null,
+            now.AddDays(8),
             epicCheckout);
+        AssignMany(subErr, now.AddDays(-4), casey, morgan, jordan);
 
         var epicTrust = NewTask(
             ng,
             ctx.Board,
             ctx.Todo,
-            "Trial module — trust badges & fine print",
+            "Trial module: trust badges & fine print",
             "Above-the-fold block on signup; legal wants EU-specific footnotes.",
             TaskPriority.Medium,
             5,
@@ -419,7 +441,7 @@ public static class DemoDataBuilder
             parent: null);
         Assign(epicTrust, sam, now.AddDays(-6));
 
-        NewTask(
+        var badges = NewTask(
             ng,
             ctx.Board,
             ctx.Backlog,
@@ -429,10 +451,11 @@ public static class DemoDataBuilder
             2,
             now.AddDays(-5),
             now,
-            null,
+            now.AddDays(15),
             epicTrust);
+        AssignMany(badges, now.AddDays(-5), jordan, morgan);
 
-        NewTask(
+        var legalReview = NewTask(
             ng,
             ctx.Board,
             ctx.Todo,
@@ -442,10 +465,11 @@ public static class DemoDataBuilder
             2,
             now.AddDays(-3),
             now,
-            null,
+            now.AddDays(9),
             epicTrust);
+        AssignMany(legalReview, now.AddDays(-3), sam, alex, morgan);
 
-        NewTask(
+        var seo = NewTask(
             ng,
             ctx.Board,
             ctx.Backlog,
@@ -455,8 +479,9 @@ public static class DemoDataBuilder
             3,
             now.AddDays(-4),
             now,
-            null,
+            now.AddDays(17),
             parent: null);
+        AssignMany(seo, now.AddDays(-4), sam, casey, morgan);
 
         var heroPl = NewTask(
             ng,
@@ -506,7 +531,7 @@ public static class DemoDataBuilder
             ng,
             ctx.Board,
             ctx.Done,
-            "Privacy center IA — shipped in docs subdomain",
+            "Privacy center IA, shipped in docs subdomain",
             string.Empty,
             TaskPriority.Medium,
             3,
@@ -519,7 +544,7 @@ public static class DemoDataBuilder
             ng,
             ctx.Board,
             ctx.Done,
-            "Homepage hero A/B (Q1) — readout & shutdown",
+            "Homepage hero A/B (Q1): readout & shutdown",
             string.Empty,
             TaskPriority.Low,
             2,
@@ -529,16 +554,16 @@ public static class DemoDataBuilder
             parent: null);
 
         AddComment(ng, epicIa, sam,
-            "Redirects wait on wireframe sign-off — don't ask CMS for slugs yet.",
+            "Redirects wait on wireframe sign-off; don't ask CMS for slugs yet.",
             now.AddDays(-8));
         AddComment(ng, epicCheckout, alex,
             "Webhook signing secret rotated in vault this morning; staging redeployed.",
             now.AddDays(-3));
         AddComment(ng, heroPl, sam,
-            "Using 2× exports from Figma node `Hero / Spring` — ping if raster shifts.",
+            "Using 2× exports from Figma node `Hero / Spring`. Ping if raster shifts.",
             now.AddDays(-5));
         AddComment(ng, safari, sam,
-            "Still reproduces on iOS 18.4 simulator — not visible in Chromium.",
+            "Still reproduces on iOS 18.4 simulator; not visible in Chromium.",
             now.AddDays(-2));
     }
 
@@ -593,6 +618,7 @@ public static class DemoDataBuilder
             now,
             null,
             epicOnboard);
+        AssignMany(subBio, now.AddDays(-6), casey, jordan, morgan);
 
         var epicOffline = NewTask(
             ng,
@@ -618,8 +644,9 @@ public static class DemoDataBuilder
             5,
             now.AddDays(-5),
             now,
-            null,
+            now.AddDays(11),
             epicOffline);
+        AssignMany(subSync, now.AddDays(-5), alex, morgan, jordan);
 
         var subQueue = NewTask(
             ng,
@@ -631,9 +658,9 @@ public static class DemoDataBuilder
             5,
             now.AddDays(-4),
             now,
-            null,
+            now.AddDays(14),
             epicOffline);
-
+        AssignMany(subQueue, now.AddDays(-4), alex, casey, morgan);
         var push = NewTask(
             ng,
             ctx.Board,
@@ -663,7 +690,7 @@ public static class DemoDataBuilder
         LinkTag(crash, tagBug, now.AddDays(-2));
         AssignMany(crash, now.AddDays(-2), casey, jordan);
 
-        NewTask(
+        var orderMap = NewTask(
             ng,
             ctx.Board,
             ctx.Todo,
@@ -675,6 +702,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(9),
             parent: null);
+        AssignMany(orderMap, now.AddDays(-3), morgan, jordan, alex);
 
         var saveForLater = NewTask(
             ng,
@@ -690,7 +718,7 @@ public static class DemoDataBuilder
             parent: null);
         Assign(saveForLater, alex, now.AddDays(-4));
 
-        NewTask(
+        var appReview = NewTask(
             ng,
             ctx.Board,
             ctx.Todo,
@@ -702,6 +730,7 @@ public static class DemoDataBuilder
             now,
             now.AddDays(5),
             parent: null);
+        AssignMany(appReview, now.AddDays(-1), sam, casey, jordan);
 
         NewTask(
             ng,
@@ -716,7 +745,7 @@ public static class DemoDataBuilder
             null,
             parent: null);
 
-        NewTask(
+        var darkMode = NewTask(
             ng,
             ctx.Board,
             ctx.Backlog,
@@ -726,14 +755,15 @@ public static class DemoDataBuilder
             3,
             now.AddDays(-1),
             now,
-            null,
+            now.AddDays(16),
             parent: null);
+        AssignMany(darkMode, now.AddDays(-1), casey, sam, alex);
 
         NewTask(
             ng,
             ctx.Board,
             ctx.Done,
-            "February beta cohort — feedback export & thank-you mail",
+            "February beta cohort: feedback export & thank-you mail",
             string.Empty,
             TaskPriority.Medium,
             1,
@@ -756,13 +786,13 @@ public static class DemoDataBuilder
             parent: null);
 
         AddComment(ng, epicOnboard, alex,
-            "Drop the second marketing slide if locale = DE — legal asked yesterday.",
+            "Drop the second marketing slide if locale = DE; legal asked yesterday.",
             now.AddDays(-5));
         AddComment(ng, epicOffline, sam,
             "Desktop team wants same merge rules eventually; keep interfaces internal for now.",
             now.AddDays(-4));
         AddComment(ng, push, alex,
-            "Firebase dynamic link TTL is 7d — doc that in runbook.",
+            "Firebase dynamic link TTL is 7d; doc that in runbook.",
             now.AddDays(-2));
         AddComment(ng, crash, alex,
             "Repro on iPhone SE 2022 with 20+ tabs backgrounded.",
@@ -782,7 +812,7 @@ public static class DemoDataBuilder
             ng,
             ctx.Board,
             ctx.InProgress,
-            "Button primitives — size ramps & focus ring",
+            "Button primitives: size ramps & focus ring",
             "Align with WCAG 2.2 focus-visible spec.",
             TaskPriority.Medium,
             5,
@@ -793,7 +823,7 @@ public static class DemoDataBuilder
         AssignMany(buttons, now.AddDays(-8), alex, jordan, morgan);
         LinkTag(buttons, tagUi, now.AddDays(-7));
 
-        NewTask(
+        var touchTargets = NewTask(
             ng,
             ctx.Board,
             ctx.Todo,
@@ -803,10 +833,11 @@ public static class DemoDataBuilder
             2,
             now.AddDays(-6),
             now,
-            null,
+            now.AddDays(11),
             buttons);
+        AssignMany(touchTargets, now.AddDays(-6), sam, casey, jordan);
 
-        NewTask(
+        var destructive = NewTask(
             ng,
             ctx.Board,
             ctx.Backlog,
@@ -816,8 +847,9 @@ public static class DemoDataBuilder
             1,
             now.AddDays(-4),
             now,
-            null,
+            now.AddDays(9),
             buttons);
+        AssignMany(destructive, now.AddDays(-4), morgan, sam, casey);
 
         var audit = NewTask(
             ng,
@@ -833,7 +865,7 @@ public static class DemoDataBuilder
             parent: null);
         Assign(audit, sam, now.AddDays(-3));
 
-        NewTask(
+        var dataTable = NewTask(
             ng,
             ctx.Board,
             ctx.Backlog,
@@ -843,11 +875,12 @@ public static class DemoDataBuilder
             3,
             now.AddDays(-2),
             now,
-            null,
+            now.AddDays(24),
             parent: null);
+        AssignMany(dataTable, now.AddDays(-2), jordan, alex, morgan);
 
         AddComment(ng, buttons, sam,
-            "Ping design before merging — they're renaming `accent-subtle` this week.",
+            "Ping design before merging; they're renaming `accent-subtle` this week.",
             now.AddDays(-5));
     }
 
@@ -864,7 +897,7 @@ public static class DemoDataBuilder
             ng,
             ctx.Board,
             ctx.InProgress,
-            "Shopify wholesale orders — idempotent webhook handler",
+            "Shopify wholesale orders: idempotent webhook handler",
             "Double events during flash sales; use payload id + HMAC.",
             TaskPriority.High,
             8,
@@ -879,14 +912,16 @@ public static class DemoDataBuilder
             ng,
             ctx.Board,
             ctx.Backlog,
-            "NetSuite SKU sync — discovery brief for RevOps",
+            "NetSuite SKU sync: discovery brief for RevOps",
             "Need field map from ERP owner before API spike.",
             TaskPriority.Medium,
             3,
             now.AddDays(-2),
             now,
-            null,
+            now.AddDays(30),
             parent: null);
+
+        AssignMany(netsuite, now.AddDays(-2), casey, jordan, sam);
 
         var sso = NewTask(
             ng,
@@ -900,10 +935,10 @@ public static class DemoDataBuilder
             now,
             now.AddDays(18),
             parent: null);
-        AssignMany(sso, now.AddDays(-4), sam, morgan);
+        AssignMany(sso, now.AddDays(-4), sam, morgan, alex, casey);
 
         AddComment(ng, webhooks, sam,
-            "Logged 412 duplicates last Friday — table `wh_order_events` is catching them now.",
+            "Logged 412 duplicates last Friday; table `wh_order_events` is catching them now.",
             now.AddDays(-2));
         AddComment(ng, netsuite, alex,
             "Won't schedule eng until RevOps confirms nightly vs near-real-time.",
@@ -922,8 +957,8 @@ public static class DemoDataBuilder
             ng,
             ctx.Board,
             ctx.InProgress,
-            "Spring laptop refresh — pilot cohort (sales)",
-            "Encrypted fleet; ship window March 18–28.",
+            "Spring laptop refresh: pilot cohort (sales)",
+            "Encrypted fleet; ship window March 18-28.",
             TaskPriority.Medium,
             5,
             now.AddDays(-9),
@@ -932,7 +967,7 @@ public static class DemoDataBuilder
             parent: null);
         AssignMany(laptops, now.AddDays(-9), alex, sam, casey);
 
-        NewTask(
+        var jamf = NewTask(
             ng,
             ctx.Board,
             ctx.Todo,
@@ -942,10 +977,11 @@ public static class DemoDataBuilder
             2,
             now.AddDays(-6),
             now,
-            null,
+            now.AddDays(8),
             laptops);
+        AssignMany(jamf, now.AddDays(-6), casey, jordan, morgan);
 
-        NewTask(
+        var fedex = NewTask(
             ng,
             ctx.Board,
             ctx.Todo,
@@ -955,8 +991,9 @@ public static class DemoDataBuilder
             1,
             now.AddDays(-5),
             now,
-            null,
+            now.AddDays(6),
             laptops);
+        AssignMany(fedex, now.AddDays(-5), sam, alex);
 
         var okta = NewTask(
             ng,
@@ -970,9 +1007,9 @@ public static class DemoDataBuilder
             now,
             now.AddDays(20),
             parent: null);
-        Assign(okta, alex, now.AddDays(-4));
+        AssignMany(okta, now.AddDays(-4), alex, sam, casey, morgan);
 
-        NewTask(
+        var swag = NewTask(
             ng,
             ctx.Board,
             ctx.Backlog,
@@ -982,12 +1019,248 @@ public static class DemoDataBuilder
             2,
             now.AddDays(-2),
             now,
-            null,
+            now.AddDays(40),
             parent: null);
+        AssignMany(swag, now.AddDays(-2), morgan, jordan, sam);
 
         AddComment(ng, laptops, alex,
-            "Two folks in London warehouse extended ship by 3 days — rows 18–19 on the sheet.",
+            "Two folks in London warehouse extended ship by 3 days (rows 18-19 on the sheet).",
             now.AddDays(-3));
+    }
+
+    private static void ApplyDemoGraphRandomization(
+        Workspace organization,
+        List<User> users,
+        User demoUser,
+        WorkspaceStatuses statuses,
+        DateTime now,
+        Func<Guid> ng)
+    {
+        const int seed = 202605131;
+        var rng = new Random(seed);
+
+        EnsureExtraSubtasksForCoverage(organization, statuses, now, ng, rng);
+
+        var allTasks = AllTasksFlat(organization).ToList();
+        ClearAllTaskAssignments(allTasks, users);
+
+        Shuffle(allTasks, rng);
+
+        var pool = users.ToArray();
+        var n = allTasks.Count;
+        var c5 = Math.Min(2, n);
+        var rem = Math.Max(0, n - c5);
+        var c1 = rem == 0 ? 0 : (int)Math.Round(rem * 0.40);
+        var c2 = rem == 0 ? 0 : (int)Math.Round(rem * 0.20);
+        var c3 = rem == 0 ? 0 : (int)Math.Round(rem * 0.20);
+        var c4 = rem - c1 - c2 - c3;
+        if (c4 < 0)
+        {
+            c3 += c4;
+            c4 = 0;
+        }
+
+        var i = 0;
+        for (var u = 0; u < c5; u++, i++)
+            AssignRandomTier(allTasks[i], 5, pool, now, rng);
+        for (var u = 0; u < c4; u++, i++)
+            AssignRandomTier(allTasks[i], 4, pool, now, rng);
+        for (var u = 0; u < c3; u++, i++)
+            AssignRandomTier(allTasks[i], 3, pool, now, rng);
+        for (var u = 0; u < c2; u++, i++)
+            AssignRandomTier(allTasks[i], 2, pool, now, rng);
+        for (var u = 0; u < c1; u++, i++)
+            Assign(allTasks[i], demoUser, now.AddMilliseconds(-u));
+
+        while (i < n)
+        {
+            Assign(allTasks[i], demoUser, now.AddMilliseconds(-i));
+            i++;
+        }
+
+        EnsureLegacyDemoPicksHaveDemo(organization, demoUser, now);
+        ClampDemoUserBacklogToThree(organization, demoUser, statuses, now, rng);
+        RebalanceDueDates(allTasks, now, rng);
+    }
+
+    private static IEnumerable<TaskItem> AllTasksFlat(Workspace ws) =>
+        ws.Projects.SelectMany(p => p.Boards).SelectMany(b => b.Tasks);
+
+    private static void Shuffle<T>(IList<T> list, Random rng)
+    {
+        for (var k = list.Count - 1; k > 0; k--)
+        {
+            var j = rng.Next(k + 1);
+            (list[k], list[j]) = (list[j], list[k]);
+        }
+    }
+
+    private static void ClearAllTaskAssignments(IReadOnlyList<TaskItem> tasks, List<User> users)
+    {
+        foreach (var t in tasks)
+        {
+            foreach (var a in t.TaskAssignments.ToList())
+                a.User?.TaskAssignments.Remove(a);
+            t.TaskAssignments.Clear();
+        }
+
+        foreach (var u in users)
+            u.TaskAssignments.Clear();
+    }
+
+    private static void AssignRandomTier(
+        TaskItem task,
+        int assigneeCount,
+        User[] pool,
+        DateTime now,
+        Random rng)
+    {
+        var picks = pool.OrderBy(_ => rng.Next()).Take(assigneeCount).ToArray();
+        AssignMany(task, now, picks);
+    }
+
+    private static void EnsureLegacyDemoPicksHaveDemo(Workspace organization, User demoUser, DateTime now)
+    {
+        var tick = 0;
+        foreach (var project in organization.Projects)
+        {
+            var picks = project.Boards
+                .SelectMany(b => b.Tasks)
+                .OrderBy(t => t.Id)
+                .GroupBy(t => t.TaskStatusDefinitionId)
+                .SelectMany(g => g.Take(1))
+                .Take(3)
+                .ToList();
+
+            foreach (var t in picks)
+            {
+                if (t.TaskAssignments.All(a => a.UserId != demoUser.Id))
+                    Assign(t, demoUser, now.AddTicks(--tick));
+            }
+        }
+    }
+
+    private static void ClampDemoUserBacklogToThree(
+        Workspace organization,
+        User demoUser,
+        WorkspaceStatuses statuses,
+        DateTime now,
+        Random rng)
+    {
+        var backlogId = statuses.Backlog.Id;
+
+        bool DemoOn(TaskItem t) => t.TaskAssignments.Any(a => a.UserId == demoUser.Id);
+
+        var demoTasks = AllTasksFlat(organization).Where(DemoOn).ToList();
+        var inBacklog = demoTasks.Where(t => t.TaskStatusDefinitionId == backlogId).ToList();
+        Shuffle(inBacklog, rng);
+
+        while (inBacklog.Count > 3)
+        {
+            var t = inBacklog[^1];
+            inBacklog.RemoveAt(inBacklog.Count - 1);
+            var dest = rng.Next(3) switch
+            {
+                0 => statuses.Todo,
+                1 => statuses.InProgress,
+                _ => statuses.Done
+            };
+            MoveTaskToStatus(t, dest, now);
+        }
+
+        while (inBacklog.Count < 3)
+        {
+            var donor = demoTasks
+                .Where(t => t.TaskStatusDefinitionId != backlogId && DemoOn(t))
+                .OrderBy(_ => rng.Next())
+                .FirstOrDefault(t => t.TaskStatusDefinition?.IsDoneState != true);
+            if (donor is null)
+                break;
+            MoveTaskToStatus(donor, statuses.Backlog, now);
+            inBacklog.Add(donor);
+            demoTasks = AllTasksFlat(organization).Where(DemoOn).ToList();
+            inBacklog = demoTasks.Where(t => t.TaskStatusDefinitionId == backlogId).ToList();
+        }
+    }
+
+    private static void MoveTaskToStatus(TaskItem task, TaskStatusDefinition next, DateTime nowUtc)
+    {
+        if (task.TaskStatusDefinitionId == next.Id)
+            return;
+        task.TaskStatusDefinition?.TaskItems.Remove(task);
+        task.TaskStatusDefinition = next;
+        task.TaskStatusDefinitionId = next.Id;
+        next.TaskItems.Add(task);
+        task.UpdatedAt = nowUtc;
+    }
+
+    private static void EnsureExtraSubtasksForCoverage(
+        Workspace organization,
+        WorkspaceStatuses statuses,
+        DateTime now,
+        Func<Guid> ng,
+        Random rng)
+    {
+        var roots = AllTasksFlat(organization).Where(t => t.ParentTaskItemId is null).ToList();
+        var target = (int)Math.Ceiling(roots.Count / 2.0);
+        while (roots.Count(r => r.Subtasks.Count > 0) < target)
+        {
+            var r = roots.Where(x => x.Subtasks.Count == 0).OrderBy(_ => rng.Next()).FirstOrDefault();
+            if (r?.Board is null)
+                break;
+
+            var col = rng.Next(4) switch
+            {
+                0 => statuses.Backlog,
+                1 => statuses.Todo,
+                2 => statuses.InProgress,
+                _ => statuses.Done
+            };
+
+            var title = r.Title.Length <= 40 ? r.Title : r.Title[..40];
+            NewTask(
+                ng,
+                r.Board,
+                col,
+                "Drill-down: " + title,
+                string.Empty,
+                TaskPriority.Low,
+                1,
+                now.AddDays(-rng.Next(1, 10)),
+                now,
+                now.AddDays(rng.Next(6, 45)),
+                r);
+        }
+    }
+
+    private static void RebalanceDueDates(IReadOnlyList<TaskItem> allTasks, DateTime now, Random rng)
+    {
+        var list = allTasks.ToList();
+        var target = (int)Math.Round(list.Count / 3.0);
+        var have = list.Count(t => t.DueDate.HasValue);
+
+        Shuffle(list, rng);
+
+        if (have < target)
+        {
+            foreach (var t in list.Where(t => !t.DueDate.HasValue))
+            {
+                if (have >= target)
+                    break;
+                t.DueDate = now.Date.AddDays(rng.Next(2, 55));
+                have++;
+            }
+        }
+        else if (have > target)
+        {
+            foreach (var t in list.Where(t => t.DueDate.HasValue))
+            {
+                if (have <= target)
+                    break;
+                t.DueDate = null;
+                have--;
+            }
+        }
     }
 
 }
