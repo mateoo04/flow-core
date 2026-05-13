@@ -128,6 +128,7 @@ app.UseStatusCodePagesWithReExecute("/Home/StatusCodePage", "?code={0}");
 
 app.UseForwardedHeaders();
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 var supportedCultures = new[]
