@@ -23,4 +23,6 @@ public interface IUserRepository
     Task<User?> DeactivateAsync(Guid id, CancellationToken ct = default);
 
     Task<bool> EmailExistsAsync(string email, Guid? excludeId, CancellationToken ct = default);
+
+    Task<User?> FindByEmailAsync(string email, CancellationToken ct = default);
 }

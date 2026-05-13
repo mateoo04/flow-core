@@ -18,6 +18,20 @@ dotnet run --project FlowCore
 
 The first run in `Development` auto-seeds ~60 demo tasks across 5 projects (see [`DatabaseSeeder.cs`](FlowCore/Data/DatabaseSeeder.cs); guarded by an `Any()` check so subsequent runs preserve your data). Open the URL Kestrel prints.
 
+## Development credentials
+
+The dev seed creates five demo users. All share the password `Admin6060!` — **lab-only, never use in production.**
+
+| Email | Role in seed |
+|---|---|
+| `alex@flowcore.demo` | Owner of `WorkspaceNorth` |
+| `sam@flowcore.demo` | Member |
+| `casey@flowcore.demo` | Member |
+| `jordan@flowcore.demo` | Member |
+| `morgan@flowcore.demo` | Member |
+
+You can also register a fresh account at `/account/register`.
+
 ## Architecture
 
 ```

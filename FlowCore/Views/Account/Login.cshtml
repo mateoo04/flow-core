@@ -1,0 +1,41 @@
+@model FlowCore.Models.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Sign in";
+    Layout = "_Layout";
+}
+
+<div class="mx-auto max-w-md py-12">
+    <h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg mb-6">Sign in</h1>
+
+    <form asp-action="Login" method="post" class="space-y-4">
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        <div asp-validation-summary="ModelOnly" class="rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-950/40 dark:text-red-400"></div>
+
+        <div>
+            <label asp-for="Email" class="block text-sm font-medium text-fg mb-1"></label>
+            <input asp-for="Email" class="w-full rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:ring-2 focus:ring-brand/50" autocomplete="username" />
+            <span asp-validation-for="Email" class="mt-1 block text-xs text-red-600 dark:text-red-400"></span>
+        </div>
+
+        <div>
+            <label asp-for="Password" class="block text-sm font-medium text-fg mb-1"></label>
+            <input asp-for="Password" class="w-full rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:ring-2 focus:ring-brand/50" autocomplete="current-password" />
+            <span asp-validation-for="Password" class="mt-1 block text-xs text-red-600 dark:text-red-400"></span>
+        </div>
+
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input asp-for="RememberMe" type="checkbox" class="rounded border-border" />
+            <span class="text-sm text-fg-secondary">@Html.DisplayNameFor(m => m.RememberMe)</span>
+        </label>
+
+        <button type="submit" class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
+            Sign in
+        </button>
+
+        <p class="text-sm text-fg-muted">
+            Don't have an account?
+            <a asp-action="Register" class="text-[var(--color-secondary)] underline hover:opacity-80">Register</a>
+        </p>
+    </form>
+</div>

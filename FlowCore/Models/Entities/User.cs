@@ -1,16 +1,13 @@
-using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace FlowCore.Models;
 
-public class User
+public class User : IdentityUser<Guid>
 {
-    [Key]
-    public Guid Id { get; set; }
     public string FullName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
     public DateTime JoinedAt { get; set; }
     public bool IsActive { get; set; }
 
-    public virtual ICollection<Workspace> OwnedWorkspaces { get; set; } = new List<Workspace>();
+    public virtual ICollection<WorkspaceMember> WorkspaceMemberships { get; set; } = new List<WorkspaceMember>();
     public virtual ICollection<TaskAssignment> TaskAssignments { get; set; } = new List<TaskAssignment>();
 }

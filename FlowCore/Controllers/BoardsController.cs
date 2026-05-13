@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
-using FlowCore.Services;
 
 namespace FlowCore.Controllers;
 
@@ -9,11 +9,19 @@ public class BoardsController : BaseController
 {
     private readonly IBoardRepository _boards;
     private readonly IProjectRepository _projects;
+    private readonly IWorkspaceRepository _workspaces;
+    private readonly IAuthorizationService _authz;
 
-    public BoardsController(IBoardRepository boards, IProjectRepository projects)
+    public BoardsController(
+        IBoardRepository boards,
+        IProjectRepository projects,
+        IWorkspaceRepository workspaces,
+        IAuthorizationService authz)
     {
         _boards = boards;
         _projects = projects;
+        _workspaces = workspaces;
+        _authz = authz;
     }
 
     public async Task<IActionResult> Index(CancellationToken ct)
@@ -32,7 +40,10 @@ public class BoardsController : BaseController
             return NotFound();
 
         if (entity.Project is not null)
+        {
+            if (await EnsureWorkspaceMemberAsync(entity.Project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
             SetNav(entity.Project.WorkspaceId, entity.ProjectId);
+        }
 
         return RedirectToAction(nameof(ProjectsController.Details), "Projects",
             new { id = entity.ProjectId, boardId = entity.Id });
@@ -43,6 +54,7 @@ public class BoardsController : BaseController
     {
         var project = await _projects.GetByIdAsync(projectId, ct);
         if (project is null) return NotFound();
+        if (await EnsureWorkspaceMemberAsync(project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
         SetNav(project.WorkspaceId, project.Id);
         ViewBag.Project = project;
@@ -58,6 +70,7 @@ public class BoardsController : BaseController
 
         var project = await _projects.GetByIdAsync(projectId, ct);
         if (project is null) return NotFound();
+        if (await EnsureWorkspaceMemberAsync(project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
         if (!ModelState.IsValid)
         {
@@ -77,7 +90,10 @@ public class BoardsController : BaseController
         if (entity is null) return NotFound();
 
         if (entity.Project is not null)
+        {
+            if (await EnsureWorkspaceMemberAsync(entity.Project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
             SetNav(entity.Project.WorkspaceId, entity.ProjectId);
+        }
 
         ViewBag.Project = entity.Project;
         return View(new BoardFormVm
@@ -96,6 +112,11 @@ public class BoardsController : BaseController
         model.Id = id;
         var entity = await _boards.GetByIdAsync(id, ct);
         if (entity is null) return NotFound();
+
+        if (entity.Project is not null)
+        {
+            if (await EnsureWorkspaceMemberAsync(entity.Project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
+        }
 
         model.ProjectId = entity.ProjectId;
         await ValidateUniqueAsync(model, excludeId: id, ct);
@@ -119,6 +140,11 @@ public class BoardsController : BaseController
     {
         var entity = await _boards.GetByIdAsync(id, ct);
         if (entity is null) return NotFound();
+
+        if (entity.Project is not null)
+        {
+            if (await EnsureWorkspaceMemberAsync(entity.Project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
+        }
 
         var projectId = entity.ProjectId;
         if (!await _boards.TryDeleteAsync(id, ct))

@@ -1,31 +1,43 @@
 using System.Diagnostics;
 using FlowCore.Common;
-using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
 using FlowCore.Services;
 using FlowCore.Services.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowCore.Controllers;
 
-public class HomeController : Controller
+public class HomeController : BaseController
 {
     private readonly ITaskRepository _tasks;
     private readonly IUserRepository _users;
     private readonly ITaskService _taskService;
+    private readonly ICurrentUserAccessor _currentUser;
+    private readonly IWorkspaceRepository _workspaces;
+    private readonly IAuthorizationService _authz;
 
-    public HomeController(ITaskRepository tasks, IUserRepository users, ITaskService taskService)
+    public HomeController(
+        ITaskRepository tasks,
+        IUserRepository users,
+        ITaskService taskService,
+        ICurrentUserAccessor currentUser,
+        IWorkspaceRepository workspaces,
+        IAuthorizationService authz)
     {
         _tasks = tasks;
         _users = users;
         _taskService = taskService;
+        _currentUser = currentUser;
+        _workspaces = workspaces;
+        _authz = authz;
     }
 
     public async Task<IActionResult> Index(CancellationToken ct)
     {
-        var currentUserId = Data.DemoSeedIds.UserAlex;
+        var currentUserId = _currentUser.UserId;
         var user = await _users.GetByIdAsync(currentUserId, ct);
 
         var tasks = await _tasks.GetAssignedToUserAsync(currentUserId, ct);
@@ -89,7 +101,12 @@ public class HomeController : Controller
     {
         if (body is null) return BadRequest();
 
-        var currentUserId = DemoSeedIds.UserAlex;
+        var task = await _tasks.GetByIdAsync(id, ct);
+        if (task is null) return NotFound();
+        var workspaceId = task.Board!.Project!.WorkspaceId;
+        if (await EnsureWorkspaceMemberAsync(workspaceId, _workspaces, _authz, ct) is { } deny) return deny;
+
+        var currentUserId = _currentUser.UserId;
         var result = await _taskService.MoveOnHomeAsync(
             currentUserId, id, body.StatusName, body.Position, ct);
 

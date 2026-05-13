@@ -85,4 +85,12 @@ public sealed class EfUserRepository : IUserRepository
         return _db.Users.AnyAsync(u =>
             u.Email.ToLower() == lowered && (excludeId == null || u.Id != excludeId), ct);
     }
+
+    public Task<User?> FindByEmailAsync(string email, CancellationToken ct = default)
+    {
+        var normalized = email.Trim().ToUpperInvariant();
+        return _db.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.NormalizedEmail == normalized, ct);
+    }
 }

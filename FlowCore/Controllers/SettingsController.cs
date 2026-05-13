@@ -2,41 +2,55 @@ using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
-using Microsoft.EntityFrameworkCore;
+using FlowCore.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlowCore.Controllers;
 
 [Route("/workspaces/{workspaceId:guid}/settings")]
-public class SettingsController : Controller
+public class SettingsController : BaseController
 {
     private readonly FlowCoreDbContext _db;
     private readonly IWorkspaceRepository _workspaces;
+    private readonly ICurrentUserAccessor _currentUser;
+    private readonly IAuthorizationService _authz;
 
-    public SettingsController(FlowCoreDbContext db, IWorkspaceRepository workspaces)
+    public SettingsController(
+        FlowCoreDbContext db,
+        IWorkspaceRepository workspaces,
+        ICurrentUserAccessor currentUser,
+        IAuthorizationService authz)
     {
         _db = db;
         _workspaces = workspaces;
+        _currentUser = currentUser;
+        _authz = authz;
     }
 
     [HttpGet("", Name = "workspace-settings")]
     public async Task<IActionResult> Index(Guid? workspaceId, CancellationToken ct)
     {
-        var ws = workspaceId is { } wid
-            ? await _db.Workspaces
-                .AsNoTracking()
-                .Include(w => w.TaskStatusDefinitions)
-                .FirstOrDefaultAsync(w => w.Id == wid, ct)
-            : await _db.Workspaces
-                .AsNoTracking()
-                .Include(w => w.TaskStatusDefinitions)
-                .OrderBy(w => w.Name)
-                .FirstOrDefaultAsync(ct);
+        if (workspaceId is null)
+        {
+            var first = (await _workspaces.GetForUserAsync(_currentUser.UserId, ct)).FirstOrDefault();
+            if (first is null) return NotFound();
+            return RedirectToAction(nameof(Index), new { workspaceId = first.Id });
+        }
+
+        var wid = workspaceId.Value;
+        if (await EnsureWorkspaceMemberAsync(wid, _workspaces, _authz, ct) is { } deny) return deny;
+
+        var ws = await _db.Workspaces
+            .AsNoTracking()
+            .Include(w => w.TaskStatusDefinitions)
+            .FirstOrDefaultAsync(w => w.Id == wid, ct);
         if (ws is null)
             return NotFound();
 
         var statuses = ws.TaskStatusDefinitions.OrderBy(s => s.Position).ToList();
-        var allWorkspaces = await _workspaces.GetAllAsync(ct);
+        var allWorkspaces = await _workspaces.GetForUserAsync(_currentUser.UserId, ct);
 
         ViewData["ActiveWorkspaceId"] = ws.Id;
         var vm = new SettingsIndexVm(ws, statuses, allWorkspaces.OrderBy(w => w.Name).ToList());
@@ -47,6 +61,8 @@ public class SettingsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Guid workspaceId, TaskStatusFormVm model, CancellationToken ct)
     {
+        if (await EnsureWorkspaceMemberAsync(workspaceId, _workspaces, _authz, ct) is { } deny) return deny;
+
         if (!ModelState.IsValid || string.IsNullOrWhiteSpace(model.Name))
         {
             TempData["SettingsError"] = "Status name is required.";
@@ -80,6 +96,8 @@ public class SettingsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Update(Guid workspaceId, Guid id, TaskStatusFormVm model, CancellationToken ct)
     {
+        if (await EnsureWorkspaceMemberAsync(workspaceId, _workspaces, _authz, ct) is { } deny) return deny;
+
         if (string.IsNullOrWhiteSpace(model.Name))
         {
             TempData["SettingsError"] = "Status name is required.";
@@ -101,6 +119,8 @@ public class SettingsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Reorder(Guid workspaceId, Guid id, int direction, CancellationToken ct)
     {
+        if (await EnsureWorkspaceMemberAsync(workspaceId, _workspaces, _authz, ct) is { } deny) return deny;
+
         var ordered = await _db.TaskStatusDefinitions
             .Where(s => s.WorkspaceId == workspaceId)
             .OrderBy(s => s.Position)
@@ -121,6 +141,8 @@ public class SettingsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid workspaceId, Guid id, CancellationToken ct)
     {
+        if (await EnsureWorkspaceMemberAsync(workspaceId, _workspaces, _authz, ct) is { } deny) return deny;
+
         var statuses = await _db.TaskStatusDefinitions
             .Where(x => x.WorkspaceId == workspaceId)
             .OrderBy(x => x.Position)

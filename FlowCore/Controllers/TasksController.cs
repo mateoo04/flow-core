@@ -1,9 +1,9 @@
 using FlowCore.Common;
-using FlowCore.Data;
 using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
 using FlowCore.Services;
 using FlowCore.Services.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowCore.Controllers;
@@ -16,6 +16,9 @@ public class TasksController : BaseController
     private readonly ITaskService _taskService;
     private readonly ICommentService _commentService;
     private readonly IBreadcrumbTrailBuilder _breadcrumbs;
+    private readonly IWorkspaceRepository _workspaces;
+    private readonly ICurrentUserAccessor _currentUser;
+    private readonly IAuthorizationService _authz;
 
     public TasksController(
         ITaskRepository tasks,
@@ -23,7 +26,10 @@ public class TasksController : BaseController
         IUserRepository users,
         ITaskService taskService,
         ICommentService commentService,
-        IBreadcrumbTrailBuilder breadcrumbs)
+        IBreadcrumbTrailBuilder breadcrumbs,
+        IWorkspaceRepository workspaces,
+        ICurrentUserAccessor currentUser,
+        IAuthorizationService authz)
     {
         _tasks = tasks;
         _projects = projects;
@@ -31,6 +37,9 @@ public class TasksController : BaseController
         _taskService = taskService;
         _commentService = commentService;
         _breadcrumbs = breadcrumbs;
+        _workspaces = workspaces;
+        _currentUser = currentUser;
+        _authz = authz;
     }
 
     public async Task<IActionResult> Index(CancellationToken ct)
@@ -49,6 +58,7 @@ public class TasksController : BaseController
         var project = await _projects.GetByIdAsync(projectId, ct);
         if (project is null)
             return NotFound();
+        if (await EnsureWorkspaceMemberAsync(project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
         var board = boardId is { } bid
             ? project.Boards.FirstOrDefault(b => b.Id == bid)
@@ -89,6 +99,7 @@ public class TasksController : BaseController
         var project = await _projects.GetByIdAsync(projectId, ct);
         if (project is null)
             return NotFound();
+        if (await EnsureWorkspaceMemberAsync(project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
         var workspace = project.Workspace;
         var statuses = workspace?.TaskStatusDefinitions.OrderBy(s => s.Position).ToList()
@@ -128,6 +139,7 @@ public class TasksController : BaseController
         var project = task.Board?.Project;
         var workspace = project?.Workspace;
         if (project is null || workspace is null) return NotFound();
+        if (await EnsureWorkspaceMemberAsync(project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
         var statuses = workspace.TaskStatusDefinitions.OrderBy(s => s.Position).ToList();
         SetNav(project.WorkspaceId, project.Id);
@@ -145,6 +157,13 @@ public class TasksController : BaseController
     public async Task<IActionResult> Edit(Guid id, TaskEditFormVm model, CancellationToken ct)
     {
         model.Id = id;
+
+        // Load task to derive workspace id for auth check
+        var taskForAuth = await _tasks.GetForEditAsync(id, ct);
+        if (taskForAuth is null) return NotFound();
+        var projectForAuth = taskForAuth.Board?.Project;
+        if (projectForAuth is null) return NotFound();
+        if (await EnsureWorkspaceMemberAsync(projectForAuth.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
         if (!ModelState.IsValid)
             return await RenderEditFormAsync(id, model, ct);
@@ -174,9 +193,15 @@ public class TasksController : BaseController
     public async Task<IActionResult> Details(Guid id, CancellationToken ct)
     {
         var entity = await _tasks.GetByIdAsync(id, ct);
-        var project = entity?.Board?.Project;
+        if (entity is null) return NotFound();
+
+        var project = entity.Board?.Project;
         if (project is not null)
+        {
+            if (await EnsureWorkspaceMemberAsync(project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
             SetNav(project.WorkspaceId, project.Id);
+        }
+
         return ViewDetails(entity, _breadcrumbs.ForTask);
     }
 
@@ -187,7 +212,15 @@ public class TasksController : BaseController
         if (!ModelState.IsValid)
             return RedirectToAction(nameof(Details), new { id });
 
-        var result = await _commentService.CreateAsync(id, DemoSeedIds.UserAlex, model.Body, ct);
+        var task = await _tasks.GetByIdAsync(id, ct);
+        if (task is null) return NotFound();
+        var project = task.Board?.Project;
+        if (project is not null)
+        {
+            if (await EnsureWorkspaceMemberAsync(project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
+        }
+
+        var result = await _commentService.CreateAsync(id, _currentUser.UserId, model.Body, ct);
         if (result.Error?.Kind == ErrorKind.NotFound)
             return NotFound();
 
@@ -201,6 +234,12 @@ public class TasksController : BaseController
         var entity = await _tasks.GetByIdAsync(id, ct);
         if (entity is null)
             return NotFound();
+
+        var project = entity.Board?.Project;
+        if (project is not null)
+        {
+            if (await EnsureWorkspaceMemberAsync(project.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
+        }
 
         var projectId = entity.Board?.ProjectId;
         if (!await _tasks.TryDeleteAsync(id, ct))
@@ -220,6 +259,12 @@ public class TasksController : BaseController
         CancellationToken ct)
     {
         if (body is null) return BadRequest();
+
+        var task = await _tasks.GetByIdAsync(id, ct);
+        if (task is null) return NotFound();
+        var workspaceId = task.Board?.Project?.WorkspaceId;
+        if (workspaceId is null) return NotFound();
+        if (await EnsureWorkspaceMemberAsync(workspaceId.Value, _workspaces, _authz, ct) is { } deny) return deny;
 
         var result = await _taskService.MoveAsync(id, body.StatusId, body.Position, ct);
         if (result.IsSuccess) return NoContent();

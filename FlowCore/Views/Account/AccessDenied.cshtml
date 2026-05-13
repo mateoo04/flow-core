@@ -1,0 +1,11 @@
+@{
+    ViewData["Title"] = "Access denied";
+    Layout = "_Layout";
+    Context.Response.StatusCode = 403;
+}
+
+<div class="mx-auto max-w-lg py-12 text-center space-y-4">
+    <h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg">Access denied</h1>
+    <p class="text-fg-muted">You don't have permission to view this resource.</p>
+    <a asp-controller="Home" asp-action="Index" class="text-[var(--color-secondary)] underline hover:opacity-80">Back to home</a>
+</div>

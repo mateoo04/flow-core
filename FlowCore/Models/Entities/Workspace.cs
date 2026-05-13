@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FlowCore.Models;
 
@@ -13,10 +12,7 @@ public class Workspace
     public DateTime? ArchivedAt { get; set; }
     public WorkspaceVisibility Visibility { get; set; }
 
-    [ForeignKey(nameof(Owner))]
-    public Guid OwnerUserId { get; set; }
-
-    public virtual User? Owner { get; set; }
+    public virtual ICollection<WorkspaceMember> Members { get; set; } = new List<WorkspaceMember>();
     public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
     public virtual ICollection<TaskStatusDefinition> TaskStatusDefinitions { get; set; } = new List<TaskStatusDefinition>();
 }

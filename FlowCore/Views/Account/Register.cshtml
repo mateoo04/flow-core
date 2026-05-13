@@ -1,0 +1,47 @@
+@model FlowCore.Models.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Create account";
+    Layout = "_Layout";
+}
+
+<div class="mx-auto max-w-md py-12">
+    <h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg mb-6">Create account</h1>
+
+    <form asp-action="Register" method="post" class="space-y-4">
+        <div asp-validation-summary="ModelOnly" class="rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-950/40 dark:text-red-400"></div>
+
+        <div>
+            <label asp-for="FullName" class="block text-sm font-medium text-fg mb-1"></label>
+            <input asp-for="FullName" class="w-full rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:ring-2 focus:ring-brand/50" autocomplete="name" />
+            <span asp-validation-for="FullName" class="mt-1 block text-xs text-red-600 dark:text-red-400"></span>
+        </div>
+
+        <div>
+            <label asp-for="Email" class="block text-sm font-medium text-fg mb-1"></label>
+            <input asp-for="Email" class="w-full rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:ring-2 focus:ring-brand/50" autocomplete="username" />
+            <span asp-validation-for="Email" class="mt-1 block text-xs text-red-600 dark:text-red-400"></span>
+        </div>
+
+        <div>
+            <label asp-for="Password" class="block text-sm font-medium text-fg mb-1"></label>
+            <input asp-for="Password" class="w-full rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:ring-2 focus:ring-brand/50" autocomplete="new-password" />
+            <span asp-validation-for="Password" class="mt-1 block text-xs text-red-600 dark:text-red-400"></span>
+        </div>
+
+        <div>
+            <label asp-for="ConfirmPassword" class="block text-sm font-medium text-fg mb-1"></label>
+            <input asp-for="ConfirmPassword" class="w-full rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:ring-2 focus:ring-brand/50" autocomplete="new-password" />
+            <span asp-validation-for="ConfirmPassword" class="mt-1 block text-xs text-red-600 dark:text-red-400"></span>
+        </div>
+
+        <button type="submit" class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">person_add</span>
+            Create account
+        </button>
+
+        <p class="text-sm text-fg-muted">
+            Already have an account?
+            <a asp-action="Login" class="text-[var(--color-secondary)] underline hover:opacity-80">Sign in</a>
+        </p>
+    </form>
+</div>

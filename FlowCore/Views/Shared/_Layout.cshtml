@@ -1,22 +1,37 @@
-@using FlowCore.Data
 @using FlowCore.Repositories
+@using FlowCore.Services
 @inject IWorkspaceRepository WorkspaceRepo
-@inject IProjectRepository ProjectRepo
-@inject IUserRepository UserRepo
+@inject ICurrentUserAccessor CurrentUser
 @inject FlowCore.Services.UiText T
 @{
-    var workspaces = (await WorkspaceRepo.GetAllAsync()).ToList();
-    var allProjects = (await ProjectRepo.GetAllAsync()).ToList();
+    string? profileName = null;
+    string? profileEmailTop = null;
+    string initials = "?";
+    List<FlowCore.Models.Workspace> workspaces;
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        workspaces = (await WorkspaceRepo.GetForUserAsync(CurrentUser.UserId)).ToList();
+        var me = await CurrentUser.GetAsync();
+        profileName = me?.FullName ?? User.Identity.Name ?? "";
+        profileEmailTop = me?.Email ?? "";
+        var parts = profileName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        initials = parts.Length switch
+        {
+            0 => "?",
+            1 => parts[0][..1].ToUpper(),
+            _ => $"{parts[0][..1]}{parts[1][..1]}".ToUpper()
+        };
+    }
+    else
+    {
+        workspaces = new List<FlowCore.Models.Workspace>();
+    }
+    var allProjects = workspaces.SelectMany(w => w.Projects).ToList();
     var activeWs = ViewData["ActiveWorkspaceId"] as Guid?;
     var activeProject = ViewData["ActiveProjectId"] as Guid?;
     var sidebarProjects = activeWs is { } w
         ? allProjects.Where(p => p.WorkspaceId == w).OrderBy(p => p.Name).Take(12).ToList()
         : allProjects.OrderBy(p => p.Name).Take(8).ToList();
-    var profileUser = await UserRepo.GetByIdAsync(DemoSeedIds.UserAlex)
-                      ?? (await UserRepo.GetAllAsync()).FirstOrDefault();
-    var initials = profileUser is { FullName: var fn } && fn.Length > 0
-        ? string.Concat(fn.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(s => char.ToUpperInvariant(s[0])))
-        : "?";
 
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
@@ -66,11 +81,9 @@
     }
     <aside class="flex h-full min-h-0 w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-sidebar" aria-label="Site navigation" data-sidebar>
         <div class="shrink-0 px-4 pt-6 pb-4">
-            <a class="group flex min-w-0 items-center gap-2 no-underline outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+            <a class="group flex min-w-0 items-center no-underline outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
                asp-controller="Home" asp-action="Index">
-                <span aria-hidden="true"
-                      class="font-headline flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--color-primary)] text-[13px] font-extrabold leading-none text-[var(--color-on-primary)] shadow-sm">F</span>
-                <span class="font-headline truncate text-xl font-extrabold tracking-tight text-fg">FlowCore</span>
+                <img src="~/images/logo.png" alt="FlowCore" class="h-12 w-auto object-contain"/>
             </a>
         </div>
 
@@ -110,16 +123,29 @@
                     <partial name="_Icon" model='new IconVm { Name = "cog-6-tooth", Size = 16, CssClass = "shrink-0 text-fg-muted" }'/>
                     @T["nav.settings"]
                 </a>
-                @if (profileUser is not null)
+                @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <button type="button" class="mt-1 flex w-full items-center gap-3 rounded-md border border-transparent p-2 text-left transition-[background-color,border-color] duration-200 ease-out hover:border-border/60 hover:bg-[var(--color-surface-container-low)]">
+                    <div class="mt-1 flex w-full items-center gap-3 rounded-md border border-transparent p-2 transition-[background-color,border-color] duration-200 ease-out hover:border-border/60 hover:bg-[var(--color-surface-container-low)]">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border/70 bg-[var(--color-primary)]/10 text-[11px] font-semibold text-fg" aria-hidden="true">@initials</span>
                         <span class="min-w-0 flex-1">
-                            <span class="block truncate text-[13px] font-semibold leading-tight text-fg">@profileUser.FullName</span>
-                            <span class="mt-0.5 block truncate text-[11px] leading-tight text-fg-muted">@(profileUser.Email)</span>
+                            <span class="block truncate text-[13px] font-semibold leading-tight text-fg">@profileName</span>
+                            @if (profileEmailTop is { Length: > 0 })
+                            {
+                                <span class="block truncate text-[11px] leading-tight text-fg-muted">@profileEmailTop</span>
+                            }
                         </span>
-                        <partial name="_Icon" model='new IconVm { Name = "chevron-up-down", Size = 14, CssClass = "shrink-0 text-fg-muted" }'/>
-                    </button>
+                        <form method="post" asp-controller="Account" asp-action="Logout" class="shrink-0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="text-[11px] leading-tight text-fg-muted underline hover:text-fg transition-colors">Sign out</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="mt-1 flex w-full items-center gap-3 rounded-md border border-transparent px-3 py-2 text-[13px] font-medium text-fg-secondary">
+                        <a asp-controller="Account" asp-action="Login" class="underline hover:text-fg transition-colors">Sign in</a>
+                        <a asp-controller="Account" asp-action="Register" class="underline hover:text-fg transition-colors">Register</a>
+                    </div>
                 }
             </div>
         </div>

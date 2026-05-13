@@ -1,0 +1,91 @@
+@model (Guid WorkspaceId, IReadOnlyList<FlowCore.Models.ViewModels.WorkspaceMemberRow> Members, bool IsOwner)
+@{
+    var (workspaceId, members, isOwner) = Model;
+}
+
+<section class="space-y-4">
+    <h2 class="text-lg font-semibold">Members</h2>
+
+    @if (TempData["MemberError"] is string err)
+    {
+        <div class="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">@err</div>
+    }
+    @if (TempData["MemberInfo"] is string info)
+    {
+        <div class="rounded border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">@info</div>
+    }
+
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="text-left text-slate-500">
+                <th class="py-1">Name</th>
+                <th class="py-1">Email</th>
+                <th class="py-1">Role</th>
+                <th class="py-1">Joined</th>
+                @if (isOwner) { <th></th> }
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var m in members)
+        {
+            <tr class="border-t">
+                <td class="py-1">@m.FullName</td>
+                <td class="py-1">@m.Email</td>
+                <td class="py-1">@m.Role</td>
+                <td class="py-1">@m.JoinedAt.ToLocalTime().ToString("yyyy-MM-dd")</td>
+                @if (isOwner)
+                {
+                    <td class="py-1 text-right">
+                        @if (m.Role != FlowCore.Models.WorkspaceRole.Owner)
+                        {
+                            <form method="post" asp-controller="Workspaces" asp-action="RemoveMember"
+                                  asp-route-id="@workspaceId" asp-route-userId="@m.UserId" class="inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="text-red-600 underline">Remove</button>
+                            </form>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    @if (isOwner)
+    {
+        <details class="mt-4">
+            <summary class="cursor-pointer text-sm underline">Add member</summary>
+            <form method="post" asp-controller="Workspaces" asp-action="AddMember" asp-route-id="@workspaceId"
+                  class="mt-2 flex items-end gap-2">
+                @Html.AntiForgeryToken()
+                <div class="grow">
+                    <label class="block text-xs">Email</label>
+                    <input name="Email" type="email" class="w-full rounded border px-3 py-2" />
+                </div>
+                <button type="submit" class="rounded bg-slate-800 text-white px-3 py-2 text-sm">Add</button>
+            </form>
+        </details>
+
+        @if (members.Count(m => m.Role != FlowCore.Models.WorkspaceRole.Owner) > 0)
+        {
+            <details class="mt-2">
+                <summary class="cursor-pointer text-sm underline">Transfer ownership</summary>
+                <form method="post" asp-controller="Workspaces" asp-action="TransferOwnership" asp-route-id="@workspaceId"
+                      class="mt-2 flex items-end gap-2">
+                    @Html.AntiForgeryToken()
+                    <div class="grow">
+                        <label class="block text-xs">New owner</label>
+                        <select name="NewOwnerUserId" class="w-full rounded border px-3 py-2">
+                            <option value="">— select member —</option>
+                            @foreach (var m in members.Where(m => m.Role != FlowCore.Models.WorkspaceRole.Owner))
+                            {
+                                <option value="@m.UserId">@m.FullName (@m.Email)</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="rounded bg-amber-700 text-white px-3 py-2 text-sm">Transfer</button>
+                </form>
+            </details>
+        }
+    }
+</section>

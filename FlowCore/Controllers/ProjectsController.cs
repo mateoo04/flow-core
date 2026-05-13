@@ -4,6 +4,7 @@ using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
 using FlowCore.Services;
 using FlowCore.Services.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowCore.Controllers;
@@ -14,21 +15,32 @@ public class ProjectsController : BaseController
     private readonly IWorkspaceRepository _workspaces;
     private readonly IProjectService _projectService;
     private readonly IBreadcrumbTrailBuilder _breadcrumbs;
+    private readonly ICurrentUserAccessor _currentUser;
+    private readonly IAuthorizationService _authz;
 
     public ProjectsController(
         IProjectRepository projects,
         IWorkspaceRepository workspaces,
         IProjectService projectService,
-        IBreadcrumbTrailBuilder breadcrumbs)
+        IBreadcrumbTrailBuilder breadcrumbs,
+        ICurrentUserAccessor currentUser,
+        IAuthorizationService authz)
     {
         _projects = projects;
         _workspaces = workspaces;
         _projectService = projectService;
         _breadcrumbs = breadcrumbs;
+        _currentUser = currentUser;
+        _authz = authz;
     }
 
     public async Task<IActionResult> Index(Guid? workspaceId, CancellationToken ct)
     {
+        if (workspaceId is { } wid)
+        {
+            if (await EnsureWorkspaceMemberAsync(wid, _workspaces, _authz, ct) is { } deny) return deny;
+        }
+
         var list = workspaceId is null
             ? await _projects.GetAllAsync(ct)
             : await _projects.GetByWorkspaceIdAsync(workspaceId.Value, ct);
@@ -44,7 +56,7 @@ public class ProjectsController : BaseController
     [HttpGet]
     public async Task<IActionResult> Create(Guid? workspaceId, CancellationToken ct)
     {
-        var workspaces = await _workspaces.GetAllAsync(ct);
+        var workspaces = await _workspaces.GetForUserAsync(_currentUser.UserId, ct);
         if (workspaces.Count == 0)
             return NotFound();
 
@@ -66,7 +78,14 @@ public class ProjectsController : BaseController
     {
         if (!ModelState.IsValid)
         {
-            ViewBag.Workspaces = await _workspaces.GetAllAsync(ct);
+            ViewBag.Workspaces = await _workspaces.GetForUserAsync(_currentUser.UserId, ct);
+            return View(model);
+        }
+
+        // Verify the user is a member of the chosen workspace before creating a project in it
+        if (await EnsureWorkspaceMemberAsync(model.WorkspaceId, _workspaces, _authz, ct) is { } deny)
+        {
+            ViewBag.Workspaces = await _workspaces.GetForUserAsync(_currentUser.UserId, ct);
             return View(model);
         }
 
@@ -87,7 +106,7 @@ public class ProjectsController : BaseController
             return NotFound();
 
         ModelState.AddModelError(string.Empty, result.Error.Value.Message);
-        ViewBag.Workspaces = await _workspaces.GetAllAsync(ct);
+        ViewBag.Workspaces = await _workspaces.GetForUserAsync(_currentUser.UserId, ct);
         return View(model);
     }
 
@@ -96,6 +115,7 @@ public class ProjectsController : BaseController
     {
         var entity = await _projects.GetByIdAsync(id, ct);
         if (entity is null) return NotFound();
+        if (await EnsureWorkspaceMemberAsync(entity.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
         SetNav(entity.WorkspaceId, entity.Id);
 
@@ -115,6 +135,10 @@ public class ProjectsController : BaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, ProjectEditFormVm model, CancellationToken ct)
     {
+        var entity = await _projects.GetByIdAsync(id, ct);
+        if (entity is null) return NotFound();
+        if (await EnsureWorkspaceMemberAsync(entity.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
+
         model.Id = id;
         if (!ModelState.IsValid)
             return View(model);
@@ -146,6 +170,7 @@ public class ProjectsController : BaseController
         var entity = await _projects.GetByIdAsync(id, ct);
         if (entity is null)
             return NotFound();
+        if (await EnsureWorkspaceMemberAsync(entity.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
         SetNav(entity.WorkspaceId, entity.Id);
 
@@ -170,6 +195,10 @@ public class ProjectsController : BaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
+        var entity = await _projects.GetByIdAsync(id, ct);
+        if (entity is null) return NotFound();
+        if (await EnsureWorkspaceMemberAsync(entity.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
+
         if (!await _projects.TryDeleteAsync(id, ct))
             return NotFound();
         return RedirectToAction(nameof(Index));

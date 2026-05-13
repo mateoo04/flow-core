@@ -1,19 +1,19 @@
 using FlowCore.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace FlowCore.Data;
 
-public sealed class DemoDataGraph
-{
-    public IReadOnlyList<Workspace> Workspaces { get; init; } = Array.Empty<Workspace>();
-    public IReadOnlyList<User> Users { get; init; } = Array.Empty<User>();
-    public IReadOnlyList<Tag> Tags { get; init; } = Array.Empty<Tag>();
-}
+public sealed record SampleGraph(
+    IReadOnlyList<User> Users,
+    IReadOnlyList<Tag> Tags,
+    IReadOnlyList<Workspace> Workspaces,
+    IReadOnlyList<WorkspaceMember> WorkspaceMembers);
 
 public static class DemoDataBuilder
 {
     private readonly record struct Team(User Alex, User Sam, User Casey, User Jordan, User Morgan);
 
-    public static DemoDataGraph CreateSampleGraph()
+    public static SampleGraph CreateSampleGraph(IPasswordHasher<User> hasher)
     {
         var now = new DateTime(2026, 4, 1, 12, 0, 0, DateTimeKind.Utc);
         Guid Ng() => Guid.NewGuid();
@@ -23,45 +23,85 @@ public static class DemoDataBuilder
             Id = DemoSeedIds.UserAlex,
             FullName = "Alex Owner",
             Email = "alex@flowcore.demo",
+            NormalizedEmail = "ALEX@FLOWCORE.DEMO",
+            UserName = "alex@flowcore.demo",
+            NormalizedUserName = "ALEX@FLOWCORE.DEMO",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            LockoutEnabled = true,
             JoinedAt = now.AddMonths(-6),
             IsActive = true
         };
+        ownerAlex.PasswordHash = hasher.HashPassword(ownerAlex, "Admin6060!");
 
         var memberSam = new User
         {
             Id = DemoSeedIds.UserSam,
             FullName = "Sam Member",
             Email = "sam@flowcore.demo",
+            NormalizedEmail = "SAM@FLOWCORE.DEMO",
+            UserName = "sam@flowcore.demo",
+            NormalizedUserName = "SAM@FLOWCORE.DEMO",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            LockoutEnabled = true,
             JoinedAt = now.AddMonths(-3),
             IsActive = true
         };
+        memberSam.PasswordHash = hasher.HashPassword(memberSam, "Admin6060!");
 
         var casey = new User
         {
             Id = DemoSeedIds.UserCasey,
             FullName = "Casey Rivera",
             Email = "casey@flowcore.demo",
+            NormalizedEmail = "CASEY@FLOWCORE.DEMO",
+            UserName = "casey@flowcore.demo",
+            NormalizedUserName = "CASEY@FLOWCORE.DEMO",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            LockoutEnabled = true,
             JoinedAt = now.AddMonths(-2),
             IsActive = true
         };
+        casey.PasswordHash = hasher.HashPassword(casey, "Admin6060!");
 
         var jordan = new User
         {
             Id = DemoSeedIds.UserJordan,
             FullName = "Jordan Lee",
             Email = "jordan@flowcore.demo",
+            NormalizedEmail = "JORDAN@FLOWCORE.DEMO",
+            UserName = "jordan@flowcore.demo",
+            NormalizedUserName = "JORDAN@FLOWCORE.DEMO",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            LockoutEnabled = true,
             JoinedAt = now.AddMonths(-2),
             IsActive = true
         };
+        jordan.PasswordHash = hasher.HashPassword(jordan, "Admin6060!");
 
         var morgan = new User
         {
             Id = DemoSeedIds.UserMorgan,
             FullName = "Morgan Kim",
             Email = "morgan@flowcore.demo",
+            NormalizedEmail = "MORGAN@FLOWCORE.DEMO",
+            UserName = "morgan@flowcore.demo",
+            NormalizedUserName = "MORGAN@FLOWCORE.DEMO",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            LockoutEnabled = true,
             JoinedAt = now.AddMonths(-1),
             IsActive = true
         };
+        morgan.PasswordHash = hasher.HashPassword(morgan, "Admin6060!");
 
         var users = new List<User> { ownerAlex, memberSam, casey, jordan, morgan };
         var team = new Team(ownerAlex, memberSam, casey, jordan, morgan);
@@ -74,14 +114,11 @@ public static class DemoDataBuilder
         {
             Id = DemoSeedIds.WorkspaceNorth,
             Name = "Acme Corporation",
-            Description = "Your company’s workspace — projects group work by product, platform, or internal function.",
+            Description = "Your company's workspace — projects group work by product, platform, or internal function.",
             CreatedAt = now.AddDays(-90),
             ArchivedAt = null,
             Visibility = WorkspaceVisibility.Team,
-            OwnerUserId = ownerAlex.Id,
-            Owner = ownerAlex
         };
-        ownerAlex.OwnedWorkspaces.Add(organization);
 
         var statuses = ProjectBlueprint.CreateWorkspaceStatuses(organization.Id, now, Ng);
         foreach (var s in statuses.All)
@@ -140,7 +177,7 @@ public static class DemoDataBuilder
             now,
             statuses,
             "People tech — new hire experience",
-            "Device prep, identity groups, and lightweight automations so week-one isn’t helpdesk roulette.",
+            "Device prep, identity groups, and lightweight automations so week-one isn't helpdesk roulette.",
             ProjectStatus.Active,
             ProjectPriority.Low);
         SeedPeopleTechTasks(peopleTech, now, team, Ng);
@@ -153,12 +190,37 @@ public static class DemoDataBuilder
 
         var workspaces = new List<Workspace> { organization };
 
-        return new DemoDataGraph
+        // Build membership list
+        var memberships = new List<WorkspaceMember>();
+
+        void AddMember(Guid workspaceId, Guid userId, WorkspaceRole role)
         {
-            Workspaces = workspaces,
-            Users = users,
-            Tags = tags
-        };
+            if (memberships.Any(m => m.WorkspaceId == workspaceId && m.UserId == userId))
+                return;
+            memberships.Add(new WorkspaceMember
+            {
+                WorkspaceId = workspaceId,
+                UserId = userId,
+                Role = role,
+                JoinedAt = now
+            });
+        }
+
+        // Owners: whoever was the previous OwnerUserId becomes the Owner WorkspaceMember.
+        AddMember(DemoSeedIds.WorkspaceNorth, DemoSeedIds.UserAlex, WorkspaceRole.Owner);
+
+        // Members: anyone with a TaskAssignment to a task in workspace W is at least a Member of W.
+        // Walk the already-built graph: workspace -> projects -> boards -> tasks -> assignments.
+        foreach (var ws in workspaces)
+        {
+            foreach (var project in ws.Projects)
+                foreach (var board in project.Boards)
+                    foreach (var task in board.Tasks)
+                        foreach (var assignment in task.TaskAssignments)
+                            AddMember(ws.Id, assignment.UserId, WorkspaceRole.Member);
+        }
+
+        return new SampleGraph(users, tags, workspaces, memberships);
     }
 
     private static TaskItem NewTask(
@@ -467,7 +529,7 @@ public static class DemoDataBuilder
             parent: null);
 
         AddComment(ng, epicIa, sam,
-            "Redirects wait on wireframe sign-off — don’t ask CMS for slugs yet.",
+            "Redirects wait on wireframe sign-off — don't ask CMS for slugs yet.",
             now.AddDays(-8));
         AddComment(ng, epicCheckout, alex,
             "Webhook signing secret rotated in vault this morning; staging redeployed.",
@@ -785,7 +847,7 @@ public static class DemoDataBuilder
             parent: null);
 
         AddComment(ng, buttons, sam,
-            "Ping design before merging — they’re renaming `accent-subtle` this week.",
+            "Ping design before merging — they're renaming `accent-subtle` this week.",
             now.AddDays(-5));
     }
 
@@ -844,7 +906,7 @@ public static class DemoDataBuilder
             "Logged 412 duplicates last Friday — table `wh_order_events` is catching them now.",
             now.AddDays(-2));
         AddComment(ng, netsuite, alex,
-            "Won’t schedule eng until RevOps confirms nightly vs near-real-time.",
+            "Won't schedule eng until RevOps confirms nightly vs near-real-time.",
             now.AddDays(-1));
     }
 

@@ -1,9 +1,11 @@
 using FlowCore.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlowCore.Data;
 
-public class FlowCoreDbContext : DbContext
+public class FlowCoreDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
     public FlowCoreDbContext(DbContextOptions<FlowCoreDbContext> options)
         : base(options)
@@ -15,28 +17,37 @@ public class FlowCoreDbContext : DbContext
     public DbSet<Board> Boards => Set<Board>();
     public DbSet<TaskItem> TaskItems => Set<TaskItem>();
     public DbSet<Comment> Comments => Set<Comment>();
-    public DbSet<User> Users => Set<User>();
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<TaskStatusDefinition> TaskStatusDefinitions => Set<TaskStatusDefinition>();
     public DbSet<TaskAssignment> TaskAssignments => Set<TaskAssignment>();
     public DbSet<TaskTag> TaskTags => Set<TaskTag>();
     public DbSet<UserTaskOrder> UserTaskOrders => Set<UserTaskOrder>();
+    public DbSet<WorkspaceMember> WorkspaceMembers => Set<WorkspaceMember>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<User>(b =>
-        {
-            b.HasIndex(u => u.Email).IsUnique();
-        });
+        // User: Identity handles Id/Email/NormalizedEmail indexes itself.
 
         modelBuilder.Entity<Workspace>(b =>
         {
             b.HasIndex(w => w.Name);
-            b.HasOne(w => w.Owner)
-                .WithMany(u => u.OwnedWorkspaces)
-                .HasForeignKey(w => w.OwnerUserId)
+        });
+
+        modelBuilder.Entity<WorkspaceMember>(b =>
+        {
+            b.HasKey(m => new { m.WorkspaceId, m.UserId });
+            b.HasIndex(m => m.UserId);
+
+            b.HasOne(m => m.Workspace)
+                .WithMany(w => w.Members)
+                .HasForeignKey(m => m.WorkspaceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(m => m.User)
+                .WithMany(u => u.WorkspaceMemberships)
+                .HasForeignKey(m => m.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

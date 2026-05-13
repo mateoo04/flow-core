@@ -13,7 +13,7 @@ public sealed class InMemoryDataStore
     public List<User> Users { get; }
     public List<Tag> Tags { get; }
 
-    public InMemoryDataStore(DemoDataGraph seed)
+    public InMemoryDataStore(SampleGraph seed)
     {
         Workspaces = seed.Workspaces.ToList();
         Users = seed.Users.ToList();
