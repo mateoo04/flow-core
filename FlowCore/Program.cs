@@ -116,6 +116,8 @@ else
     app.UseHsts();
 }
 
+app.UseStatusCodePagesWithReExecute("/Home/StatusCodePage", "?code={0}");
+
 app.UseHttpsRedirection();
 app.UseRouting();
 

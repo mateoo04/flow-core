@@ -1,0 +1,24 @@
+@{
+    ViewData["Title"] = "Page not found";
+}
+
+<div class="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center text-center">
+    <div class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-card shadow-card">
+        <partial name="_Icon" model='new IconVm { Name = "magnifying-glass", Size = 28, CssClass = "text-fg-muted", StrokeWidth = "1.75" }'/>
+    </div>
+
+    <p class="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-fg-muted">404</p>
+    <h1 class="font-headline text-4xl font-extrabold tracking-tight text-fg sm:text-5xl">Page not found</h1>
+    <p class="mt-4 max-w-xl text-sm leading-6 text-fg-secondary">
+        The page you were looking for does not exist, or it may have moved.
+        Head back to your task board to keep working.
+    </p>
+
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a asp-controller="Home" asp-action="Index"
+           class="inline-flex h-10 items-center gap-2 rounded-md bg-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-on-primary)] transition-[background-color,box-shadow] duration-200 ease-out hover:bg-[#4a2034] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+            <partial name="_Icon" model='new IconVm { Name = "clipboard-document-check", Size = 16, StrokeWidth = "2" }'/>
+            My tasks
+        </a>
+    </div>
+</div>
