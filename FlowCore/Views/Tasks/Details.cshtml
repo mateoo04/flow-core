@@ -75,7 +75,7 @@
                               placeholder="@(T["crud.tasks.comment_placeholder"])"
                               class="w-full rounded-xl border border-fg-muted/20 bg-app px-3 py-2 text-sm text-fg"></textarea>
                     <button type="submit" class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
-                        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">send</span>
+                        <partial name="_Icon" model='new IconVm { Name = "paper-airplane", Size = 18 }'/>
                         @T["crud.tasks.add_comment"]
                     </button>
                 </form>

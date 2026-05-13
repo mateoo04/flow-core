@@ -1,54 +1,113 @@
 @model FlowCore.Models.ViewModels.LoginViewModel
 @{
     ViewData["Title"] = "Sign in";
-    Layout = "_Layout";
+    Layout = "_AuthLayout";
 }
 
-<div class="mx-auto max-w-md py-12">
-    <h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg mb-6">Sign in</h1>
+<div class="min-h-screen">
+    <div class="flex min-h-screen w-full">
+        <section class="relative z-10 flex w-full items-center bg-[var(--color-surface)] px-8 py-10 sm:px-16 lg:w-1/2 lg:px-24">
+            <div class="mx-auto flex w-full max-w-md flex-col gap-10">
+                <div class="flex items-center gap-2">
+                    <partial name="_Icon" model='new IconVm { Name = "square-3-stack-3d", Size = 28, CssClass = "text-[var(--color-primary)]" }'/>
+                    <span class="font-display text-2xl font-black tracking-tight text-fg">FlowCore</span>
+                </div>
 
-    <form asp-action="Login" method="post" class="space-y-4">
-        <input type="hidden" asp-for="ReturnUrl" />
+                <div class="space-y-7">
+                    <div class="space-y-2">
+                        <h1 class="font-headline text-3xl font-bold tracking-tight text-fg">Welcome back</h1>
+                        <p class="text-base leading-relaxed text-fg-secondary">Enter your credentials to access your workspace and continue your operations.</p>
+                    </div>
 
-        <div asp-validation-summary="ModelOnly" class="rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-950/40 dark:text-red-400"></div>
+                    <form asp-action="Login" method="post" class="space-y-5">
+                        <input type="hidden" asp-for="ReturnUrl" />
 
-        <div>
-            <label asp-for="Email" class="block text-sm font-medium text-fg mb-1"></label>
-            <input asp-for="Email" class="w-full rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:ring-2 focus:ring-brand/50" autocomplete="username" />
-            <span asp-validation-for="Email" class="mt-1 block text-xs text-red-600 dark:text-red-400"></span>
-        </div>
+                        <div asp-validation-summary="ModelOnly" class="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-950/40 dark:text-red-400"></div>
 
-        <div>
-            <label asp-for="Password" class="block text-sm font-medium text-fg mb-1"></label>
-            <input asp-for="Password" class="w-full rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:ring-2 focus:ring-brand/50" autocomplete="current-password" />
-            <span asp-validation-for="Password" class="mt-1 block text-xs text-red-600 dark:text-red-400"></span>
-        </div>
+                        <div class="space-y-2">
+                            <label asp-for="Email" class="block text-sm font-semibold text-fg"></label>
+                            <input asp-for="Email"
+                                   autocomplete="username"
+                                   placeholder="name@company.com"
+                                   class="w-full rounded-md border border-border bg-[var(--color-surface-container-low)] px-4 py-3 text-base text-fg placeholder:text-fg-muted focus:border-[var(--color-primary)] focus:outline-none focus:ring-0" />
+                            <span asp-validation-for="Email" class="block text-xs text-red-600 dark:text-red-400"></span>
+                        </div>
 
-        <label class="flex items-center gap-2 cursor-pointer">
-            <input asp-for="RememberMe" type="checkbox" class="rounded border-border" />
-            <span class="text-sm text-fg-secondary">@Html.DisplayNameFor(m => m.RememberMe)</span>
-        </label>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label asp-for="Password" class="block text-sm font-semibold text-fg"></label>
+                                <a href="#" class="text-sm font-medium text-[var(--color-primary)] transition-colors hover:opacity-80">Forgot password?</a>
+                            </div>
+                            <input asp-for="Password"
+                                   autocomplete="current-password"
+                                   placeholder="••••••••"
+                                   class="w-full rounded-md border border-border bg-[var(--color-surface-container-low)] px-4 py-3 text-base text-fg placeholder:text-fg-muted focus:border-[var(--color-primary)] focus:outline-none focus:ring-0" />
+                            <span asp-validation-for="Password" class="block text-xs text-red-600 dark:text-red-400"></span>
+                        </div>
 
-        <button type="submit" class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
-            Sign in
-        </button>
+                        <label class="flex cursor-pointer items-center gap-2">
+                            <input asp-for="RememberMe" type="checkbox" class="rounded border-border" />
+                            <span class="text-sm text-fg-secondary">@Html.DisplayNameFor(m => m.RememberMe)</span>
+                        </label>
 
-        <p class="text-sm text-fg-muted">
-            Don't have an account?
-            <a asp-action="Register" class="text-[var(--color-secondary)] underline hover:opacity-80">Sign up</a>
-        </p>
-    </form>
+                        <button type="submit"
+                                class="w-full rounded-md bg-[var(--color-primary)] px-6 py-3.5 text-base font-semibold text-[var(--color-on-primary)] shadow-soft transition-all duration-200 hover:-translate-y-px hover:opacity-95 active:translate-y-px">
+                            Log in
+                        </button>
+                    </form>
 
-    <div class="relative my-6">
-        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-border"></div></div>
-        <div class="relative flex justify-center text-xs"><span class="bg-bg px-2 text-fg-muted">or</span></div>
+                    <div class="relative flex items-center py-2">
+                        <div class="h-px flex-1 bg-border"></div>
+                        <span class="mx-4 text-xs uppercase tracking-widest text-fg-muted">or</span>
+                        <div class="h-px flex-1 bg-border"></div>
+                    </div>
+
+                    <form asp-action="Demo" method="post" class="space-y-4">
+                        <button type="submit"
+                                class="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-[var(--color-surface-container-low)] px-6 py-3 text-sm font-semibold text-fg transition-colors duration-200 hover:bg-[var(--color-surface-container)]">
+                            <partial name="_Icon" model='new IconVm { Name = "magnifying-glass", Size = 18 }'/>
+                            Explore demo workspace
+                        </button>
+                        <p class="text-sm text-fg-muted">
+                            Don't have an account?
+                            <a asp-action="Register" class="ml-1 font-semibold text-[var(--color-primary)] transition-colors hover:opacity-80">Create an account</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <aside class="relative hidden w-1/2 items-center justify-center overflow-hidden bg-[var(--color-surface-container-highest)] lg:flex">
+            <div class="absolute inset-0 flex items-center justify-center p-24">
+                <div class="relative h-full max-h-[800px] w-full max-w-2xl">
+                    <div class="absolute right-0 top-0 h-2/3 w-3/4 translate-x-12 -translate-y-12 rounded-xl bg-card shadow-card"></div>
+                    <div class="absolute bottom-0 left-0 flex h-3/4 w-2/3 -translate-x-8 translate-y-16 flex-col gap-6 rounded-xl border border-border/60 bg-[var(--color-surface)] p-8 shadow-soft">
+                        <div class="h-2 w-1/3 rounded-full bg-[var(--color-surface-container-high)]"></div>
+                        <div class="my-2 h-px w-full bg-border/70"></div>
+                        <div class="flex w-full gap-4">
+                            <div class="h-24 w-1/2 rounded-md bg-[var(--color-surface-container-high)]"></div>
+                            <div class="h-24 w-1/2 rounded-md bg-[var(--color-surface-container-high)]"></div>
+                        </div>
+                        <div class="mt-auto h-4 w-3/4 rounded-sm bg-[var(--color-surface-container-high)]"></div>
+                        <div class="h-4 w-1/2 rounded-sm bg-[var(--color-surface-container-high)]"></div>
+                    </div>
+
+                    <div class="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-primary)]/8 blur-3xl"></div>
+                    <div class="absolute right-1/4 top-1/2 flex -translate-y-1/2 flex-col gap-3">
+                        <div class="h-1 w-12 rounded-r-full bg-[var(--color-primary)]"></div>
+                        <div class="h-1 w-8 rounded-r-full bg-[var(--color-primary)]/60"></div>
+                        <div class="h-1 w-16 rounded-r-full bg-[var(--color-primary)]/30"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-tr from-[var(--color-surface-container-highest)] via-transparent to-[var(--color-surface-container-highest)]/60"></div>
+
+            <div class="absolute top-[180px] left-16 right-16 z-20">
+                <blockquote class="border-l-4 border-[var(--color-primary)] pl-6 font-headline text-2xl font-light leading-snug tracking-tight text-fg">
+                    "Precision in execution requires clarity in design. FlowCore provides the structure needed for complex operations."
+                </blockquote>
+            </div>
+        </aside>
     </div>
-
-    <form asp-action="Demo" method="post">
-        <button type="submit"
-                class="w-full rounded-full border border-border bg-transparent px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-hover)]">
-            Try the demo
-        </button>
-        <p class="mt-2 text-center text-xs text-fg-muted">No signup. Shared with other demo visitors.</p>
-    </form>
 </div>

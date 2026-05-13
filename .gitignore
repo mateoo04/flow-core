@@ -43,3 +43,5 @@ node_modules/
 FlowCore/wwwroot/css/tailwind.css
 .claude/mcp.json
 /.playwright-mcp
+.cursor/mcp.json
+.cursor/logs/agent_log.txt
