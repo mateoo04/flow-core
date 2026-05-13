@@ -1,5 +1,6 @@
 using FlowCore.Data;
 using FlowCore.Models;
+using FlowCore.Services.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlowCore.Repositories.EntityFramework;
@@ -56,7 +57,7 @@ public sealed class EfTaskRepository : ITaskRepository
                 .ThenInclude(a => a.User)
             .Include(t => t.Subtasks)
                 .ThenInclude(s => s.TaskStatusDefinition)
-            .Where(t => t.TaskAssignments.Any(a => a.UserId == userId))
+            .Where(TaskHierarchyVisibility.MyTasksRootCard(userId))
             .ToListAsync(ct);
 
         var userOrderByTaskId = await _db.UserTaskOrders

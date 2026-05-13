@@ -30,17 +30,6 @@
         </p>
     </div>
     <div class="flex items-center gap-1.5">
-        <button type="button"
-                class="group inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-[13px] font-medium text-fg-secondary transition-[background-color,border-color,color] duration-200 ease-out hover:border-fg-muted/40 hover:bg-[var(--color-surface-container-low)] hover:text-fg active:bg-[var(--color-surface-container)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-            <partial name="_Icon" model='new IconVm { Name = "funnel", Size = 14, CssClass = "text-fg-muted group-hover:text-fg-secondary transition-colors duration-200 ease-out" }'/>
-            Filter
-        </button>
-        <button type="button"
-                class="group inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-[13px] font-medium text-fg-secondary transition-[background-color,border-color,color] duration-200 ease-out hover:border-fg-muted/40 hover:bg-[var(--color-surface-container-low)] hover:text-fg active:bg-[var(--color-surface-container)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-            <partial name="_Icon" model='new IconVm { Name = "bars-arrow-down", Size = 14, CssClass = "text-fg-muted group-hover:text-fg-secondary transition-colors duration-200 ease-out" }'/>
-            Sort
-        </button>
-        <span aria-hidden="true" class="mx-2 hidden h-5 w-px bg-border sm:block"></span>
         <a asp-controller="Projects" asp-action="Create"
            class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-primary)] text-[var(--color-on-primary)] transition-[background-color,box-shadow] duration-200 ease-out hover:bg-[#4a2034] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
            aria-label="New project">

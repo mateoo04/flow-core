@@ -1,6 +1,7 @@
 @using System.Globalization
 @using FlowCore.Models
 @using FlowCore.Services
+@using FlowCore.Services.Domain
 @model Board
 @inject FlowCore.Services.UiText T
 @functions {
@@ -22,6 +23,7 @@
 }
 @{
     var groups = Model.Tasks
+        .Where(TaskHierarchyVisibility.IsBoardRootCard)
         .Where(t => t.TaskStatusDefinition is not null)
         .GroupBy(t => t.TaskStatusDefinition!)
         .OrderBy(g => g.Key.Position)

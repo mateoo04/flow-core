@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowCore", "FlowCore\FlowCore.csproj", "{9AE61153-DC1F-42A9-9B9D-0DF98E277D98}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowCore.Tests", "FlowCore.Tests\FlowCore.Tests.csproj", "{F4A4630E-2D71-4F2C-8A93-A9E6CA555835}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{9AE61153-DC1F-42A9-9B9D-0DF98E277D98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AE61153-DC1F-42A9-9B9D-0DF98E277D98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AE61153-DC1F-42A9-9B9D-0DF98E277D98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4A4630E-2D71-4F2C-8A93-A9E6CA555835}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4A4630E-2D71-4F2C-8A93-A9E6CA555835}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4A4630E-2D71-4F2C-8A93-A9E6CA555835}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4A4630E-2D71-4F2C-8A93-A9E6CA555835}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
