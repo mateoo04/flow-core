@@ -20,8 +20,8 @@ else
             <section>
                 <header class="mb-3 flex items-baseline justify-between gap-3">
                     <h2 class="text-sm font-semibold uppercase tracking-wide text-fg-muted">@group.Key.WorkspaceName</h2>
-                    <a class="text-xs text-brand outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app"
-                       asp-controller="Settings" asp-action="Index" asp-route-workspaceId="@group.Key.WorkspaceId">Manage →</a>
+                    <a class="text-xs text-primary outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-app"
+                       asp-controller="Statuses" asp-action="Manage" asp-route-workspaceId="@group.Key.WorkspaceId">Manage →</a>
                 </header>
                 <div class="overflow-hidden rounded-xl border border-fg-muted/15 shadow-card">
                     <table class="w-full border-collapse text-left text-sm">

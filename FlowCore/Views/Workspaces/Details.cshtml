@@ -9,39 +9,55 @@
         @error
     </div>
 }
-<div class="flex flex-wrap items-baseline justify-between gap-3">
-    <h1 class="text-3xl font-bold tracking-tight text-fg">@Model.Name</h1>
-    <div class="flex gap-2">
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="rounded-lg border border-border px-3 py-2 text-sm font-medium text-fg hover:bg-[var(--color-surface-container)]">Edit</a>
-        <form method="post" asp-action="Delete" asp-route-id="@Model.Id" onsubmit="return confirm('Delete this workspace?');">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="rounded-lg border border-brand-warn/40 px-3 py-2 text-sm font-medium text-brand-warn hover:bg-brand-warn/10">Delete</button>
-        </form>
+<header class="border-b border-fg-muted/15 pb-7">
+    <div class="flex flex-wrap items-end justify-between gap-6">
+        <div class="min-w-0">
+            <h1 class="font-display text-5xl font-extrabold leading-[0.96] tracking-tight text-fg sm:text-6xl">@Model.Name</h1>
+            <p class="mt-3 max-w-3xl text-[15px] leading-7 text-fg-secondary">@Model.Description</p>
+            <div class="mt-5 flex flex-wrap gap-2">
+                <span class="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">@Model.Visibility</span>
+                <span class="rounded-full bg-raised px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-fg-secondary">Created @Model.CreatedAt.ToString("d")</span>
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <a asp-controller="Projects" asp-action="Create" asp-route-workspaceId="@Model.Id" class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm transition-opacity hover:opacity-95">
+                <partial name="_Icon" model='new IconVm { Name = "plus", Size = 18 }'/>
+                New project
+            </a>
+            <a asp-controller="Statuses" asp-action="Manage" asp-route-workspaceId="@Model.Id" class="inline-flex items-center gap-2 rounded-full border border-fg-muted/25 bg-raised/40 px-4 py-2.5 text-sm font-semibold text-fg transition-colors hover:border-primary/35 hover:bg-primary/10">
+                <partial name="_Icon" model='new IconVm { Name = "cog-6-tooth", Size = 18 }'/>
+                Manage statuses
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="inline-flex items-center gap-2 rounded-full border border-fg-muted/25 bg-raised/40 px-4 py-2.5 text-sm font-semibold text-fg transition-colors hover:border-primary/35 hover:bg-primary/10">
+                <partial name="_Icon" model='new IconVm { Name = "pencil-square", Size = 18 }'/>
+                Edit
+            </a>
+            <form method="post" asp-action="Delete" asp-route-id="@Model.Id" onsubmit="return confirm('Delete this workspace?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="inline-flex items-center gap-2 rounded-full border border-brand-warn/40 px-4 py-2.5 text-sm font-semibold text-brand-warn transition-colors hover:bg-brand-warn/10">
+                    <partial name="_Icon" model='new IconVm { Name = "trash", Size = 18 }'/>
+                    Delete
+                </button>
+            </form>
+        </div>
     </div>
-</div>
-<p class="mt-2 max-w-3xl text-fg-secondary">@Model.Description</p>
+</header>
 
-<dl class="mt-6 grid gap-3 text-sm sm:grid-cols-[8rem_1fr]">
-    <dt class="text-fg-muted">Visibility</dt>
-    <dd class="text-fg">@Model.Visibility</dd>
-    <dt class="text-fg-muted">Created</dt>
-    <dd class="text-fg-secondary">@Model.CreatedAt.ToString("u")</dd>
-</dl>
-
-<section class="mt-10">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <h2 class="text-lg font-semibold text-fg">Projects</h2>
-        <a class="rounded-lg border border-brand/40 px-4 py-2 text-sm font-medium text-brand transition-colors hover:bg-brand/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-           asp-controller="Projects" asp-action="Index" asp-route-workspaceId="@Model.Id">View filtered list</a>
+<section class="mt-8">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xs font-bold uppercase tracking-[0.14em] text-fg-muted">Projects</h2>
+            <p class="mt-1 text-sm text-fg-secondary">Projects that belong to this workspace.</p>
+        </div>
     </div>
     <div class="mt-4 grid gap-4 sm:grid-cols-2">
         @foreach (var p in Model.Projects.OrderBy(x => x.Name))
         {
             <a asp-controller="Projects" asp-action="Details" asp-route-id="@p.Id"
-               class="rounded-xl border border-fg-muted/10 bg-card p-4 shadow-card outline-none transition-colors duration-150 hover:border-brand/30 hover:bg-raised focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app">
-                <div class="font-medium text-fg">@p.Name</div>
+               class="rounded-2xl border border-fg-muted/15 bg-card p-4 shadow-card outline-none transition-colors duration-150 hover:border-primary/30 hover:bg-raised focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-app">
+                <div class="font-semibold text-fg">@p.Name</div>
                 <div class="mt-2 flex gap-2 text-xs text-fg-muted">
-                    <span class="rounded-md bg-raised px-2 py-0.5">@p.Status</span>
+                    <span class="rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary">@p.Status</span>
                     @if (p.DueDate is { } due)
                     {
                         <span>Due @due.ToString("d")</span>
@@ -52,7 +68,7 @@
     </div>
 </section>
 
-<div class="mt-10">
+<div class="mt-10 border-t border-fg-muted/15 pt-8">
 @{
     var members = (IReadOnlyList<FlowCore.Models.ViewModels.WorkspaceMemberRow>?)ViewBag.Members
         ?? new List<FlowCore.Models.ViewModels.WorkspaceMemberRow>();

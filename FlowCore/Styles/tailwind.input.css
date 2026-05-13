@@ -73,8 +73,8 @@ html.dark {
   --color-danger: #fcb1a6;
   --color-success: #00b295;
 
-  --color-primary: #c0c1ff;
-  --color-secondary: #38bdf8;
+  --color-primary: #7b304f;
+  --color-secondary: #9f4a68;
   --color-tertiary: #2dd4bf;
   --color-error: #fcb1a6;
   --color-background: #09090b;
@@ -84,8 +84,8 @@ html.dark {
   --color-surface-container-high: #3f3f46;
   --color-on-surface: #fafafa;
   --color-on-background: #fafafa;
-  --color-on-primary: #1e1b4b;
-  --color-on-secondary: #082f49;
+  --color-on-primary: #ffffff;
+  --color-on-secondary: #ffffff;
 
   --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.4);
   --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.5);

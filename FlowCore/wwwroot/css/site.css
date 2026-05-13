@@ -63,7 +63,7 @@ html.dark .fc-nav-active {
     0 6px 14px -4px rgb(0 0 0 / 0.55);
 }
 
-/* Shared sidebar hover tint — soft primary wash on light, lavender on dark. */
+/* Shared sidebar hover tint — soft primary wash in both themes. */
 .fc-nav-hover {
   transition:
     background-color 180ms var(--ease-out, ease-out),
@@ -75,7 +75,7 @@ html.dark .fc-nav-active {
 }
 
 html.dark .fc-nav-hover:hover {
-  background-color: rgba(192, 193, 255, 0.08);
+  background-color: rgba(123, 48, 79, 0.22);
 }
 
 @media (prefers-reduced-motion: reduce) {

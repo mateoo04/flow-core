@@ -162,7 +162,7 @@ public sealed class TaskStatusFormVm
     public bool IsDoneState { get; set; }
 }
 
-public sealed record SettingsIndexVm(
+public sealed record WorkspaceStatusSettingsVm(
     Workspace ActiveWorkspace,
     IReadOnlyList<TaskStatusDefinition> Statuses,
     IReadOnlyList<Workspace> AllWorkspaces);

@@ -1,15 +1,15 @@
 @model WorkspaceFormVm
 <div asp-validation-summary="ModelOnly" class="text-sm text-[var(--color-error)]"></div>
 <div>
-    <label asp-for="Name" class="block text-sm font-medium text-fg-secondary">Name</label>
-    <input asp-for="Name" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]" maxlength="80" autocomplete="off"/>
+    <label asp-for="Name" class="block text-xs font-semibold uppercase tracking-[0.12em] text-fg-muted">Name</label>
+    <input asp-for="Name" class="mt-1.5 w-full rounded-xl border border-fg-muted/20 bg-[var(--color-surface)] px-4 py-3 text-sm text-fg shadow-soft focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" maxlength="80" autocomplete="off"/>
     <span asp-validation-for="Name" class="mt-1 block text-xs text-[var(--color-error)]"></span>
 </div>
 <div>
-    <label asp-for="Description" class="block text-sm font-medium text-fg-secondary">Description</label>
-    <textarea asp-for="Description" rows="3" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></textarea>
+    <label asp-for="Description" class="block text-xs font-semibold uppercase tracking-[0.12em] text-fg-muted">Description</label>
+    <textarea asp-for="Description" rows="4" class="mt-1.5 w-full rounded-xl border border-fg-muted/20 bg-[var(--color-surface)] px-4 py-3 text-sm text-fg shadow-soft focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"></textarea>
 </div>
 <div>
-    <label asp-for="Visibility" class="block text-sm font-medium text-fg-secondary">Visibility</label>
-    <select asp-for="Visibility" asp-items="Html.GetEnumSelectList<WorkspaceVisibility>()" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></select>
+    <label asp-for="Visibility" class="block text-xs font-semibold uppercase tracking-[0.12em] text-fg-muted">Visibility</label>
+    <select asp-for="Visibility" asp-items="Html.GetEnumSelectList<WorkspaceVisibility>()" class="mt-1.5 w-full rounded-xl border border-fg-muted/20 bg-[var(--color-surface)] px-4 py-3 text-sm text-fg shadow-soft focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"></select>
 </div>

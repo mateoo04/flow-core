@@ -76,7 +76,7 @@
     @{
         var onHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home";
         var onProjectsIndex = ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" && ViewContext.RouteData.Values["action"]?.ToString() == "Index";
-        var settingsWsId = activeWs ?? workspaces.FirstOrDefault()?.Id;
+        var onSettings = ViewContext.RouteData.Values["controller"]?.ToString() == "Settings";
     }
     <aside class="flex h-full min-h-0 w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-sidebar" aria-label="Site navigation" data-sidebar>
         <div class="shrink-0 px-4 pt-6 pb-4">
@@ -120,9 +120,9 @@
             </nav>
 
             <div class="shrink-0 border-t border-border/70 p-3">
-                <a class="flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-fg-secondary transition-[background-color,color] duration-200 ease-out hover:bg-[var(--color-surface-container)] hover:text-fg"
-                   asp-controller="Settings" asp-action="Index" asp-route-workspaceId="@settingsWsId">
-                    <partial name="_Icon" model='new IconVm { Name = "cog-6-tooth", Size = 16, CssClass = "shrink-0 text-fg-muted" }'/>
+                <a class="flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-[background-color,color] duration-200 ease-out @(onSettings ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] fc-nav-active" : "text-fg-secondary hover:bg-[var(--color-surface-container)] hover:text-fg")"
+                   asp-controller="Settings" asp-action="Index">
+                    <partial name="_Icon" model='new IconVm { Name = "cog-6-tooth", Size = 16, CssClass = onSettings ? "shrink-0 text-[var(--color-on-primary)]" : "shrink-0 text-fg-muted" }'/>
                     @T["nav.settings"]
                 </a>
                 @if (User.Identity?.IsAuthenticated == true)
@@ -138,7 +138,9 @@
                         </span>
                         <form method="post" asp-controller="Account" asp-action="Logout" class="shrink-0">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="text-[11px] leading-tight text-fg-muted underline hover:text-fg transition-colors">Sign out</button>
+                            <button type="submit" aria-label="Sign out" class="inline-flex items-center text-fg-muted transition-colors hover:text-fg">
+                                <partial name="_Icon" model='new IconVm { Name = "arrow-right-on-rectangle", Size = 13 }'/>
+                            </button>
                         </form>
                     </div>
                 }
