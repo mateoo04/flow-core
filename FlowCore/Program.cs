@@ -114,11 +114,9 @@ builder.Services.AddSingleton<UiText>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    await app.Services.SeedDevelopmentDataAsync();
-}
-else
+await app.Services.SeedDemoDataAsync();
+
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();

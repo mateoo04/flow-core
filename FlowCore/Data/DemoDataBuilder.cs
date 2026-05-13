@@ -13,7 +13,7 @@ public static class DemoDataBuilder
 {
     private readonly record struct Team(User Alex, User Sam, User Casey, User Jordan, User Morgan);
 
-    public static SampleGraph CreateSampleGraph(IPasswordHasher<User> hasher)
+    public static SampleGraph CreateSampleGraph(IPasswordHasher<User> hasher, string sharedPassword)
     {
         var now = new DateTime(2026, 4, 1, 12, 0, 0, DateTimeKind.Utc);
         Guid Ng() => Guid.NewGuid();
@@ -33,7 +33,7 @@ public static class DemoDataBuilder
             JoinedAt = now.AddMonths(-6),
             IsActive = true
         };
-        ownerAlex.PasswordHash = hasher.HashPassword(ownerAlex, "Admin6060!");
+        ownerAlex.PasswordHash = hasher.HashPassword(ownerAlex, sharedPassword);
 
         var memberSam = new User
         {
@@ -50,7 +50,7 @@ public static class DemoDataBuilder
             JoinedAt = now.AddMonths(-3),
             IsActive = true
         };
-        memberSam.PasswordHash = hasher.HashPassword(memberSam, "Admin6060!");
+        memberSam.PasswordHash = hasher.HashPassword(memberSam, sharedPassword);
 
         var casey = new User
         {
@@ -67,7 +67,7 @@ public static class DemoDataBuilder
             JoinedAt = now.AddMonths(-2),
             IsActive = true
         };
-        casey.PasswordHash = hasher.HashPassword(casey, "Admin6060!");
+        casey.PasswordHash = hasher.HashPassword(casey, sharedPassword);
 
         var jordan = new User
         {
@@ -84,7 +84,7 @@ public static class DemoDataBuilder
             JoinedAt = now.AddMonths(-2),
             IsActive = true
         };
-        jordan.PasswordHash = hasher.HashPassword(jordan, "Admin6060!");
+        jordan.PasswordHash = hasher.HashPassword(jordan, sharedPassword);
 
         var morgan = new User
         {
@@ -101,7 +101,7 @@ public static class DemoDataBuilder
             JoinedAt = now.AddMonths(-1),
             IsActive = true
         };
-        morgan.PasswordHash = hasher.HashPassword(morgan, "Admin6060!");
+        morgan.PasswordHash = hasher.HashPassword(morgan, sharedPassword);
 
         var demoUser = new User
         {
@@ -118,7 +118,7 @@ public static class DemoDataBuilder
             JoinedAt = now,
             IsActive = true
         };
-        demoUser.PasswordHash = hasher.HashPassword(demoUser, "Admin6060!");
+        demoUser.PasswordHash = hasher.HashPassword(demoUser, sharedPassword);
 
         var users = new List<User> { ownerAlex, memberSam, casey, jordan, morgan, demoUser };
         var team = new Team(ownerAlex, memberSam, casey, jordan, morgan);

@@ -23,10 +23,16 @@ The first run in `Development` auto-seeds ~60 demo tasks across 5 projects (see 
 - The app now fails build/publish if Tailwind output cannot be generated (`npm run build:css`), so make sure Node/npm is available in your Railway build image.
 - Forwarded proxy headers (`X-Forwarded-For`, `X-Forwarded-Proto`) are enabled in startup for TLS-terminating platforms.
 - Demo login is **disabled outside Development by default**. Enable it explicitly with `Features__EnableDemoLogin=true` only for public demo environments.
+- A production `Dockerfile` is included at repository root. It publishes the app and binds to Railway's `PORT` at runtime.
+- Seed demo data in Railway with `Seed__Enabled=true`.
+- Set one shared password for all seeded users with `Seed__SharedPassword=<your-strong-password>`.
 
 ## Development credentials
 
-The dev seed creates five demo users. All share the password `Admin6060!` — **lab-only, never use in production.**
+The seeded demo users share one password:
+
+- `Seed__SharedPassword` if provided (recommended for Railway and any shared environment)
+- otherwise in local `Development`, fallback is `Admin6060!` (lab-only)
 
 | Email | Role in seed |
 |---|---|

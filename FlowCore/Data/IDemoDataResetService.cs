@@ -1,6 +1,8 @@
 using FlowCore.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace FlowCore.Data;
 
@@ -13,11 +15,19 @@ public sealed class DemoDataResetService : IDemoDataResetService
 {
     private readonly FlowCoreDbContext _db;
     private readonly IPasswordHasher<User> _hasher;
+    private readonly IConfiguration _configuration;
+    private readonly IHostEnvironment _environment;
 
-    public DemoDataResetService(FlowCoreDbContext db, IPasswordHasher<User> hasher)
+    public DemoDataResetService(
+        FlowCoreDbContext db,
+        IPasswordHasher<User> hasher,
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         _db = db;
         _hasher = hasher;
+        _configuration = configuration;
+        _environment = environment;
     }
 
     public async Task ResetAsync(CancellationToken ct = default)
@@ -75,7 +85,8 @@ public sealed class DemoDataResetService : IDemoDataResetService
 
         // Re-build the seed graph. Skip users/tags that already exist (Identity
         // rows are preserved so the visitor's cookie stays valid).
-        var graph = DemoDataBuilder.CreateSampleGraph(_hasher);
+        var sharedPassword = DemoSeedSettings.ResolveSharedPassword(_configuration, _environment);
+        var graph = DemoDataBuilder.CreateSampleGraph(_hasher, sharedPassword);
 
         var existingUserIds = (await _db.Users
             .Where(u => seededUserIds.Contains(u.Id))

@@ -1,0 +1,11 @@
+.git
+.github/hooks
+.cursor
+.claude
+.idea
+.vscode
+**/bin
+**/obj
+node_modules
+tmp-stitch
+*.log
