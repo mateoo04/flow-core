@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace FlowCore.Controllers;
 
@@ -13,11 +15,17 @@ public class AccountController : Controller
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
+    private readonly bool _enableDemoLogin;
 
-    public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+    public AccountController(
+        UserManager<User> userManager,
+        SignInManager<User> signInManager,
+        IHostEnvironment hostEnvironment,
+        IConfiguration configuration)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _enableDemoLogin = hostEnvironment.IsDevelopment() || configuration.GetValue<bool>("Features:EnableDemoLogin");
     }
 
     [HttpGet("register")]
@@ -56,7 +64,11 @@ public class AccountController : Controller
     [HttpGet("login")]
     [AllowAnonymous]
     public IActionResult Login(string? returnUrl = null)
-        => View(new LoginViewModel { ReturnUrl = returnUrl });
+        => View(new LoginViewModel
+        {
+            ReturnUrl = returnUrl,
+            EnableDemoLogin = _enableDemoLogin
+        });
 
     [HttpPost("login")]
     [AllowAnonymous]
@@ -64,6 +76,7 @@ public class AccountController : Controller
     [EnableRateLimiting("auth")]
     public async Task<IActionResult> Login(LoginViewModel vm)
     {
+        vm.EnableDemoLogin = _enableDemoLogin;
         if (!ModelState.IsValid) return View(vm);
 
         var result = await _signInManager.PasswordSignInAsync(
@@ -100,11 +113,16 @@ public class AccountController : Controller
     [EnableRateLimiting("auth")]
     public async Task<IActionResult> Demo()
     {
+        if (!_enableDemoLogin)
+        {
+            return NotFound();
+        }
+
         var demo = await _userManager.FindByEmailAsync(DemoSeedIds.UserDemoEmail);
         if (demo is null)
         {
             ModelState.AddModelError(string.Empty, "Demo account is not available.");
-            return View(nameof(Login), new LoginViewModel());
+            return View(nameof(Login), new LoginViewModel { EnableDemoLogin = _enableDemoLogin });
         }
         await _signInManager.SignInAsync(demo, isPersistent: false);
         return RedirectToAction("Index", "Home");

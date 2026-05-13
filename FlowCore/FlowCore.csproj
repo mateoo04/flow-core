@@ -23,9 +23,11 @@
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
     </ItemGroup>
 
-    <!-- Keeps wwwroot/css/tailwind.css in sync when building from Rider/VS (requires Node + npm install at repo root). -->
-    <Target Name="TailwindBuild" BeforeTargets="BeforeBuild" Condition="Exists('$(MSBuildProjectDirectory)\..\package.json')">
-        <Exec WorkingDirectory="$(MSBuildProjectDirectory)\.." Command="npm run build:css" ContinueOnError="true"/>
+    <!-- Keeps wwwroot/css/tailwind.css in sync and fails build if CSS is missing. -->
+    <Target Name="TailwindBuild" BeforeTargets="BeforeBuild;Publish" Condition="Exists('$(MSBuildProjectDirectory)\..\package.json')">
+        <Exec WorkingDirectory="$(MSBuildProjectDirectory)\.." Command="npm run build:css" />
+        <Error Condition="!Exists('$(MSBuildProjectDirectory)\wwwroot\css\tailwind.css')"
+               Text="Tailwind output missing at FlowCore/wwwroot/css/tailwind.css. Ensure Node dependencies are installed and the CSS build completes successfully." />
     </Target>
 
 </Project>

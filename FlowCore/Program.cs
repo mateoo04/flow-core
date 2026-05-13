@@ -10,6 +10,7 @@ using FlowCore.Services.Domain;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -81,6 +82,13 @@ builder.Services.AddAuthorization(opts =>
         p => p.Requirements.Add(new DemoUserRequirement()));
 });
 
+builder.Services.Configure<ForwardedHeadersOptions>(opts =>
+{
+    opts.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    opts.KnownIPNetworks.Clear();
+    opts.KnownProxies.Clear();
+});
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IWorkspaceRepository, EfWorkspaceRepository>();
@@ -118,6 +126,7 @@ else
 
 app.UseStatusCodePagesWithReExecute("/Home/StatusCodePage", "?code={0}");
 
+app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseRouting();
 

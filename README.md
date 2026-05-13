@@ -18,6 +18,12 @@ dotnet run --project FlowCore
 
 The first run in `Development` auto-seeds ~60 demo tasks across 5 projects (see [`DatabaseSeeder.cs`](FlowCore/Data/DatabaseSeeder.cs); guarded by an `Any()` check so subsequent runs preserve your data). Open the URL Kestrel prints.
 
+## Production notes (Railway)
+
+- The app now fails build/publish if Tailwind output cannot be generated (`npm run build:css`), so make sure Node/npm is available in your Railway build image.
+- Forwarded proxy headers (`X-Forwarded-For`, `X-Forwarded-Proto`) are enabled in startup for TLS-terminating platforms.
+- Demo login is **disabled outside Development by default**. Enable it explicitly with `Features__EnableDemoLogin=true` only for public demo environments.
+
 ## Development credentials
 
 The dev seed creates five demo users. All share the password `Admin6060!` — **lab-only, never use in production.**
@@ -57,7 +63,3 @@ If you're evaluating engineering signal, start with these:
 [`TaskService.cs`](FlowCore/Services/Domain/TaskService.cs),
 [`EfTaskRepository.cs`](FlowCore/Repositories/EntityFramework/EfTaskRepository.cs),
 [`BreadcrumbTrailBuilder.cs`](FlowCore/Services/BreadcrumbTrailBuilder.cs).
-
----
-
-*Note for professor: agent activity logs are in `.cursor/logs/hook-events.jsonl`.*

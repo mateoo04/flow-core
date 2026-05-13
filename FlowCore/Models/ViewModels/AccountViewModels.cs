@@ -37,6 +37,8 @@ public class LoginViewModel
     public bool RememberMe { get; set; }
 
     public string? ReturnUrl { get; set; }
+
+    public bool EnableDemoLogin { get; set; }
 }
 
 public sealed record WorkspaceMemberRow(Guid UserId, string FullName, string Email, WorkspaceRole Role, DateTime JoinedAt);
