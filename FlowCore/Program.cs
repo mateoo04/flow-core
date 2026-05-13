@@ -35,9 +35,11 @@ builder.Services.Configure<RouteOptions>(opts =>
     opts.LowercaseQueryStrings = true;
 });
 
+var configuredDbConnection = PostgresConnectionStringResolver.ResolveFromConfiguration(builder.Configuration);
+
 builder.Services.AddDbContext<FlowCoreDbContext>(options =>
     options.UseNpgsql(
-        builder.Configuration.GetConnectionString("FlowCoreDbContext"),
+        configuredDbConnection,
         npg => npg.EnableRetryOnFailure()));
 
 builder.Services
@@ -114,7 +116,7 @@ builder.Services.AddSingleton<UiText>();
 
 var app = builder.Build();
 
-await app.Services.SeedDemoDataAsync();
+await app.Services.InitializeDatabaseAsync(app.Configuration);
 
 if (!app.Environment.IsDevelopment())
 {

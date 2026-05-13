@@ -24,6 +24,8 @@ The first run in `Development` auto-seeds ~60 demo tasks across 5 projects (see 
 - Forwarded proxy headers (`X-Forwarded-For`, `X-Forwarded-Proto`) are enabled in startup for TLS-terminating platforms.
 - Demo login is **disabled outside Development by default**. Enable it explicitly with `Features__EnableDemoLogin=true` only for public demo environments.
 - A production `Dockerfile` is included at repository root. It publishes the app and binds to Railway's `PORT` at runtime.
+- Database configuration accepts both Npgsql connection-string format and Railway URL format (`postgres://` / `postgresql://`).
+- EF Core migrations run automatically on startup by default. Disable with `Database__AutoMigrate=false`.
 - Seed demo data in Railway with `Seed__Enabled=true`.
 - Set one shared password for all seeded users with `Seed__SharedPassword=<your-strong-password>`.
 
