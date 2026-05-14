@@ -1,4 +1,4 @@
-# FlowCore
+# [FlowCore](https://flow-core.up.railway.app)
 
 FlowCore is a backend-focused full-stack project management app with a clear **workspace -> project -> board -> task** hierarchy.
 
