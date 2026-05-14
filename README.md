@@ -1,20 +1,28 @@
 # [FlowCore](https://flow-core.up.railway.app)
 
-FlowCore is a backend-focused full-stack project management app with a clear **workspace -> project -> board -> task** hierarchy.
+FlowCore is a backend-focused full-stack project management app for organizing work across **workspaces, projects, boards, and tasks**. It combines authentication, workspace-level authorization, EF Core data modeling, and a Tailwind MVC UI in one complete app.
 
 **Tech stack:** **ASP.NET Core MVC (.NET 10)**, **EF Core 10**, **PostgreSQL 18**, **Tailwind 4**.
 
-## Why this project stands out
+## Technical focus
 
 - Built with a clean backend architecture: **Controller -> Service -> Repository -> DbContext**.
+- Uses **ASP.NET Core Identity** with cookie auth, login rate limiting, and workspace member/owner policies.
 - Uses production-minded patterns: **`Result<T>` flow**, explicit cascade rules, and async-first data access.
 - Includes a Tailwind UI and realistic seeded data so reviewers can evaluate full user flows quickly.
 
 ## Screenshots
 
+**My tasks dashboard** - aggregated task board across multiple projects.
 ![My tasks dashboard](screenshots/my_tasks_dashboard.png)
+
+**Project board** - kanban-style project view with task status columns.
 ![Project board](screenshots/project_board.png)
+
+**Task details** - task metadata, assignees, subtasks, and comments.
 ![Task details](screenshots/task_details.png)
+
+**Edit task form** - task editing flow with priority, due date, and assignee fields.
 ![Edit task form](screenshots/edit_task.png)
 
 ## Run locally
