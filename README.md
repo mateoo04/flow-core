@@ -1,73 +1,68 @@
 # FlowCore
 
-Project-management app modelled on a workspace → project → board → task hierarchy. Built for an ASP.NET Core MVC course; structured to look and behave like a real production codebase rather than the usual lab template.
+FlowCore is a backend-focused full-stack project management app with a clear **workspace -> project -> board -> task** hierarchy.
 
-**.NET 10 · EF Core 10 · PostgreSQL 18 · Tailwind 4 · async/await throughout**
+**Tech stack:** **ASP.NET Core MVC (.NET 10)**, **EF Core 10**, **PostgreSQL 18**, **Tailwind 4**.
 
-## Quick start
+## Why this project stands out
+
+- Built with a clean backend architecture: **Controller -> Service -> Repository -> DbContext**.
+- Uses production-minded patterns: **`Result<T>` flow**, explicit cascade rules, and async-first data access.
+- Includes a Tailwind UI and realistic seeded data so reviewers can evaluate full user flows quickly.
+
+## Screenshots
+
+![My tasks dashboard](screenshots/my_tasks_dashboard.png)
+![Project board](screenshots/project_board.png)
+![Task details](screenshots/task_details.png)
+![Edit task form](screenshots/edit_task.png)
+
+## Run locally
+
+### Prerequisites
+
+- **.NET 10 SDK**
+- **Node.js + npm** (needed for Tailwind CSS build)
+- **Docker** (or a local PostgreSQL instance)
+
+### 1) Start PostgreSQL (Docker)
 
 ```bash
-docker run -d --name flowcore-pg -p 5432:5432 \
-  -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=FlowCore postgres:18
+docker run -d --name flowcore-pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=FlowCore postgres:18
+```
 
-dotnet ef database update \
-  --project FlowCore --startup-project FlowCore --context FlowCoreDbContext
+### 2) Install frontend dependencies
 
+```bash
+npm install
+```
+
+### 3) Apply migrations
+
+```bash
+dotnet ef database update --project FlowCore --startup-project FlowCore --context FlowCoreDbContext
+```
+
+### 4) Run the app
+
+```bash
 dotnet run --project FlowCore
 ```
 
-The first run in `Development` auto-seeds ~60 demo tasks across 5 projects (see [`DatabaseSeeder.cs`](FlowCore/Data/DatabaseSeeder.cs); guarded by an `Any()` check so subsequent runs preserve your data). Open the URL Kestrel prints.
+Open the local URL printed by Kestrel.
 
-## Production notes (Railway)
+## Demo accounts (seeded)
 
-- The app now fails build/publish if Tailwind output cannot be generated (`npm run build:css`), so make sure Node/npm is available in your Railway build image.
-- Forwarded proxy headers (`X-Forwarded-For`, `X-Forwarded-Proto`) are enabled in startup for TLS-terminating platforms.
-- Demo login is **disabled outside Development by default**. Enable it explicitly with `Features__EnableDemoLogin=true` only for public demo environments.
-- A production `Dockerfile` is included at repository root. It publishes the app and binds to Railway's `PORT` at runtime.
-- Database configuration accepts both Npgsql connection-string format and Railway URL format (`postgres://` / `postgresql://`).
-- EF Core migrations run automatically on startup by default. Disable with `Database__AutoMigrate=false`.
-- Seed demo data in Railway with `Seed__Enabled=true`.
-- Set one shared password for all seeded users with `Seed__SharedPassword=<your-strong-password>`.
+On first run in `Development`, the app seeds demo users/projects/tasks.
 
-## Development credentials
+- Emails: `alex@flowcore.demo`, `sam@flowcore.demo`, `casey@flowcore.demo`, `jordan@flowcore.demo`, `morgan@flowcore.demo`
+- Password: `Seed__SharedPassword` if configured, otherwise local fallback `Admin6060!`
 
-The seeded demo users share one password:
+## Code highlights
 
-- `Seed__SharedPassword` if provided (recommended for Railway and any shared environment)
-- otherwise in local `Development`, fallback is `Admin6060!` (lab-only)
+If someone wants to inspect code quality quickly:
 
-| Email | Role in seed |
-|---|---|
-| `alex@flowcore.demo` | Owner of `WorkspaceNorth` |
-| `sam@flowcore.demo` | Member |
-| `casey@flowcore.demo` | Member |
-| `jordan@flowcore.demo` | Member |
-| `morgan@flowcore.demo` | Member |
-
-You can also sign up for an account at `/account/register`.
-
-## Architecture
-
-```
-View → Controller → Service (validation, Result<T>) → Repository → FlowCoreDbContext → PostgreSQL
-```
-
-- **Repositories** read with `AsNoTracking`; heavy `GetById` queries use `AsSplitQuery`. Cascade-delete handled by Postgres, not by recursive code.
-- **Domain services** ([`Services/Domain/`](FlowCore/Services/Domain/)) own validation and return [`Result<T>`](FlowCore/Common/Result.cs) so controllers map success / `Validation` / `NotFound` / `Conflict` without exception-driven control flow.
-- **Attribute routing** with `:guid` constraints for resource URLs; lowercase URL emission via `RouteOptions.LowercaseUrls`. Named routes referenced through `LinkGenerator.GetPathByName` for refactor-safe URL generation in [`BreadcrumbTrailBuilder`](FlowCore/Services/BreadcrumbTrailBuilder.cs).
-- **Cascade behaviour** is configured explicitly in [`OnModelCreating`](FlowCore/Data/FlowCoreDbContext.cs); `Comment.Author` and `TaskItem.TaskStatusDefinition` use `Restrict` (rationale in the model doc).
-
-## Documentation
-
-- [docs/semantic-model.md](docs/semantic-model.md) — entities + Mermaid ER diagram + cascade table
-- [docs/sitemap.md](docs/sitemap.md) — every URL → controller / action / view
-- [.claude/skills/](.claude/skills/) — agent skills for the EF and list-page workflows (auto-discovered by Claude Code)
-
-## Highlights for code review
-
-If you're evaluating engineering signal, start with these:
-[`FlowCoreDbContext.cs`](FlowCore/Data/FlowCoreDbContext.cs) (Fluent API),
-[`Result.cs`](FlowCore/Common/Result.cs),
-[`TaskService.cs`](FlowCore/Services/Domain/TaskService.cs),
-[`EfTaskRepository.cs`](FlowCore/Repositories/EntityFramework/EfTaskRepository.cs),
-[`BreadcrumbTrailBuilder.cs`](FlowCore/Services/BreadcrumbTrailBuilder.cs).
+- [`FlowCore/Data/FlowCoreDbContext.cs`](FlowCore/Data/FlowCoreDbContext.cs)
+- [`FlowCore/Common/Result.cs`](FlowCore/Common/Result.cs)
+- [`FlowCore/Services/Domain/TaskService.cs`](FlowCore/Services/Domain/TaskService.cs)
+- [`FlowCore/Repositories/EntityFramework/EfTaskRepository.cs`](FlowCore/Repositories/EntityFramework/EfTaskRepository.cs)
