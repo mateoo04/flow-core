@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace FlowCore.Tests.Infrastructure;
 
@@ -52,6 +53,14 @@ public sealed class FlowCoreApiFactory : WebApplicationFactory<Program>
                     options.DefaultScheme = TestAuth.Scheme;
                 })
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuth.Scheme, _ => { });
+
+            services.RemoveAll(typeof(FlowCore.Services.Attachments.IAttachmentStorage));
+            services.AddSingleton<FlowCore.Services.Attachments.IAttachmentStorage, FakeAttachmentStorage>();
+            services.AddSingleton<FakeAttachmentStorage>(sp =>
+                (FakeAttachmentStorage)sp.GetRequiredService<FlowCore.Services.Attachments.IAttachmentStorage>());
+
+            services.RemoveAll(typeof(Microsoft.AspNetCore.Antiforgery.IAntiforgery));
+            services.AddSingleton<Microsoft.AspNetCore.Antiforgery.IAntiforgery, NoopAntiforgery>();
         });
     }
 

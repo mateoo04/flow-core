@@ -140,6 +140,18 @@ public static class TestDataSeeder
         return task;
     }
 
+    public static async Task AddMemberAsync(FlowCoreDbContext db, Workspace workspace, Guid userId, WorkspaceRole role = WorkspaceRole.Member)
+    {
+        db.WorkspaceMembers.Add(new WorkspaceMember
+        {
+            WorkspaceId = workspace.Id,
+            UserId = userId,
+            Role = role,
+            JoinedAt = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync();
+    }
+
     public static async Task<Comment> CreateCommentAsync(FlowCoreDbContext db)
     {
         var user = await EnsureTestUserAsync(db);
