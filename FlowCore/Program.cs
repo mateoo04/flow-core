@@ -61,6 +61,30 @@ builder.Services.ConfigureApplicationCookie(opts =>
     opts.AccessDeniedPath = "/account/access-denied";
     opts.ExpireTimeSpan = TimeSpan.FromDays(7);
     opts.SlidingExpiration = true;
+
+    // API clients expect status codes, not redirects to the login/access-denied pages.
+    opts.Events.OnRedirectToLogin = ctx =>
+    {
+        if (ctx.Request.Path.StartsWithSegments("/api"))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        }
+
+        ctx.Response.Redirect(ctx.RedirectUri);
+        return Task.CompletedTask;
+    };
+    opts.Events.OnRedirectToAccessDenied = ctx =>
+    {
+        if (ctx.Request.Path.StartsWithSegments("/api"))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        }
+
+        ctx.Response.Redirect(ctx.RedirectUri);
+        return Task.CompletedTask;
+    };
 });
 
 builder.Services.AddRateLimiter(opts =>
@@ -149,9 +173,14 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
+app.MapControllers();
+
 app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 app.Run();
+
+// Exposed so the integration test project can reference the entry point via WebApplicationFactory<Program>.
+public partial class Program;
