@@ -63,3 +63,52 @@
         <a asp-action="Details" asp-route-id="@Model.Id" class="rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]">Cancel</a>
     </div>
 </form>
+
+<section class="mt-10 max-w-xl">
+    <h2 class="font-headline text-xl font-bold text-fg">Images</h2>
+
+    <form id="attachmentDropzone" class="dropzone mt-3 rounded-xl border border-dashed border-border bg-[var(--color-surface)] p-4"
+          action="/tasks/@Model.Id/attachments" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <div id="attachmentList" class="mt-4"></div>
+</section>
+
+@section Scripts {
+    <link rel="stylesheet" href="~/lib/dropzone/dropzone.min.css" asp-append-version="true" />
+    <script src="~/lib/dropzone/dropzone.min.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            const taskId = "@Model.Id";
+            const token = document.querySelector('#attachmentDropzone input[name="__RequestVerificationToken"]').value;
+            const listEl = document.getElementById("attachmentList");
+
+            async function loadAttachments() {
+                const res = await fetch(`/tasks/${taskId}/attachments`, { headers: { "RequestVerificationToken": token } });
+                listEl.innerHTML = await res.text();
+            }
+
+            Dropzone.autoDiscover = false;
+            const dz = new Dropzone("#attachmentDropzone", {
+                url: `/tasks/${taskId}/attachments`,
+                paramName: "file",
+                maxFilesize: 5, // MB
+                acceptedFiles: "image/*",
+                headers: { "RequestVerificationToken": token },
+                dictDefaultMessage: "Drop images here or click to upload"
+            });
+            dz.on("success", function (file) { dz.removeFile(file); loadAttachments(); });
+
+            listEl.addEventListener("click", async function (e) {
+                const btn = e.target.closest("[data-delete-attachment]");
+                if (!btn) return;
+                const id = btn.getAttribute("data-delete-attachment");
+                await fetch(`/attachments/${id}/delete`, { method: "POST", headers: { "RequestVerificationToken": token } });
+                loadAttachments();
+            });
+
+            loadAttachments();
+        })();
+    </script>
+}
