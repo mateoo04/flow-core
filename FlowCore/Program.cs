@@ -5,6 +5,7 @@ using FlowCore.Models;
 using FlowCore.Repositories;
 using FlowCore.Repositories.EntityFramework;
 using FlowCore.Services;
+using FlowCore.Services.Attachments;
 using FlowCore.Services.Authorization;
 using FlowCore.Services.Domain;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -137,6 +138,11 @@ builder.Services.AddScoped<IAuthorizationHandler, DemoUserHandler>();
 
 builder.Services.AddSingleton<IBreadcrumbTrailBuilder, BreadcrumbTrailBuilder>();
 builder.Services.AddSingleton<UiText>();
+
+builder.Services.Configure<AttachmentOptions>(
+    builder.Configuration.GetSection(AttachmentOptions.SectionName));
+builder.Services.AddScoped<IAttachmentStorage, LocalDiskAttachmentStorage>();
+builder.Services.AddScoped<ImageUploadValidator>();
 
 var app = builder.Build();
 
