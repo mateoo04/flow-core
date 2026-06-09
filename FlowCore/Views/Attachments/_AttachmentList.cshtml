@@ -1,0 +1,25 @@
+@model IReadOnlyList<FlowCore.Models.ViewModels.AttachmentListItem>
+
+@if (Model.Count == 0)
+{
+    <p class="text-sm text-fg-secondary">No images yet.</p>
+}
+else
+{
+    <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        @foreach (var item in Model)
+        {
+            <li class="rounded-xl border border-border p-2" data-attachment-id="@item.Id">
+                <a href="/attachments/@item.Id/content" target="_blank">
+                    <img src="/attachments/@item.Id/content" alt="@item.FileName"
+                         class="h-28 w-full rounded-lg object-cover" />
+                </a>
+                <div class="mt-2 flex items-center justify-between gap-2">
+                    <span class="truncate text-xs text-fg-secondary" title="@item.FileName">@item.FileName</span>
+                    <button type="button" class="text-xs text-[var(--color-error)]"
+                            data-delete-attachment="@item.Id">Delete</button>
+                </div>
+            </li>
+        }
+    </ul>
+}
