@@ -23,6 +23,7 @@ public class FlowCoreDbContext : IdentityDbContext<User, IdentityRole<Guid>, Gui
     public DbSet<TaskTag> TaskTags => Set<TaskTag>();
     public DbSet<UserTaskOrder> UserTaskOrders => Set<UserTaskOrder>();
     public DbSet<WorkspaceMember> WorkspaceMembers => Set<WorkspaceMember>();
+    public DbSet<Attachment> Attachments => Set<Attachment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -111,6 +112,21 @@ public class FlowCoreDbContext : IdentityDbContext<User, IdentityRole<Guid>, Gui
             b.HasOne(c => c.Author)
                 .WithMany()
                 .HasForeignKey(c => c.AuthorUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Attachment>(b =>
+        {
+            b.HasIndex(a => a.TaskItemId);
+
+            b.HasOne(a => a.TaskItem)
+                .WithMany(t => t.Attachments)
+                .HasForeignKey(a => a.TaskItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(a => a.UploadedBy)
+                .WithMany()
+                .HasForeignKey(a => a.UploadedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

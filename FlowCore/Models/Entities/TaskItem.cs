@@ -36,4 +36,5 @@ public class TaskItem
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public virtual ICollection<TaskAssignment> TaskAssignments { get; set; } = new List<TaskAssignment>();
     public virtual ICollection<TaskTag> TaskTags { get; set; } = new List<TaskTag>();
+    public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
 }
