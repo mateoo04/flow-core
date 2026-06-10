@@ -1,0 +1,29 @@
+@{
+    ViewData["Title"] = "FlowCore — Plan, track, ship";
+    Layout = "_AuthLayout";
+}
+<section class="mx-auto max-w-3xl px-6 py-20 text-center">
+    <h1 class="font-headline text-5xl font-extrabold tracking-tight text-fg">Plan, track, and ship together.</h1>
+    <p class="mt-6 text-lg text-fg-secondary">FlowCore is a workspace for teams to organize projects, boards, and tasks — from idea to done.</p>
+    <div class="mt-10 flex items-center justify-center gap-4">
+        <a asp-controller="Account" asp-action="Register"
+           class="rounded-xl bg-[var(--color-primary)] px-6 py-3 font-semibold text-[var(--color-on-primary)]">Get started</a>
+        <a asp-controller="Account" asp-action="Login"
+           class="rounded-xl border border-border px-6 py-3 font-semibold text-fg">Sign in</a>
+    </div>
+
+    <div class="mt-20 grid gap-8 text-left sm:grid-cols-3">
+        <div>
+            <h3 class="font-headline text-lg font-bold text-fg">Workspaces &amp; projects</h3>
+            <p class="mt-2 text-sm text-fg-secondary">Group your work into workspaces and projects with the right people.</p>
+        </div>
+        <div>
+            <h3 class="font-headline text-lg font-bold text-fg">Boards &amp; tasks</h3>
+            <p class="mt-2 text-sm text-fg-secondary">Track progress on boards with statuses, priorities, and subtasks.</p>
+        </div>
+        <div>
+            <h3 class="font-headline text-lg font-bold text-fg">Attachments &amp; comments</h3>
+            <p class="mt-2 text-sm text-fg-secondary">Keep context on every task with image attachments and discussion.</p>
+        </div>
+    </div>
+</section>

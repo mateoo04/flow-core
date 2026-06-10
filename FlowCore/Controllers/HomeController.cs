@@ -35,8 +35,12 @@ public class HomeController : BaseController
         _authz = authz;
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
+        if (User.Identity?.IsAuthenticated != true)
+            return View("Landing");
+
         var currentUserId = _currentUser.UserId;
         var user = await _users.GetByIdAsync(currentUserId, ct);
 
