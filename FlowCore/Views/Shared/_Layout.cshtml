@@ -125,6 +125,13 @@
                     <partial name="_Icon" model='new IconVm { Name = "cog-6-tooth", Size = 16, CssClass = onSettings ? "shrink-0 text-[var(--color-on-primary)]" : "shrink-0 text-fg-muted" }'/>
                     @T["nav.settings"]
                 </a>
+                @if (User.IsInRole(FlowCore.Models.AppRoles.Admin))
+                {
+                    <a class="mt-1 flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-fg-secondary transition-[background-color,color] duration-200 ease-out hover:bg-[var(--color-surface-container)] hover:text-fg"
+                       asp-controller="Admin" asp-action="Index">
+                        Admin
+                    </a>
+                }
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <div class="mt-1 flex w-full items-center gap-3 rounded-md border border-transparent p-2 transition-[background-color,border-color] duration-200 ease-out hover:border-border/60 hover:bg-[var(--color-surface-container-low)]">
