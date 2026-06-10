@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlowCore.Tests.Infrastructure;
 
-// Small existence checks used by tests to assert persisted state without
-// pulling EF Core usings into every test file.
 public static class DbAssert
 {
     public static Task<bool> TagExistsAsync(FlowCoreDbContext db, Guid id) =>

@@ -15,7 +15,6 @@ public sealed class LocalDiskAttachmentStorage : IAttachmentStorage
     public async Task<string> SaveAsync(Guid taskId, IFormFile file, CancellationToken ct = default)
     {
         var ext = Path.GetExtension(file.FileName);
-        // Key is server-generated (no client path) -> no traversal risk.
         var key = Path.Combine("tasks", taskId.ToString(), $"{Guid.NewGuid()}{ext}");
         var absolute = Path.Combine(_root, key);
         Directory.CreateDirectory(Path.GetDirectoryName(absolute)!);

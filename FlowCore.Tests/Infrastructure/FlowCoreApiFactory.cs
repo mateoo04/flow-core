@@ -10,9 +10,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace FlowCore.Tests.Infrastructure;
 
-// Boots the real application with two test-only overrides:
-//   1. the PostgreSQL DbContext is swapped for an isolated EF InMemory database, and
-//   2. a TestAuthHandler satisfies the global authorization filter.
 public sealed class FlowCoreApiFactory : WebApplicationFactory<Program>
 {
     private readonly string _databaseName = $"FlowCoreTests-{Guid.NewGuid()}";
@@ -25,16 +22,13 @@ public sealed class FlowCoreApiFactory : WebApplicationFactory<Program>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                // Dummy value so PostgresConnectionStringResolver doesn't throw at startup.
                 ["ConnectionStrings:FlowCoreDbContext"] = "Host=test;Database=test;Username=test;Password=test",
-                // Skip MigrateAsync() at startup — invalid against the InMemory provider.
                 ["Database:AutoMigrate"] = "false"
             });
         });
 
         builder.ConfigureTestServices(services =>
         {
-            // Replace the Npgsql DbContext registration with an isolated InMemory database.
             var toRemove = services.Where(d =>
                 d.ServiceType == typeof(DbContextOptions<FlowCoreDbContext>) ||
                 d.ServiceType == typeof(DbContextOptions) ||
@@ -45,7 +39,6 @@ public sealed class FlowCoreApiFactory : WebApplicationFactory<Program>
             services.AddDbContext<FlowCoreDbContext>(options =>
                 options.UseInMemoryDatabase(_databaseName));
 
-            // Make the test scheme the default so [Authorize] / the global filter are satisfied.
             services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = TestAuth.Scheme;
@@ -73,7 +66,6 @@ public sealed class FlowCoreApiFactory : WebApplicationFactory<Program>
         return client;
     }
 
-    // Run an action against a scoped DbContext (for seeding / asserting on persisted state).
     public async Task<T> WithDbContextAsync<T>(Func<FlowCoreDbContext, Task<T>> action)
     {
         using var scope = Services.CreateScope();

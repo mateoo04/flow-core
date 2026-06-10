@@ -63,7 +63,6 @@ builder.Services.ConfigureApplicationCookie(opts =>
     opts.ExpireTimeSpan = TimeSpan.FromDays(7);
     opts.SlidingExpiration = true;
 
-    // API clients expect status codes, not redirects to the login/access-denied pages.
     opts.Events.OnRedirectToLogin = ctx =>
     {
         if (ctx.Request.Path.StartsWithSegments("/api"))
@@ -154,7 +153,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithReExecute("/Home/StatusCodePage", "?code={0}");
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    app.UseStatusCodePagesWithReExecute("/Home/StatusCodePage", "?code={0}");
+}
 
 app.UseForwardedHeaders();
 app.UseHttpsRedirection();
@@ -188,5 +190,4 @@ app.MapControllerRoute(
 
 app.Run();
 
-// Exposed so the integration test project can reference the entry point via WebApplicationFactory<Program>.
 public partial class Program;

@@ -92,7 +92,6 @@ public class StatusesApiController : ControllerBase
         if (status is null)
             return NotFound();
 
-        // TaskItem -> TaskStatusDefinition uses DeleteBehavior.Restrict; block deletion if any task still uses it.
         var inUse = await _db.TaskItems.AnyAsync(t => t.TaskStatusDefinitionId == id, ct);
         if (inUse)
             return Conflict(new { message = "Status is still used by tasks and cannot be deleted." });

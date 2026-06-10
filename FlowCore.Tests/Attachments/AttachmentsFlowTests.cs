@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using FlowCore.Models;
 using FlowCore.Tests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -85,5 +86,35 @@ public class AttachmentsFlowTests : IClassFixture<FlowCoreApiFactory>
         var response = await client.PostAsync($"/tasks/{taskId}/attachments", ImageContent());
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Content_Returns403_ForNonMember()
+    {
+        var attachmentId = await _factory.WithDbContextAsync(async db =>
+        {
+            var user = await TestDataSeeder.EnsureTestUserAsync(db);
+            var ctx = await TestDataSeeder.CreateTaskContextAsync(db);
+            var task = await TestDataSeeder.CreateTaskAsync(db, ctx);
+            var attachment = new Attachment
+            {
+                Id = Guid.NewGuid(),
+                TaskItemId = task.Id,
+                FileName = "secret.png",
+                StoragePath = $"tasks/{task.Id}/secret.png",
+                ContentType = "image/png",
+                FileSize = 10,
+                UploadedByUserId = user.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.Attachments.Add(attachment);
+            await db.SaveChangesAsync();
+            return attachment.Id;
+        });
+        var client = _factory.CreateAuthenticatedClient();
+
+        var response = await client.GetAsync($"/attachments/{attachmentId}/content");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 }

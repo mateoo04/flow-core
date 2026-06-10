@@ -4,9 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlowCore.Tests.Infrastructure;
 
-// Builds minimal valid object graphs directly in the DbContext, mirroring the lab's
-// CreateQuizAsync helper pattern. Every entity uses a fresh Guid so tests sharing a
-// class-level database don't collide.
 public static class TestDataSeeder
 {
     public static async Task<Tag> CreateTagAsync(FlowCoreDbContext db, string? name = null)
@@ -106,7 +103,6 @@ public static class TestDataSeeder
         return user;
     }
 
-    // Workspace -> Project -> Board (+ a Status in the same workspace) needed to create tasks.
     public sealed record TaskContext(Workspace Workspace, Project Project, Board Board, TaskStatusDefinition Status);
 
     public static async Task<TaskContext> CreateTaskContextAsync(FlowCoreDbContext db)

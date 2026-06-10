@@ -72,7 +72,6 @@ public class AttachmentsController : BaseController
         }
         catch
         {
-            // Don't leave an orphaned file on disk if the metadata write fails.
             await _storage.DeleteAsync(key, ct);
             throw;
         }
@@ -135,7 +134,6 @@ public class AttachmentsController : BaseController
         var denied = await EnsureWorkspaceMemberAsync(workspaceId.Value, _workspaces, _authz, ct);
         if (denied is not null) return denied;
 
-        // Remove the row first; a failed file delete is more recoverable than a dangling DB row.
         _db.Attachments.Remove(attachment);
         await _db.SaveChangesAsync(ct);
         await _storage.DeleteAsync(attachment.StoragePath, ct);

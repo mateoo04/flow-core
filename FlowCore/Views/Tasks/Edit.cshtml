@@ -93,7 +93,7 @@
             const dz = new Dropzone("#attachmentDropzone", {
                 url: `/tasks/${taskId}/attachments`,
                 paramName: "file",
-                maxFilesize: 5, // MB
+                maxFilesize: 5,
                 acceptedFiles: "image/*",
                 headers: { "RequestVerificationToken": token },
                 dictDefaultMessage: "Drop images here or click to upload"

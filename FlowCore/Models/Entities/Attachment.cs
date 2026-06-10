@@ -11,8 +11,8 @@ public class Attachment
     [ForeignKey(nameof(TaskItem))]
     public Guid TaskItemId { get; set; }
 
-    public string FileName { get; set; } = string.Empty;      // original client name
-    public string StoragePath { get; set; } = string.Empty;   // relative key within the storage root
+    public string FileName { get; set; } = string.Empty;
+    public string StoragePath { get; set; } = string.Empty;
     public string ContentType { get; set; } = string.Empty;
     public long FileSize { get; set; }
 

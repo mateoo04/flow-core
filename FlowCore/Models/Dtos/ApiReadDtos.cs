@@ -1,8 +1,5 @@
 namespace FlowCore.Models.Dtos;
 
-// Read DTOs returned to API clients. Entities are never serialized directly:
-// navigation properties would cause cyclic/oversized JSON and leak internal fields.
-
 public sealed record WorkspaceSummaryDto(Guid Id, string Name);
 
 public sealed record StatusSummaryDto(Guid Id, string Name, string ColorHex);

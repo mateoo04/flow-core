@@ -2,10 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FlowCore.Models.Dtos;
 
-// Request DTOs accepted from API clients. Validation lives in data-annotation
-// attributes; [ApiController] auto-returns 400 when ModelState is invalid.
-// Rules mirror the existing *FormVm classes in ViewModels/CrudViewModels.cs.
-
 internal static class DtoValidation
 {
     public const string HexColor = @"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$";

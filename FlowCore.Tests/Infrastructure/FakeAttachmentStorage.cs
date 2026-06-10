@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace FlowCore.Tests.Infrastructure;
 
-// In-memory IAttachmentStorage so tests never touch disk.
 public sealed class FakeAttachmentStorage : IAttachmentStorage
 {
     private readonly ConcurrentDictionary<string, byte[]> _files = new();

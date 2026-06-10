@@ -1,7 +1,5 @@
 namespace FlowCore.Models.Dtos;
 
-// Manual entity -> DTO mapping. Because these are methods (not translatable to SQL),
-// callers must materialize the query (ToList/ToListAsync) BEFORE projecting with ToDto().
 public static class ApiMappingExtensions
 {
     public static WorkspaceSummaryDto ToSummaryDto(this Workspace workspace) =>

@@ -10,16 +10,13 @@ public static class TestAuth
 {
     public const string Scheme = "Test";
 
-    // Header an anonymous client sends to opt out of authentication (to exercise 401 paths).
     public const string AnonymousHeader = "X-Test-Anonymous";
 
-    // Fixed identity every authenticated test request runs as.
     public static readonly Guid UserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     public const string Email = "test.user@flowcore.local";
     public const string FullName = "Test User";
 }
 
-// Authenticates every request as a fixed test user, unless the anonymous marker header is present.
 public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     public TestAuthHandler(
