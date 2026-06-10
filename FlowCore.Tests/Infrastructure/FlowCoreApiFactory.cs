@@ -66,6 +66,13 @@ public sealed class FlowCoreApiFactory : WebApplicationFactory<Program>
         return client;
     }
 
+    public HttpClient CreateClientInRole(string role)
+    {
+        var client = CreateClient();
+        client.DefaultRequestHeaders.Add(TestAuth.RoleHeader, role);
+        return client;
+    }
+
     public async Task<T> WithDbContextAsync<T>(Func<FlowCoreDbContext, Task<T>> action)
     {
         using var scope = Services.CreateScope();

@@ -11,6 +11,7 @@ public static class TestAuth
     public const string Scheme = "Test";
 
     public const string AnonymousHeader = "X-Test-Anonymous";
+    public const string RoleHeader = "X-Test-Role";
 
     public static readonly Guid UserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     public const string Email = "test.user@flowcore.local";
@@ -32,12 +33,20 @@ public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationScheme
         if (Request.Headers.ContainsKey(TestAuth.AnonymousHeader))
             return Task.FromResult(AuthenticateResult.NoResult());
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, TestAuth.UserId.ToString()),
-            new Claim(ClaimTypes.Name, TestAuth.Email),
-            new Claim(ClaimTypes.Email, TestAuth.Email)
+            new(ClaimTypes.NameIdentifier, TestAuth.UserId.ToString()),
+            new(ClaimTypes.Name, TestAuth.Email),
+            new(ClaimTypes.Email, TestAuth.Email)
         };
+
+        if (Request.Headers.TryGetValue(TestAuth.RoleHeader, out var roleValues))
+        {
+            foreach (var role in roleValues)
+                if (!string.IsNullOrEmpty(role))
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
         var identity = new ClaimsIdentity(claims, TestAuth.Scheme);
         var principal = new ClaimsPrincipal(identity);
         var ticket = new AuthenticationTicket(principal, TestAuth.Scheme);
