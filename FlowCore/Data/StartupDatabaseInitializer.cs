@@ -8,6 +8,7 @@ public static class StartupDatabaseInitializer
     {
         await ApplyMigrationsAsync(services, configuration);
         await services.SeedDemoDataAsync();
+        await services.SeedRolesAsync();
     }
 
     private static async Task ApplyMigrationsAsync(IServiceProvider services, IConfiguration configuration)

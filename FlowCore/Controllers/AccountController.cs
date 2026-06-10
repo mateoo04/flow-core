@@ -57,6 +57,7 @@ public class AccountController : Controller
             return View(vm);
         }
 
+        await _userManager.AddToRoleAsync(user, AppRoles.User);
         await _signInManager.SignInAsync(user, isPersistent: false);
         return RedirectToAction("Index", "Home");
     }
