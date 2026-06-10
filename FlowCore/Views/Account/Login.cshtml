@@ -56,6 +56,17 @@
                         </button>
                     </form>
 
+                    @if (Model.ShowGoogleLogin)
+                    {
+                        <form asp-action="ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="space-y-4">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" name="provider" value="Google"
+                                    class="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-[var(--color-surface-container-low)] px-6 py-3 text-sm font-semibold text-fg transition-colors duration-200 hover:bg-[var(--color-surface-container)]">
+                                Sign in with Google
+                            </button>
+                        </form>
+                    }
+
                     @if (Model.EnableDemoLogin)
                     {
                         <div class="relative flex items-center py-2">

@@ -8,6 +8,7 @@ using FlowCore.Services;
 using FlowCore.Services.Attachments;
 using FlowCore.Services.Authorization;
 using FlowCore.Services.Domain;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -55,6 +56,29 @@ builder.Services
     .AddEntityFrameworkStores<FlowCoreDbContext>()
     .AddClaimsPrincipalFactory<FlowCoreUserClaimsPrincipalFactory>()
     .AddDefaultTokenProviders();
+
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    builder.Services.AddAuthentication().AddGoogle(options =>
+    {
+        options.ClientId = googleClientId;
+        options.ClientSecret = googleClientSecret;
+        options.SignInScheme = IdentityConstants.ExternalScheme;
+        options.Events.OnCreatingTicket = ctx =>
+        {
+            if (ctx.Identity is not null
+                && ctx.User.TryGetProperty("email_verified", out var verified)
+                && verified.GetBoolean())
+            {
+                ctx.Identity.AddClaim(new Claim("email_verified", "true"));
+            }
+
+            return Task.CompletedTask;
+        };
+    });
+}
 
 builder.Services.ConfigureApplicationCookie(opts =>
 {
