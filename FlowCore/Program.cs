@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
+LoadDotEnv();
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews(opts =>
@@ -213,5 +215,38 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.Run();
+
+static void LoadDotEnv()
+{
+    var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+    while (directory is not null)
+    {
+        var envPath = Path.Combine(directory.FullName, ".env");
+        if (File.Exists(envPath))
+        {
+            foreach (var rawLine in File.ReadAllLines(envPath))
+            {
+                var line = rawLine.Trim();
+                if (string.IsNullOrEmpty(line) || line.StartsWith('#'))
+                    continue;
+
+                var separatorIndex = line.IndexOf('=');
+                if (separatorIndex <= 0)
+                    continue;
+
+                var key = line[..separatorIndex].Trim();
+                var value = line[(separatorIndex + 1)..].Trim().Trim('"');
+                if (string.IsNullOrEmpty(key) || Environment.GetEnvironmentVariable(key) is not null)
+                    continue;
+
+                Environment.SetEnvironmentVariable(key, value);
+            }
+
+            return;
+        }
+
+        directory = directory.Parent;
+    }
+}
 
 public partial class Program;

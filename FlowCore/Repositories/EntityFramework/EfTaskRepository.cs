@@ -83,6 +83,7 @@ public sealed class EfTaskRepository : ITaskRepository
             .Include(t => t.Subtasks)
             .Include(t => t.Comments)
             .ThenInclude(c => c.Author)
+            .Include(t => t.Attachments)
             .Include(t => t.TaskTags)
             .ThenInclude(tt => tt.Tag)
             .Include(t => t.TaskAssignments)

@@ -32,6 +32,24 @@
                 <div class="mt-3 max-w-3xl whitespace-pre-wrap text-[15px] leading-7 text-fg-secondary">@(string.IsNullOrWhiteSpace(Model.Description) ? "—" : Model.Description)</div>
             </section>
 
+            @if (Model.Attachments.Count > 0)
+            {
+                <section>
+                    <h2 class="text-xs font-bold uppercase tracking-[0.14em] text-fg-muted">Images</h2>
+                    <ul class="mt-4 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3">
+                        @foreach (var image in Model.Attachments.OrderByDescending(x => x.CreatedAt))
+                        {
+                            <li class="overflow-hidden rounded-xl border border-fg-muted/15 bg-card shadow-soft">
+                                <a href="/attachments/@image.Id/content" target="_blank" rel="noopener" class="block outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-app">
+                                    <img src="/attachments/@image.Id/content" alt="@image.FileName" class="h-36 w-full object-cover" />
+                                </a>
+                                <div class="truncate px-3 py-2 text-xs text-fg-secondary" title="@image.FileName">@image.FileName</div>
+                            </li>
+                        }
+                    </ul>
+                </section>
+            }
+
             @if (Model.ParentTaskItemId is { } pp)
             {
                 <p class="text-sm">

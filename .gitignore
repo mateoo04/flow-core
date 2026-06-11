@@ -1,8 +1,13 @@
+.env
+.env.*
+!.env.example
+
 ## Build
 bin/
 obj/
 /packages/
 out/
+artifacts/
 
 ## .NET / MSBuild
 *.user
@@ -12,7 +17,6 @@ out/
 *.rsuser
 project.lock.json
 project.fragment.lock.json
-artifacts/
 
 ## Visual Studio / VS Code
 .vs/
@@ -30,11 +34,14 @@ riderModule.iml
 ## macOS / OS
 .DS_Store
 
+## Node
 node_modules/
 
-## AI / editor local (Cursor, Claude)
-.claude/
-.cursor/
+## Local Codex/runtime files
+.codex/
+
+## Uploaded files from local development
+FlowCore/wwwroot/uploads/
 
 ## Local experiments
 labs/

@@ -2,6 +2,15 @@
     ViewData["Title"] = "FlowCore — Plan, track, ship";
     Layout = "_AuthLayout";
 }
+<header class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 py-5 sm:relative sm:flex-row">
+    <a asp-controller="Home" asp-action="Index" class="font-headline text-xl font-extrabold tracking-tight text-fg sm:absolute sm:left-1/2 sm:-translate-x-1/2">FlowCore</a>
+    <nav class="flex items-center gap-3 sm:ml-auto" aria-label="Account">
+        <a asp-controller="Account" asp-action="Login"
+           class="rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-[var(--color-surface-container)]">Log in</a>
+        <a asp-controller="Account" asp-action="Register"
+           class="rounded-full bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-primary)] transition-opacity hover:opacity-95">Get started</a>
+    </nav>
+</header>
 <section class="mx-auto max-w-3xl px-6 py-20 text-center">
     <h1 class="font-headline text-5xl font-extrabold tracking-tight text-fg">Plan, track, and ship together.</h1>
     <p class="mt-6 text-lg text-fg-secondary">FlowCore is a workspace for teams to organize projects, boards, and tasks — from idea to done.</p>
@@ -9,7 +18,7 @@
         <a asp-controller="Account" asp-action="Register"
            class="rounded-xl bg-[var(--color-primary)] px-6 py-3 font-semibold text-[var(--color-on-primary)]">Get started</a>
         <a asp-controller="Account" asp-action="Login"
-           class="rounded-xl border border-border px-6 py-3 font-semibold text-fg">Sign in</a>
+           class="rounded-xl border border-border px-6 py-3 font-semibold text-fg">Log in</a>
     </div>
 
     <div class="mt-20 grid gap-8 text-left sm:grid-cols-3">
