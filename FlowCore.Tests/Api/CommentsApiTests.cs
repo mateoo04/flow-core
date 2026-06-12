@@ -55,7 +55,9 @@ public class CommentsApiTests : IClassFixture<FlowCoreApiFactory>
         var (taskId, userId) = await _factory.WithDbContextAsync(async db =>
         {
             var user = await TestDataSeeder.EnsureTestUserAsync(db);
-            var task = await TestDataSeeder.CreateTaskAsync(db);
+            var ctx = await TestDataSeeder.CreateTaskContextAsync(db);
+            await TestDataSeeder.AddMemberAsync(db, ctx.Workspace, user.Id);
+            var task = await TestDataSeeder.CreateTaskAsync(db, ctx);
             return (task.Id, user.Id);
         });
         var client = _factory.CreateAuthenticatedClient();
@@ -75,7 +77,9 @@ public class CommentsApiTests : IClassFixture<FlowCoreApiFactory>
         var (taskId, userId) = await _factory.WithDbContextAsync(async db =>
         {
             var user = await TestDataSeeder.EnsureTestUserAsync(db);
-            var task = await TestDataSeeder.CreateTaskAsync(db);
+            var ctx = await TestDataSeeder.CreateTaskContextAsync(db);
+            await TestDataSeeder.AddMemberAsync(db, ctx.Workspace, user.Id);
+            var task = await TestDataSeeder.CreateTaskAsync(db, ctx);
             return (task.Id, user.Id);
         });
         var client = _factory.CreateAuthenticatedClient();

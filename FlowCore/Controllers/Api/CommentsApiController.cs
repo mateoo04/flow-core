@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.Dtos;
@@ -19,7 +20,22 @@ public class CommentsApiController : ControllerBase
         [FromQuery] Guid? taskItemId,
         CancellationToken ct)
     {
-        var comments = _db.Comments.AsNoTracking().Include(c => c.Author).AsQueryable();
+        if (CurrentUserId() is not { } userId)
+            return Unauthorized();
+
+        var comments = _db.Comments
+            .AsNoTracking()
+            .Include(c => c.Author)
+            .AsQueryable();
+
+        if (!User.IsInRole(AppRoles.Admin))
+        {
+            comments = comments.Where(c =>
+                c.TaskItem != null &&
+                c.TaskItem.Board != null &&
+                c.TaskItem.Board.Project != null &&
+                c.TaskItem.Board.Project.Workspace!.Members.Any(m => m.UserId == userId));
+        }
 
         if (taskItemId is { } tid)
             comments = comments.Where(c => c.TaskItemId == tid);
@@ -39,6 +55,8 @@ public class CommentsApiController : ControllerBase
             .FirstOrDefaultAsync(c => c.Id == id, ct);
         if (comment is null)
             return NotFound();
+        if (!await CanAccessCommentAsync(comment.Id, ct))
+            return Forbid();
 
         return Ok(comment.ToDto());
     }
@@ -46,17 +64,20 @@ public class CommentsApiController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CommentDto>> Create([FromBody] CommentCreateDto model, CancellationToken ct)
     {
+        if (CurrentUserId() is not { } userId)
+            return Unauthorized();
+
         if (!await _db.TaskItems.AnyAsync(t => t.Id == model.TaskItemId, ct))
             return BadRequest(new { message = "Task does not exist." });
 
-        if (!await _db.Users.AnyAsync(u => u.Id == model.AuthorUserId, ct))
-            return BadRequest(new { message = "Author does not exist." });
+        if (!await CanAccessTaskAsync(model.TaskItemId, ct))
+            return Forbid();
 
         var comment = new Comment
         {
             Id = Guid.NewGuid(),
             TaskItemId = model.TaskItemId,
-            AuthorUserId = model.AuthorUserId,
+            AuthorUserId = userId,
             Body = model.Body,
             CreatedAt = DateTime.UtcNow
         };
@@ -76,6 +97,8 @@ public class CommentsApiController : ControllerBase
         var comment = await _db.Comments.Include(c => c.Author).FirstOrDefaultAsync(c => c.Id == id, ct);
         if (comment is null)
             return NotFound();
+        if (!CanModifyComment(comment) || !await CanAccessCommentAsync(comment.Id, ct))
+            return Forbid();
 
         comment.Body = model.Body;
         comment.EditedAt = DateTime.UtcNow;
@@ -90,10 +113,43 @@ public class CommentsApiController : ControllerBase
         var comment = await _db.Comments.FirstOrDefaultAsync(c => c.Id == id, ct);
         if (comment is null)
             return NotFound();
+        if (!CanModifyComment(comment) || !await CanAccessCommentAsync(comment.Id, ct))
+            return Forbid();
 
         _db.Comments.Remove(comment);
         await _db.SaveChangesAsync(ct);
 
         return NoContent();
+    }
+
+    private Guid? CurrentUserId() =>
+        Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : null;
+
+    private bool CanModifyComment(Comment comment) =>
+        User.IsInRole(AppRoles.Admin) || comment.AuthorUserId == CurrentUserId();
+
+    private async Task<bool> CanAccessCommentAsync(Guid commentId, CancellationToken ct)
+    {
+        var taskId = await _db.Comments
+            .Where(c => c.Id == commentId)
+            .Select(c => c.TaskItemId)
+            .FirstOrDefaultAsync(ct);
+
+        return taskId != Guid.Empty && await CanAccessTaskAsync(taskId, ct);
+    }
+
+    private async Task<bool> CanAccessTaskAsync(Guid taskId, CancellationToken ct)
+    {
+        if (User.IsInRole(AppRoles.Admin))
+            return true;
+
+        if (CurrentUserId() is not { } userId)
+            return false;
+
+        return await _db.TaskItems.AnyAsync(t =>
+            t.Id == taskId &&
+            t.Board != null &&
+            t.Board.Project != null &&
+            t.Board.Project.Workspace!.Members.Any(m => m.UserId == userId), ct);
     }
 }

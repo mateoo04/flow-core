@@ -151,7 +151,9 @@ public static class TestDataSeeder
     public static async Task<Comment> CreateCommentAsync(FlowCoreDbContext db)
     {
         var user = await EnsureTestUserAsync(db);
-        var task = await CreateTaskAsync(db);
+        var context = await CreateTaskContextAsync(db);
+        await AddMemberAsync(db, context.Workspace, user.Id);
+        var task = await CreateTaskAsync(db, context);
         var comment = new Comment
         {
             Id = Guid.NewGuid(),

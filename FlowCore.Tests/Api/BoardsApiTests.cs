@@ -15,7 +15,9 @@ public class BoardsApiTests : IClassFixture<FlowCoreApiFactory>
     private Task<FlowCore.Models.Board> SeedBoardAsync() =>
         _factory.WithDbContextAsync(async db =>
         {
+            var user = await TestDataSeeder.EnsureTestUserAsync(db);
             var ws = await TestDataSeeder.CreateWorkspaceAsync(db);
+            await TestDataSeeder.AddMemberAsync(db, ws, user.Id);
             var project = await TestDataSeeder.CreateProjectAsync(db, ws);
             return await TestDataSeeder.CreateBoardAsync(db, project);
         });
