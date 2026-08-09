@@ -9,7 +9,7 @@ namespace FlowCore.Controllers;
 
 public class SearchController : Controller
 {
-    private const int ResultLimit = 8;
+    private const int ResultLimit = 3;
 
     private readonly IProjectRepository _projects;
     private readonly ITaskRepository _tasks;
@@ -33,29 +33,52 @@ public class SearchController : Controller
 
     [HttpGet("/search/results")]
     public async Task<IActionResult> Results(
-        [FromQuery] string? tab,
         [FromQuery] string? q,
-        CancellationToken ct)
+        [FromQuery] string? section,
+        CancellationToken ct,
+        [FromQuery] int page = 1)
     {
         var query = (q ?? string.Empty).Trim();
-        var parsedTab = ParseTab(tab);
-        if (parsedTab is null) return BadRequest();
+        if (query.Length == 0) return Content(string.Empty);
+        if (page < 1) return BadRequest();
 
         var userWorkspaceIds = await _db.WorkspaceMembers
             .Where(m => m.UserId == _currentUser.UserId)
             .Select(m => m.WorkspaceId)
             .ToListAsync(ct);
 
-        return parsedTab switch
+        if (section is not null)
         {
-            SearchTab.Projects => await ProjectsAsync(query, userWorkspaceIds, ct),
-            SearchTab.Tasks => await TasksAsync(query, userWorkspaceIds, ct),
-            SearchTab.Users => await UsersAsync(query, ct),
-            _ => BadRequest()
-        };
+            var loadedSection = await GetSectionAsync(section, query, page, userWorkspaceIds, ct);
+            return loadedSection is null
+                ? BadRequest()
+                : PartialView("_GlobalSearchSection", loadedSection);
+        }
+
+        var sections = new List<GlobalSearchSectionVm>();
+        var pages = GetMatchingPages(query);
+        if (pages.Rows.Count > 0) sections.Add(pages);
+
+        foreach (var key in new[] { "tasks", "projects", "users", "comments" })
+        {
+            var searchSection = await GetSectionAsync(key, query, 1, userWorkspaceIds, ct);
+            if (searchSection is { Rows.Count: > 0 }) sections.Add(searchSection);
+        }
+
+        return PartialView("_GlobalSearchResults", new GlobalSearchResultsVm(query, sections));
     }
 
-    private async Task<IActionResult> ProjectsAsync(string query, List<Guid> userWorkspaceIds, CancellationToken ct)
+    private async Task<GlobalSearchSectionVm?> GetSectionAsync(
+        string section, string query, int page, List<Guid> userWorkspaceIds, CancellationToken ct) => section switch
+    {
+        "tasks" => await TasksAsync(query, page, userWorkspaceIds, ct),
+        "projects" => await ProjectsAsync(query, page, userWorkspaceIds, ct),
+        "users" => await UsersAsync(query, page, ct),
+        "comments" => await CommentsAsync(query, page, userWorkspaceIds, ct),
+        _ => null
+    };
+
+    private async Task<GlobalSearchSectionVm> ProjectsAsync(string query, int page, List<Guid> userWorkspaceIds, CancellationToken ct)
     {
         // TODO(auth-followup): membership filter is applied in-memory after over-fetching.
         // For datasets where a user's accessible projects fall outside the first
@@ -63,16 +86,15 @@ public class SearchController : Controller
         // filter into the repo query when ProjectRepo exposes a workspace-scoped variant.
         var hits = query.Length == 0
             ? Array.Empty<Models.Project>()
-            : (await _projects.SearchAsync(query, ResultLimit * 3, ct))
+            : (await _projects.SearchAsync(query, (page * ResultLimit + 1) * 3, ct))
                 .Where(p => userWorkspaceIds.Contains(p.WorkspaceId))
-                .Take(ResultLimit)
                 .ToArray();
 
-        var rows = hits.Select(p => new SearchProjectRow(p.Id, p.Name, p.Workspace?.Name)).ToList();
-        return PartialView("_SearchResultsProjects", new SearchResultsVm<SearchProjectRow>(query, rows));
+        return BuildSection("projects", "Projects", hits, page, p => new GlobalSearchRow(
+            p.Name, p.Workspace?.Name, Url.Action("Details", "Projects", new { id = p.Id })!, "Project"));
     }
 
-    private async Task<IActionResult> TasksAsync(string query, List<Guid> userWorkspaceIds, CancellationToken ct)
+    private async Task<GlobalSearchSectionVm> TasksAsync(string query, int page, List<Guid> userWorkspaceIds, CancellationToken ct)
     {
         // TODO(auth-followup): membership filter is applied in-memory after over-fetching.
         // For datasets where a user's accessible tasks fall outside the first
@@ -80,39 +102,78 @@ public class SearchController : Controller
         // filter into the repo query when TaskRepo exposes a workspace-scoped variant.
         var hits = query.Length == 0
             ? Array.Empty<Models.TaskItem>()
-            : (await _tasks.SearchAsync(query, ResultLimit * 3, ct))
+            : (await _tasks.SearchAsync(query, (page * ResultLimit + 1) * 3, ct))
                 .Where(t => t.Board?.Project?.WorkspaceId is { } wsId && userWorkspaceIds.Contains(wsId))
-                .Take(ResultLimit)
                 .ToArray();
 
-        var rows = hits.Select(t => new SearchTaskRow(
-            t.Id,
-            t.Title,
-            t.Board?.Project?.Name,
-            string.IsNullOrWhiteSpace(t.TaskStatusDefinition?.ColorHex) ? null : t.TaskStatusDefinition!.ColorHex)).ToList();
-        return PartialView("_SearchResultsTasks", new SearchResultsVm<SearchTaskRow>(query, rows));
+        return BuildSection("tasks", "Tasks", hits, page, t => new GlobalSearchRow(
+            t.Title, t.Board?.Project?.Name, Url.Action("Details", "Tasks", new { id = t.Id })!, "Task",
+            StatusColorHex: string.IsNullOrWhiteSpace(t.TaskStatusDefinition?.ColorHex) ? null : t.TaskStatusDefinition!.ColorHex));
     }
 
-    private async Task<IActionResult> UsersAsync(string query, CancellationToken ct)
+    private async Task<GlobalSearchSectionVm> UsersAsync(string query, int page, CancellationToken ct)
     {
         var hits = query.Length == 0
             ? Array.Empty<Models.User>()
-            : await _users.SearchActiveAsync(query, Array.Empty<Guid>(), ResultLimit, ct);
+            : await _users.SearchActiveAsync(query, Array.Empty<Guid>(), page * ResultLimit + 1, ct);
 
-        var rows = hits.Select(u => new SearchUserRow(
-            u.Id,
-            u.FullName,
-            u.Email,
-            UserDisplayHelper.GetInitials(u.FullName),
-            UserDisplayHelper.BackgroundColorForUser(u.Id))).ToList();
-        return PartialView("_SearchResultsUsers", new SearchResultsVm<SearchUserRow>(query, rows));
+        return BuildSection("users", "People", hits, page, u => new GlobalSearchRow(
+            u.FullName, u.Email, Url.Action("Details", "Users", new { id = u.Id })!, "Person",
+            UserDisplayHelper.GetInitials(u.FullName), UserDisplayHelper.BackgroundColorForUser(u.Id)));
     }
 
-    private static SearchTab? ParseTab(string? tab) => tab switch
+    private async Task<GlobalSearchSectionVm> CommentsAsync(
+        string query, int page, List<Guid> userWorkspaceIds, CancellationToken ct)
     {
-        "projects" => SearchTab.Projects,
-        "tasks" => SearchTab.Tasks,
-        "users" => SearchTab.Users,
-        _ => null
-    };
+        var pattern = $"%{query}%";
+        var hits = await _db.Comments
+            .AsNoTracking()
+            .Include(c => c.Author)
+            .Include(c => c.TaskItem)
+                .ThenInclude(t => t!.Board)
+                    .ThenInclude(b => b!.Project)
+            .Where(c => EF.Functions.ILike(c.Body, pattern))
+            .Where(c => userWorkspaceIds.Contains(c.TaskItem!.Board!.Project!.WorkspaceId))
+            .OrderByDescending(c => c.CreatedAt)
+            .Take(page * ResultLimit + 1)
+            .ToListAsync(ct);
+
+        return BuildSection("comments", "Comments", hits, page, c => new GlobalSearchRow(
+            CommentExcerpt(c.Body),
+            $"{c.TaskItem!.Title} · {c.Author?.FullName ?? "User"}",
+            $"{Url.Action("Details", "Tasks", new { id = c.TaskItemId })}#comment-{c.Id}",
+            "Comment"));
+    }
+
+    private GlobalSearchSectionVm GetMatchingPages(string query)
+    {
+        var pages = new List<GlobalSearchRow>
+        {
+            new("My tasks", "Page", Url.Action("Index", "Home")!, "Page"),
+            new("Workspaces", "Page", Url.Action("Index", "Workspaces")!, "Page"),
+            new("Projects", "Page", Url.Action("Index", "Projects")!, "Page"),
+            new("New project", "Page", Url.Action("Create", "Projects")!, "Page"),
+            new("Settings", "Page", Url.Action("Index", "Settings")!, "Page")
+        };
+
+        if (User.IsInRole(Models.AppRoles.Admin))
+            pages.Add(new GlobalSearchRow("Admin", "Page", Url.Action("Index", "Admin")!, "Page"));
+
+        var matches = pages.Where(p => p.Title.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+        return new GlobalSearchSectionVm("pages", "Pages", matches, false, 0);
+    }
+
+    private static GlobalSearchSectionVm BuildSection<TEntity>(
+        string key, string title, IReadOnlyList<TEntity> hits, int page, Func<TEntity, GlobalSearchRow> map)
+    {
+        var skipped = (page - 1) * ResultLimit;
+        var rows = hits.Skip(skipped).Take(ResultLimit).Select(map).ToList();
+        return new GlobalSearchSectionVm(key, title, rows, hits.Count > skipped + rows.Count, page + 1);
+    }
+
+    private static string CommentExcerpt(string body)
+    {
+        var compact = string.Join(' ', body.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        return compact.Length <= 120 ? compact : $"{compact[..117]}…";
+    }
 }

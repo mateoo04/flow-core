@@ -1,9 +1,6 @@
 @model SearchPanelRootVm
 @inject FlowCore.Services.UiText T
-@{
-    var defaultTab = Model.DefaultTab.ToString().ToLowerInvariant();
-}
-<div data-search-root data-default-tab="@defaultTab" data-search-url="@Url.Action("Results", "Search")">
+<div data-search-root data-search-url="@Url.Action("Results", "Search")">
     <button type="button" data-search-trigger
             class="group flex w-full items-center gap-2 rounded-lg border border-border bg-app px-3 py-2 text-sm text-fg-muted outline-none transition-colors hover:bg-raised focus-visible:ring-2 focus-visible:ring-brand dark:bg-raised/50"
             aria-haspopup="dialog">
@@ -29,21 +26,6 @@
                 <button type="button" data-search-close
                         class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-md px-1.5 py-0.5 text-[10px] font-semibold text-fg-muted ring-1 ring-border transition-colors hover:bg-raised hover:text-fg"
                         aria-label="Close search">ESC</button>
-            </div>
-
-            <div class="flex border-b border-border/60" role="tablist">
-                <button type="button" data-search-tab="projects" role="tab"
-                        class="flex-1 cursor-pointer -mb-px border-b-2 border-transparent px-3 py-3 text-sm font-semibold transition-colors text-fg-muted hover:text-fg data-[active=true]:border-[var(--color-primary)] data-[active=true]:text-[var(--color-primary)]">
-                    @T["search.tab.projects"]
-                </button>
-                <button type="button" data-search-tab="tasks" role="tab"
-                        class="flex-1 cursor-pointer -mb-px border-b-2 border-transparent px-3 py-3 text-sm font-semibold transition-colors text-fg-muted hover:text-fg data-[active=true]:border-[var(--color-primary)] data-[active=true]:text-[var(--color-primary)]">
-                    @T["search.tab.tasks"]
-                </button>
-                <button type="button" data-search-tab="users" role="tab"
-                        class="flex-1 cursor-pointer -mb-px border-b-2 border-transparent px-3 py-3 text-sm font-semibold transition-colors text-fg-muted hover:text-fg data-[active=true]:border-[var(--color-primary)] data-[active=true]:text-[var(--color-primary)]">
-                    @T["search.tab.users"]
-                </button>
             </div>
 
             <div id="search-modal-results"

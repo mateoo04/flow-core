@@ -3,7 +3,6 @@
 
   function init(root) {
     var searchUrl = root.getAttribute("data-search-url");
-    var defaultTab = root.getAttribute("data-default-tab") || "projects";
 
     var trigger = root.querySelector("[data-search-trigger]");
     var modal = root.querySelector("[data-search-modal]");
@@ -11,19 +10,8 @@
     var closeBtn = root.querySelector("[data-search-close]");
     var input = root.querySelector("[data-search-input]");
     var results = root.querySelector("[data-search-results]");
-    var tabs = root.querySelectorAll("[data-search-tab]");
-
-    var activeTab = defaultTab;
     var highlight = -1;
     var isOpen = false;
-
-    function setActiveTabUi() {
-      for (var i = 0; i < tabs.length; i++) {
-        var isActive = tabs[i].getAttribute("data-search-tab") === activeTab;
-        tabs[i].setAttribute("data-active", isActive ? "true" : "false");
-        tabs[i].setAttribute("aria-selected", isActive ? "true" : "false");
-      }
-    }
 
     function rows() { return results.querySelectorAll("[data-search-result]"); }
 
@@ -37,8 +25,6 @@
     function openModal() {
       if (isOpen) return;
       isOpen = true;
-      activeTab = defaultTab;
-      setActiveTabUi();
       modal.classList.remove("hidden");
       modal.classList.add("flex");
       document.body.style.overflow = "hidden";
@@ -64,7 +50,7 @@
         highlight = -1;
         return;
       }
-      var url = searchUrl + "?tab=" + encodeURIComponent(activeTab) + "&q=" + encodeURIComponent(q);
+      var url = searchUrl + "?q=" + encodeURIComponent(q);
 
       results.setAttribute("data-loading", "true");
       fetch(url, { headers: { "Accept": "text/html" } })
@@ -128,16 +114,47 @@
       all[highlight].scrollIntoView({ block: "nearest" });
     }
 
-    for (var i = 0; i < tabs.length; i++) {
-      tabs[i].addEventListener("click", function (e) {
-        var tab = e.currentTarget.getAttribute("data-search-tab");
-        if (!tab || tab === activeTab) return;
-        activeTab = tab;
-        setActiveTabUi();
-        fetchResults();
-        input.focus();
-      });
-    }
+    results.addEventListener("click", function (e) {
+      var result = e.target.closest("[data-search-result]");
+      if (result) {
+        closeModal();
+        return;
+      }
+
+      var loadMore = e.target.closest("[data-search-load-more]");
+      if (!loadMore) return;
+      var section = loadMore.getAttribute("data-search-section-key");
+      var nextPage = loadMore.getAttribute("data-search-next-page");
+      var q = input.value.trim();
+      if (!section || !nextPage || !q) return;
+
+      loadMore.disabled = true;
+      fetch(searchUrl + "?q=" + encodeURIComponent(q) + "&section=" + encodeURIComponent(section) + "&page=" + encodeURIComponent(nextPage), { headers: { "Accept": "text/html" } })
+        .then(function (r) { return r.ok ? r.text() : ""; })
+        .then(function (html) {
+          var current = results.querySelector('[data-search-section="' + section + '"]');
+          if (!current || !html) return;
+
+          var incoming = new DOMParser().parseFromString(html, "text/html");
+          var incomingSection = incoming.querySelector('[data-search-section="' + section + '"]');
+          if (!incomingSection) return;
+
+          var incomingRows = incomingSection.querySelectorAll("[data-search-result]");
+          for (var i = 0; i < incomingRows.length; i++) {
+            loadMore.insertAdjacentElement("beforebegin", incomingRows[i]);
+          }
+
+          var nextLoadMore = incomingSection.querySelector("[data-search-load-more]");
+          if (nextLoadMore) {
+            loadMore.outerHTML = nextLoadMore.outerHTML;
+          } else {
+            loadMore.remove();
+          }
+          highlight = -1;
+          applyHighlight();
+        })
+        .catch(function () { loadMore.disabled = false; });
+    });
 
     results.addEventListener("mousemove", function (e) {
       var row = e.target.closest("[data-search-result]");

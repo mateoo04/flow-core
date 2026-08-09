@@ -9,22 +9,22 @@ public enum SearchTab
 
 public sealed record SearchPanelRootVm(SearchTab DefaultTab);
 
-public sealed record SearchResultsVm<TRow>(string Query, IReadOnlyList<TRow> Rows);
+public sealed record GlobalSearchResultsVm(
+    string Query,
+    IReadOnlyList<GlobalSearchSectionVm> Sections);
 
-public sealed record SearchProjectRow(
-    Guid Id,
-    string Name,
-    string? WorkspaceName);
-
-public sealed record SearchTaskRow(
-    Guid Id,
+public sealed record GlobalSearchSectionVm(
+    string Key,
     string Title,
-    string? ProjectName,
-    string? StatusColorHex);
+    IReadOnlyList<GlobalSearchRow> Rows,
+    bool HasMore,
+    int NextPage);
 
-public sealed record SearchUserRow(
-    Guid Id,
-    string FullName,
-    string Email,
-    string Initials,
-    string AvatarColor);
+public sealed record GlobalSearchRow(
+    string Title,
+    string? Subtitle,
+    string Href,
+    string Kind,
+    string? Initials = null,
+    string? AvatarColor = null,
+    string? StatusColorHex = null);

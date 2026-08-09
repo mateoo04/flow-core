@@ -1,0 +1,36 @@
+@model GlobalSearchSectionVm
+<section data-search-section="@Model.Key" class="border-b border-border/60 last:border-b-0">
+    <h2 class="px-4 pt-3 pb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-fg-muted">@Model.Title</h2>
+    @foreach (var row in Model.Rows)
+    {
+        <a data-search-result href="@row.Href"
+           class="flex items-center gap-3 border-l-2 border-transparent px-4 py-2 text-sm text-fg no-underline transition-colors hover:bg-raised data-[highlight=true]:border-[var(--color-primary)] data-[highlight=true]:bg-[var(--color-surface-container)]">
+            @if (!string.IsNullOrWhiteSpace(row.AvatarColor))
+            {
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white" style="background-color: @row.AvatarColor" aria-hidden="true">@row.Initials</span>
+            }
+            else if (!string.IsNullOrWhiteSpace(row.StatusColorHex))
+            {
+                <span class="h-2 w-2 shrink-0 rounded-full" style="background-color: @row.StatusColorHex" aria-hidden="true"></span>
+            }
+            else
+            {
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-raised text-[10px] font-bold uppercase text-fg-muted" aria-hidden="true">@row.Kind[0]</span>
+            }
+            <span class="min-w-0 flex-1">
+                <span class="block truncate font-medium">@row.Title</span>
+                @if (!string.IsNullOrWhiteSpace(row.Subtitle))
+                {
+                    <span class="block truncate text-xs text-fg-muted">@row.Subtitle</span>
+                }
+            </span>
+        </a>
+    }
+    @if (Model.HasMore)
+    {
+        <button type="button" data-search-load-more data-search-section-key="@Model.Key" data-search-next-page="@Model.NextPage"
+                class="mx-4 mb-3 mt-1 cursor-pointer text-xs font-semibold text-[var(--color-primary)] hover:underline">
+            Load more @Model.Title.ToLowerInvariant()
+        </button>
+    }
+</section>

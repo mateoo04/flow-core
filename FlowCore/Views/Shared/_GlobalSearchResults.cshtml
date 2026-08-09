@@ -1,0 +1,12 @@
+@model GlobalSearchResultsVm
+@if (Model.Sections.Count == 0)
+{
+    <div class="px-4 py-6 text-sm text-fg-muted">No results match "@Model.Query".</div>
+}
+else
+{
+    foreach (var section in Model.Sections)
+    {
+        <partial name="_GlobalSearchSection" model="section" />
+    }
+}
