@@ -5875,3 +5875,173 @@ Fixed. Selecting any search result now closes the search modal first, including 
 
 Updated [search.js](/C:/Users/mateo/OneDrive/Documents/GitHub/flow-core/FlowCore/wwwroot/js/search.js).
 ----
+
+[2026-08-09 17:56:19 +02:00] TURN 019fe73d-3791-79f0-ba05-69f4951d13c9
+USER:
+professor put this as a task: Expose MCP i pristup kroz agentic IDE. whats the plan and ur recs?
+
+ASSISTANT:
+Profesor vjerojatno tra┼¥i demonstraciju da se FlowCore funkcionalnosti mogu koristiti kao alati iz AI agenta unutar IDE-a ÔÇö ne samo kroz web UI/API.
+
+Preporu─ìujem ovo kao minimalan, jak scope:
+
+1. Napraviti FlowCore MCP server kao zaseban .NET projekt.
+2. Izlo┼¥iti 4ÔÇô6 alata nad postoje─çom domenom:
+   - `list_projects`
+   - `get_project_board`
+   - `search_tasks`
+   - `get_task`
+   - `create_task`
+   - `update_task_status`
+3. Prvo napraviti read-only alate; write alati moraju tra┼¥iti eksplicitnu potvrdu.
+4. Povezati server u VS Code/Cursor/Windsurf preko Codex MCP konfiguracije.
+5. Snimiti kratak demo: ÔÇ£Prona─æi moje otvorene taskoveÔÇØ, zatim ÔÇ£Kreiraj task u projektu X i postavi status To Do.ÔÇØ
+6. Predati README s arhitekturom, instalacijom, primjerima promptova i sigurnosnim ograni─ìenjima.
+
+Arhitektura:
+
+```text
+Agentic IDE (Codex / VS Code)
+            Ôöé MCP
+            Ôû╝
+    FlowCore MCP server
+            Ôöé HTTP / service layer
+            Ôû╝
+       FlowCore API + DB
+```
+
+Moje preporuke:
+
+- Ne izlagati bazu direktno agentu. MCP neka zove postoje─çi API ili domenske servise, tako ostaju validacija, autorizacija i audit.
+- Za demo koristi autentikaciju testnog/demo korisnika ili token s najmanjim potrebnim ovlastima.
+- U MCP opisu alata jasno nazna─ìi koji su read-only, a koji mijenjaju podatke.
+- Izbjegni ÔÇ£general purposeÔÇØ alat poput `execute_sql` ili slobodan HTTP client ÔÇö to izgleda lo┼íe sigurnosno i profesori ga ─ìesto pitaju.
+- Najbolji use case za FlowCore: agent triagira taskove, pretra┼¥uje backlog, izra─æuje task iz prirodnog jezika i a┼¥urira status uz potvrdu.
+
+Codex podr┼¥ava lokalne STDIO i udaljene Streamable HTTP MCP servere; desktop app, CLI i IDE extension dijele MCP konfiguraciju na istom ra─ìunalu. Po─ìni sa STDIO serverom jer je najbr┼¥i za lokalni demo, a HTTP/OAuth ostavi kao pro┼íirenje. [Official OpenAI MCP documentation](https://learn.chatgpt.com/docs/extend/mcp) Tako─æer, Codex radi u VS Codeu i kompatibilnim editorima poput Cursora i Windsurfa. [Official IDE documentation](https://learn.chatgpt.com/docs/codex/ide)
+
+Ako ┼¥eli┼í, sljede─çe mogu pretvoriti u konkretan backlog i odmah scaffoldati MCP projekt za ovaj repo.
+----
+
+[2026-08-09 17:58:19 +02:00] TURN 019fe73f-1280-7233-896c-e55ce2db10a1
+USER:
+onda cemo ga morat povezat s nekim user accountom ili?
+
+ASSISTANT:
+Da ÔÇö za alate koji ─ìitaju ili mijenjaju privatne FlowCore podatke agent mora imati identitet korisnika.
+
+Za projekt bih preporu─ìio dva koraka:
+
+- MVP/demo: MCP server koristi jedan unaprijed konfiguriran demo ra─ìun ili API token s ograni─ìenim ovlastima. Brzo je za pokazati i dovoljno za fakultetski zadatak.
+- Ispravna verzija: pri povezivanju MCP-a korisnik se prijavi u FlowCore (OAuth/JWT), a server svaki poziv izvr┼íava u ime tog korisnika. Tako agent vidi samo njegove workspaces/projekte i smije raditi samo ono ┼íto korisnik ina─ìe smije.
+
+Ne bih stavljao korisni─ìku lozinku u MCP konfiguraciju. Token ide kroz environment variable ili OAuth; za write alate dodatno ostavimo potvrdu prije izmjene.
+
+Za tvoj trenutni FlowCore, idealan demo je: prijava kao demo user ÔåÆ ÔÇ£poka┼¥i moje taskoveÔÇØ ÔåÆ ÔÇ£kreiraj task u mom projektuÔÇØ.
+----
+
+[2026-08-09 17:58:35 +02:00] TURN 019fe73f-502e-70c0-a84d-4c87e2f6e92c
+USER:
+go
+
+ASSISTANT:
+MVP je implementiran.
+
+Dodano je:
+
+- [FlowCore.Mcp/Program.cs](C:\Users\mateo\OneDrive\Documents\GitHub\flow-core\FlowCore.Mcp\Program.cs) ÔÇö lokalni STDIO MCP server
+- [docs/mcp-flowcore.md](C:\Users\mateo\OneDrive\Documents\GitHub\flow-core\docs\mcp-flowcore.md) ÔÇö setup za Codex IDE i demo promptovi
+- `FLOWCORE_MCP_USER_EMAIL` u [.env.example](C:\Users\mateo\OneDrive\Documents\GitHub\flow-core\.env.example)
+
+Server se ve┼¥e uz FlowCore account kroz email i provjerava workspace membership prije ─ìitanja ili izmjene podataka. Alati su:
+
+- `list_projects`
+- `search_tasks`
+- `get_project_board`
+- `create_task`
+- `update_task_status`
+
+Write alati su ozna─ìeni kao takvi, a u Codex konfiguraciji koristi┼í `default_tools_approval_mode = "writes"`.
+
+Provjereno: Release build prolazi bez warninga, a stvarni MCP `list_projects` poziv vra─ça projekte demo korisnika.
+
+Tvoj sljede─çi korak:
+
+1. U lokalni `.env` dodaj:
+   ```env
+   FLOWCORE_MCP_USER_EMAIL=alex@flowcore.demo
+   ```
+2. Napravi build:
+   ```powershell
+   dotnet build FlowCore.Mcp/FlowCore.Mcp.csproj -c Release
+   ```
+3. Dodaj TOML iz [uputa](C:\Users\mateo\OneDrive\Documents\GitHub\flow-core\docs\mcp-flowcore.md) u lokalni `.codex/config.toml` i restartaj Codex extension.
+
+Ovo je lokalni demo identiteta; za produkciju bi ga zamijenili OAuthom ili kratkotrajnim user tokenom. Codex slu┼¥beno podr┼¥ava STDIO MCP servere i dijeljenu konfiguraciju izme─æu IDE extensiona, CLI-ja i desktop aplikacije. [OpenAI MCP docs](https://learn.chatgpt.com/docs/extend/mcp)
+----
+
+[2026-08-09 18:08:33 +02:00] TURN 019fe748-6f84-7253-ba3f-48abced7309d
+USER:
+da prebacim uputu u .codex u ovom projektu?
+
+ASSISTANT:
+Da ÔÇö za lokalni setup stavi ga u `.codex/config.toml` unutar ovog projekta.
+
+Ne stavljaj connection string ni lozinke u TOML; server ih ─ìita iz lokalnog `.env`. `.codex` je ve─ç gitignored, pa konfiguracija ostaje samo na tvom ra─ìunalu.
+
+U `.codex/config.toml` dodaj:
+
+```toml
+[mcp_servers.flowcore]
+command = "dotnet"
+args = ["run", "--no-build", "--configuration", "Release", "--project", "FlowCore.Mcp/FlowCore.Mcp.csproj", "--no-launch-profile"]
+cwd = "C:/Users/mateo/OneDrive/Documents/GitHub/flow-core"
+default_tools_approval_mode = "writes"
+enabled = true
+```
+
+Zatim restartaj Codex extension.
+----
+
+[2026-08-09 18:09:25 +02:00] TURN 019fe749-3d86-7e20-b79e-99231b7c9fb1
+USER:
+hocers da napravim config.toml i stavim sto u njega, samo ovo: [mcp_servers.flowcore]
+command = "dotnet"
+args = ["run", "--no-build", "--configuration", "Release", "--project", "FlowCore.Mcp/FlowCore.Mcp.csproj", "--no-launch-profile"]
+cwd = "C:/Users/mateo/OneDrive/Documents/GitHub/flow-core"
+default_tools_approval_mode = "writes"
+enabled = true?
+
+ASSISTANT:
+Da, to─ìno to stavi u `.codex/config.toml`.
+
+Prije restarta provjeri jo┼í samo da `.env` ima:
+
+```env
+FLOWCORE_MCP_USER_EMAIL=alex@flowcore.demo
+```
+
+i jednom pokreni:
+
+```powershell
+dotnet build FlowCore.Mcp/FlowCore.Mcp.csproj -c Release
+```
+
+Nakon restarta Codexa, u MCP servers listi bi se trebao pojaviti `flowcore`.
+----
+
+[2026-08-09 18:10:00 +02:00] TURN 019fe749-c5fa-7de0-aa25-53d00b5ebe07
+USER:
+kak da te restartam
+
+ASSISTANT:
+Ne treba┼í restartati mene niti VS Code.
+
+U Codex sidebaru:
+
+1. Klikni gear ikonu.
+2. Odaberi **MCP servers**.
+3. Klikni **Restart extension**.
+
+Ako tu opciju ne vidi┼í: `Ctrl+Shift+P` ÔåÆ **Developer: Reload Window**. Nakon toga ponovno otvori Codex sidebar.
+----
