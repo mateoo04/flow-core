@@ -72,14 +72,30 @@
 <body class="antialiased">
 <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-fg focus:shadow-card focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-brand"
    href="#main-content">Skip to main content</a>
-<div class="flex h-screen max-h-screen min-h-0 overflow-hidden">
+<div class="flex h-screen max-h-screen min-h-0 flex-col overflow-hidden lg:flex-row">
     @{
         var onHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home";
         var onProjectsIndex = ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" && ViewContext.RouteData.Values["action"]?.ToString() == "Index";
         var onSettings = ViewContext.RouteData.Values["controller"]?.ToString() == "Settings";
     }
-    <aside class="flex h-full min-h-0 w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-sidebar" aria-label="Site navigation" data-sidebar>
-        <div class="shrink-0 px-4 pt-6 pb-4">
+    <header class="flex h-16 shrink-0 items-center gap-2 border-b border-border bg-sidebar px-4 lg:hidden">
+
+        <button type="button" data-mobile-sidebar-toggle aria-controls="site-sidebar" aria-expanded="false" aria-label="Open navigation"
+                class="inline-flex h-10 w-10 items-center justify-center rounded-md text-fg-secondary transition-colors hover:bg-[var(--color-surface-container)] hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+            <partial name="_Icon" model='new IconVm { Name = "bars-3", Size = 24 }'/>
+        </button>
+                <a class="group flex min-w-0 items-center no-underline outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+           asp-controller="Home" asp-action="Index">
+            <span class="flex items-center gap-2">
+                <partial name="_Icon" model='new IconVm { Name = "square-3-stack-3d", Size = 24, CssClass = "text-[var(--color-primary)]" }'/>
+                <span class="font-display text-xl font-black tracking-tight text-fg">FlowCore</span>
+            </span>
+        </a>
+    </header>
+
+    <button type="button" class="fixed inset-0 z-[100] hidden bg-black/30 lg:hidden" aria-label="Close navigation" data-mobile-sidebar-backdrop></button>
+    <aside id="site-sidebar" class="fixed inset-y-0 left-0 z-[110] hidden h-[100dvh] min-h-0 w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-sidebar shadow-xl lg:static lg:z-auto lg:flex lg:h-full lg:shadow-none" aria-label="Site navigation" aria-hidden="true" data-sidebar>
+        <div class="flex shrink-0 items-center justify-between px-4 pt-6 pb-4">
             <a class="group flex min-w-0 items-center no-underline outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
                asp-controller="Home" asp-action="Index">
                 <div class="flex items-center gap-2">
@@ -87,6 +103,10 @@
                     <span class="font-display text-2xl font-black tracking-tight text-fg">FlowCore</span>
                 </div>
             </a>
+            <button type="button" data-mobile-sidebar-close aria-label="Close navigation"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-md text-fg-secondary transition-colors hover:bg-[var(--color-surface-container)] hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand lg:hidden">
+                <partial name="_Icon" model='new IconVm { Name = "x-mark", Size = 22 }'/>
+            </button>
         </div>
 
         @* Main view *@
@@ -212,7 +232,7 @@
     </aside>
 
     <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background">
-        <main id="main-content" tabindex="-1" class="min-h-0 flex-1 overflow-y-auto px-6 py-10 sm:px-8 lg:px-12">
+        <main id="main-content" tabindex="-1" class="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
             <div class="mx-auto max-w-7xl">
                 <partial name="_Breadcrumbs"/>
                 @RenderBody()

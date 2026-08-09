@@ -31,22 +31,25 @@
 }
 <p class="mt-4 text-sm text-fg-secondary">@T["crud.board.hint"]</p>
 
-<div class="mt-8 hide-scrollbar -mx-4 overflow-x-auto px-4 pb-6 [mask-image:linear-gradient(to_right,transparent_0,black_2rem,black_calc(100%-2rem),transparent_100%)]" role="region" aria-label="Board statuses and tasks">
-    <div class="flex min-w-max items-start gap-8 pb-4">
-    @foreach (var group in groups)
+<div class="mt-8 space-y-3 lg:hide-scrollbar lg:-mx-4 lg:overflow-x-auto lg:px-4 lg:pb-6 lg:[mask-image:linear-gradient(to_right,transparent_0,black_2rem,black_calc(100%-2rem),transparent_100%)]" role="region" aria-label="Board statuses and tasks">
+    <div class="space-y-3 lg:flex lg:min-w-max lg:items-start lg:gap-8 lg:space-y-0 lg:pb-4">
+    @foreach (var item in groups.Select((group, index) => new { group, index }))
     {
+        var group = item.group;
         var status = group.Key;
         var accent = AccentHex(status);
         var tasksInStatus = group.OrderBy(t => t.Position).ThenBy(t => t.Title).ToList();
-        <section class="w-80 shrink-0 space-y-6">
-            <div class="flex items-center justify-between px-2">
+        var columnId = $"board-status-{status.Id}";
+        <section class="rounded-lg p-3 lg:w-80 lg:shrink-0 lg:space-y-6 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
+            <button type="button" class="flex w-full items-center justify-between px-2 text-left lg:cursor-default" data-board-mobile-toggle aria-controls="@columnId" aria-expanded="@(item.index == 0 ? "true" : "false")">
                 <div class="flex items-center gap-3">
                     <span class="h-2 w-2 shrink-0 rounded-full" style="background-color: @accent" aria-hidden="true"></span>
                     <h2 class="font-headline text-lg font-bold tracking-tight text-fg">@status.Name</h2>
                     <span class="rounded-md bg-[var(--color-primary)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-fg/70">@tasksInStatus.Count</span>
                 </div>
-            </div>
-            <div class="space-y-4" data-board-dnd-column data-status-id="@status.Id" data-status-color="@accent">
+                <partial name="_Icon" model='new IconVm { Name = "chevron-down", Size = 18, CssClass = "shrink-0 text-fg-muted transition-transform lg:hidden", }'/>
+            </button>
+            <div id="@columnId" class="mt-3 space-y-4 lg:mt-0" data-board-mobile-content data-board-dnd-column data-status-id="@status.Id" data-status-color="@accent">
                 @foreach (var task in tasksInStatus)
                 {
                     var assignees = TaskAssigneeStackBuilder.FromTask(task);

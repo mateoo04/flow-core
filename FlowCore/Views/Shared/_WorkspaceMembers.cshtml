@@ -15,65 +15,55 @@
         <div class="rounded border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">@info</div>
     }
 
-    <table class="w-full text-sm">
-        <thead>
-            <tr class="text-left text-slate-500">
-                <th class="py-1">Name</th>
-                <th class="py-1">Email</th>
-                <th class="py-1">Role</th>
-                <th class="py-1">Joined</th>
-                @if (isOwner) { <th></th> }
-            </tr>
-        </thead>
-        <tbody>
+    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         @foreach (var m in members)
         {
-            <tr class="border-t">
-                <td class="py-1">@m.FullName</td>
-                <td class="py-1">@m.Email</td>
-                <td class="py-1">@m.Role</td>
-                <td class="py-1">@m.JoinedAt.ToLocalTime().ToString("yyyy-MM-dd")</td>
-                @if (isOwner)
-                {
-                    <td class="py-1 text-right">
-                        @if (m.Role != FlowCore.Models.WorkspaceRole.Owner)
-                        {
-                            <form method="post" asp-controller="Workspaces" asp-action="RemoveMember"
-                                  asp-route-id="@workspaceId" asp-route-userId="@m.UserId" class="inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="text-red-600 underline">Remove</button>
-                            </form>
-                        }
-                    </td>
-                }
-            </tr>
+            <article class="rounded-xl border border-border bg-card p-4 shadow-card">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <h3 class="truncate font-semibold text-fg">@m.FullName</h3>
+                        <a href="mailto:@m.Email" class="mt-1 block truncate text-sm text-fg-secondary underline decoration-fg-muted/40 underline-offset-2 transition-colors hover:text-fg">@m.Email</a>
+                    </div>
+                    <span class="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">@m.Role</span>
+                </div>
+                <div class="mt-4 flex items-center justify-between gap-3 border-t border-border/70 pt-3 text-xs text-fg-muted">
+                    <span>Joined @m.JoinedAt.ToLocalTime().ToString("yyyy-MM-dd")</span>
+                    @if (isOwner && m.Role != FlowCore.Models.WorkspaceRole.Owner)
+                    {
+                        <form method="post" asp-controller="Workspaces" asp-action="RemoveMember"
+                              asp-route-id="@workspaceId" asp-route-userId="@m.UserId">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="font-semibold text-[var(--color-error)] transition-colors hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-error)]">Remove</button>
+                        </form>
+                    }
+                </div>
+            </article>
         }
-        </tbody>
-    </table>
+    </div>
 
     @if (isOwner)
     {
         <details class="mt-4">
             <summary class="cursor-pointer text-sm underline">Add member</summary>
             <form method="post" asp-controller="Workspaces" asp-action="AddMember" asp-route-id="@workspaceId"
-                  class="mt-2 flex items-end gap-2">
+                  class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
                 @Html.AntiForgeryToken()
-                <div class="grow">
+                <div class="w-full grow">
                     <label class="block text-xs">Email</label>
                     <input name="Email" type="email" class="w-full rounded border px-3 py-2" />
                 </div>
-                <button type="submit" class="rounded bg-slate-800 text-white px-3 py-2 text-sm">Add</button>
+                <button type="submit" class="w-full rounded bg-slate-800 px-3 py-2 text-sm text-white sm:w-auto">Add</button>
             </form>
         </details>
 
         @if (members.Count(m => m.Role != FlowCore.Models.WorkspaceRole.Owner) > 0)
         {
             <details class="mt-2">
-                <summary class="cursor-pointer text-sm underline">Transfer ownership</summary>
-                <form method="post" asp-controller="Workspaces" asp-action="TransferOwnership" asp-route-id="@workspaceId"
-                      class="mt-2 flex items-end gap-2">
-                    @Html.AntiForgeryToken()
-                    <div class="grow">
+            <summary class="cursor-pointer text-sm underline">Transfer ownership</summary>
+            <form method="post" asp-controller="Workspaces" asp-action="TransferOwnership" asp-route-id="@workspaceId"
+                  class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
+                @Html.AntiForgeryToken()
+                <div class="w-full grow">
                         <label class="block text-xs">New owner</label>
                         <select name="NewOwnerUserId" class="w-full rounded border px-3 py-2">
                             <option value="">— select member —</option>
@@ -83,7 +73,7 @@
                             }
                         </select>
                     </div>
-                    <button type="submit" class="rounded bg-amber-700 text-white px-3 py-2 text-sm">Transfer</button>
+                <button type="submit" class="w-full rounded bg-amber-700 px-3 py-2 text-sm text-white sm:w-auto">Transfer</button>
                 </form>
             </details>
         }
