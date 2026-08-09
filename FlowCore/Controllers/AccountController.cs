@@ -19,6 +19,7 @@ public class AccountController : Controller
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly IAuthenticationSchemeProvider _schemes;
+    private readonly ILogger<AccountController> _logger;
     private readonly bool _enableDemoLogin;
 
     public AccountController(
@@ -26,11 +27,13 @@ public class AccountController : Controller
         SignInManager<User> signInManager,
         IAuthenticationSchemeProvider schemes,
         IHostEnvironment hostEnvironment,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _schemes = schemes;
+        _logger = logger;
         _enableDemoLogin = hostEnvironment.IsDevelopment() || configuration.GetValue<bool>("Features:EnableDemoLogin");
     }
 
@@ -71,6 +74,7 @@ public class AccountController : Controller
 
         await _userManager.AddToRoleAsync(user, AppRoles.User);
         await _signInManager.SignInAsync(user, isPersistent: false);
+        _logger.LogInformation("User registered. {UserId}", user.Id);
         return RedirectToAction("Index", "Home");
     }
 
@@ -99,6 +103,7 @@ public class AccountController : Controller
 
         if (result.Succeeded)
         {
+            _logger.LogInformation("Password login succeeded.");
             return Url.IsLocalUrl(vm.ReturnUrl)
                 ? LocalRedirect(vm.ReturnUrl!)
                 : RedirectToAction("Index", "Home");
@@ -106,10 +111,12 @@ public class AccountController : Controller
 
         if (result.IsLockedOut)
         {
+            _logger.LogWarning("Password login rejected because the account is locked out.");
             ModelState.AddModelError(string.Empty, "Account locked. Try again in 15 minutes.");
             return View(vm);
         }
 
+        _logger.LogWarning("Password login failed.");
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
         return View(vm);
     }
@@ -172,6 +179,7 @@ public class AccountController : Controller
             return LoginWithError(string.Join(" ", linked.Errors.Select(e => e.Description)));
 
         await _signInManager.SignInAsync(user, isPersistent: false);
+        _logger.LogInformation("External login succeeded. {UserId} {Provider}", user.Id, info.LoginProvider);
         return RedirectAfterLogin(returnUrl);
     }
 
@@ -188,6 +196,7 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
+        _logger.LogInformation("User logged out. {UserId}", User.FindFirstValue(ClaimTypes.NameIdentifier));
         await _signInManager.SignOutAsync();
         return RedirectToAction(nameof(Login));
     }

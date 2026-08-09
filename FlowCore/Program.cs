@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Threading.RateLimiting;
 using FlowCore.Data;
 using FlowCore.Models;
+using FlowCore.Observability;
 using FlowCore.Repositories;
 using FlowCore.Repositories.EntityFramework;
 using FlowCore.Services;
@@ -24,6 +25,28 @@ using Microsoft.EntityFrameworkCore;
 LoadDotEnv();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Keep the .env names simple; IConfiguration uses double underscores for nesting,
+// so read these flat environment variables directly.
+var betterStackSourceToken = Environment.GetEnvironmentVariable("BETTER_STACK_SOURCE_TOKEN");
+var betterStackIngestingHost = Environment.GetEnvironmentVariable("BETTER_STACK_INGESTING_HOST");
+var isBetterStackConfigured = !string.IsNullOrWhiteSpace(betterStackSourceToken)
+                              && !string.IsNullOrWhiteSpace(betterStackIngestingHost);
+
+builder.Logging.ClearProviders();
+if (isBetterStackConfigured)
+{
+    builder.Logging.AddJsonConsole();
+    builder.Logging.AddProvider(new BetterStackLoggerProvider(betterStackSourceToken!, betterStackIngestingHost!));
+}
+else
+{
+    builder.Logging.AddSimpleConsole(options =>
+    {
+        options.SingleLine = true;
+        options.TimestampFormat = "HH:mm:ss ";
+    });
+}
 
 builder.Services.AddControllersWithViews(opts =>
 {
@@ -173,6 +196,11 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
+if (isBetterStackConfigured)
+{
+    app.Logger.LogInformation("Better Stack direct logging enabled. {IngestingHost}", betterStackIngestingHost);
+}
+
 await app.Services.InitializeDatabaseAsync(app.Configuration);
 
 if (!app.Environment.IsDevelopment())
@@ -187,6 +215,7 @@ if (!app.Environment.IsEnvironment("Testing"))
 }
 
 app.UseForwardedHeaders();
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();

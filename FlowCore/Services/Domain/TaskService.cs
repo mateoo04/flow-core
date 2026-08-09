@@ -10,11 +10,13 @@ public sealed class TaskService : ITaskService
 {
     private readonly ITaskRepository _tasks;
     private readonly FlowCoreDbContext _db;
+    private readonly ILogger<TaskService> _logger;
 
-    public TaskService(ITaskRepository tasks, FlowCoreDbContext db)
+    public TaskService(ITaskRepository tasks, FlowCoreDbContext db, ILogger<TaskService> logger)
     {
         _tasks = tasks;
         _db = db;
+        _logger = logger;
     }
 
     public async Task<Result<TaskItem>> CreateAsync(CreateTaskRequest request, CancellationToken ct = default)
@@ -74,7 +76,9 @@ public sealed class TaskService : ITaskService
             });
         }
 
-        return Result.Ok(await _tasks.AddAsync(task, ct));
+        var created = await _tasks.AddAsync(task, ct);
+        _logger.LogInformation("Task created. {TaskId} {BoardId} {StatusId} {AssigneeCount}", created.Id, created.BoardId, created.TaskStatusDefinitionId, created.TaskAssignments.Count);
+        return Result.Ok(created);
     }
 
     public async Task<Result<TaskItem>> UpdateAsync(UpdateTaskRequest request, CancellationToken ct = default)
@@ -118,6 +122,7 @@ public sealed class TaskService : ITaskService
         }
 
         await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Task updated. {TaskId} {StatusId} {AssigneeCount}", task.Id, task.TaskStatusDefinitionId, task.TaskAssignments.Count);
         return Result.Ok(task);
     }
 
@@ -148,6 +153,8 @@ public sealed class TaskService : ITaskService
             return Result.Validation<bool>("Position must be non-negative.");
 
         var outcome = await _tasks.MoveAsync(taskId, destinationStatusId, position, ct);
+        if (outcome == MoveResult.Moved)
+            _logger.LogInformation("Task moved. {TaskId} {DestinationStatusId} {Position}", taskId, destinationStatusId, position);
         return outcome switch
         {
             MoveResult.Moved => Result.Ok(true),
