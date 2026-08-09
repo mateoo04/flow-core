@@ -127,53 +127,61 @@ public sealed class EfWorkspaceRepository : IWorkspaceRepository
         return member;
     }
 
-    public async Task<bool> RemoveMemberAsync(Guid workspaceId, Guid userId, CancellationToken ct = default)
+    public Task<bool> RemoveMemberAsync(Guid workspaceId, Guid userId, CancellationToken ct = default)
     {
-        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+        var strategy = _db.Database.CreateExecutionStrategy();
+        return strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
-        var member = await _db.WorkspaceMembers
-            .FirstOrDefaultAsync(m => m.WorkspaceId == workspaceId && m.UserId == userId, ct);
-        if (member is null) return false;
+            var member = await _db.WorkspaceMembers
+                .FirstOrDefaultAsync(m => m.WorkspaceId == workspaceId && m.UserId == userId, ct);
+            if (member is null) return false;
 
-        // Cascade: drop the user's TaskAssignments and UserTaskOrders for tasks in this workspace.
-        var taskIds = await _db.TaskItems
-            .Where(t => t.Board.Project.WorkspaceId == workspaceId)
-            .Select(t => t.Id)
-            .ToListAsync(ct);
+            // Cascade: drop the user's TaskAssignments and UserTaskOrders for tasks in this workspace.
+            var taskIds = await _db.TaskItems
+                .Where(t => t.Board.Project.WorkspaceId == workspaceId)
+                .Select(t => t.Id)
+                .ToListAsync(ct);
 
-        var assignments = _db.TaskAssignments
-            .Where(a => a.UserId == userId && taskIds.Contains(a.TaskItemId));
-        _db.TaskAssignments.RemoveRange(assignments);
+            var assignments = _db.TaskAssignments
+                .Where(a => a.UserId == userId && taskIds.Contains(a.TaskItemId));
+            _db.TaskAssignments.RemoveRange(assignments);
 
-        var orders = _db.UserTaskOrders
-            .Where(o => o.UserId == userId && taskIds.Contains(o.TaskItemId));
-        _db.UserTaskOrders.RemoveRange(orders);
+            var orders = _db.UserTaskOrders
+                .Where(o => o.UserId == userId && taskIds.Contains(o.TaskItemId));
+            _db.UserTaskOrders.RemoveRange(orders);
 
-        _db.WorkspaceMembers.Remove(member);
-        await _db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        return true;
+            _db.WorkspaceMembers.Remove(member);
+            await _db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return true;
+        });
     }
 
-    public async Task<bool> TransferOwnershipAsync(Guid workspaceId, Guid newOwnerUserId, CancellationToken ct = default)
+    public Task<bool> TransferOwnershipAsync(Guid workspaceId, Guid newOwnerUserId, CancellationToken ct = default)
     {
-        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+        var strategy = _db.Database.CreateExecutionStrategy();
+        return strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
-        var members = await _db.WorkspaceMembers
-            .Where(m => m.WorkspaceId == workspaceId)
-            .ToListAsync(ct);
+            var members = await _db.WorkspaceMembers
+                .Where(m => m.WorkspaceId == workspaceId)
+                .ToListAsync(ct);
 
-        var currentOwner = members.FirstOrDefault(m => m.Role == WorkspaceRole.Owner);
-        var newOwner = members.FirstOrDefault(m => m.UserId == newOwnerUserId);
-        if (currentOwner is null || newOwner is null) return false;
+            var currentOwner = members.FirstOrDefault(m => m.Role == WorkspaceRole.Owner);
+            var newOwner = members.FirstOrDefault(m => m.UserId == newOwnerUserId);
+            if (currentOwner is null || newOwner is null) return false;
 
-        if (currentOwner.UserId == newOwnerUserId) return true; // no-op
+            if (currentOwner.UserId == newOwnerUserId) return true; // no-op
 
-        currentOwner.Role = WorkspaceRole.Member;
-        newOwner.Role = WorkspaceRole.Owner;
+            currentOwner.Role = WorkspaceRole.Member;
+            newOwner.Role = WorkspaceRole.Owner;
 
-        await _db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-        return true;
+            await _db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return true;
+        });
     }
 }

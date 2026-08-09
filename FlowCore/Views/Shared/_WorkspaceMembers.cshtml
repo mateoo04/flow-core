@@ -31,7 +31,8 @@
                     @if (isOwner && m.Role != FlowCore.Models.WorkspaceRole.Owner)
                     {
                         <form method="post" asp-controller="Workspaces" asp-action="RemoveMember"
-                              asp-route-id="@workspaceId" asp-route-userId="@m.UserId">
+                              asp-route-id="@workspaceId" asp-route-userId="@m.UserId"
+                              onsubmit="return confirm('Are you sure you want to remove this member?');">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="font-semibold text-[var(--color-error)] transition-colors hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-error)]">Remove</button>
                         </form>
