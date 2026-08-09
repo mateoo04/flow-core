@@ -8,7 +8,9 @@ using FlowCore.Services;
 using FlowCore.Services.Attachments;
 using FlowCore.Services.Authorization;
 using FlowCore.Services.Domain;
+using FlowCore.Validation;
 using System.Security.Claims;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -167,7 +169,7 @@ builder.Services.AddSingleton<UiText>();
 builder.Services.Configure<AttachmentOptions>(
     builder.Configuration.GetSection(AttachmentOptions.SectionName));
 builder.Services.AddScoped<IAttachmentStorage, LocalDiskAttachmentStorage>();
-builder.Services.AddScoped<ImageUploadValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 

@@ -90,6 +90,49 @@ public class TasksApiTests : IClassFixture<FlowCoreApiFactory>
     }
 
     [Fact]
+    public async Task Post_Returns400_WhenStoryPointsAreNegative()
+    {
+        var ctx = await _factory.WithDbContextAsync(db => TestDataSeeder.CreateTaskContextAsync(db));
+        var client = _factory.CreateAuthenticatedClient();
+        var body = new TaskCreateDto
+        {
+            BoardId = ctx.Board.Id,
+            TaskStatusDefinitionId = ctx.Status.Id,
+            Title = "Bad Estimate",
+            StoryPoints = -1
+        };
+
+        var response = await client.PostAsJsonAsync("/api/tasks", body);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Post_Returns400_WhenAssigneeOrTagIdsContainDuplicates()
+    {
+        var (ctx, tag, userId) = await _factory.WithDbContextAsync(async db =>
+        {
+            var context = await TestDataSeeder.CreateTaskContextAsync(db);
+            var createdTag = await TestDataSeeder.CreateTagAsync(db);
+            var user = await TestDataSeeder.EnsureTestUserAsync(db);
+            return (context, createdTag, user.Id);
+        });
+        var client = _factory.CreateAuthenticatedClient();
+        var body = new TaskCreateDto
+        {
+            BoardId = ctx.Board.Id,
+            TaskStatusDefinitionId = ctx.Status.Id,
+            Title = "Duplicates",
+            AssigneeIds = new List<Guid> { userId, userId },
+            TagIds = new List<Guid> { tag.Id, tag.Id }
+        };
+
+        var response = await client.PostAsJsonAsync("/api/tasks", body);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Post_Returns400_WhenBoardMissing()
     {
         var ctx = await _factory.WithDbContextAsync(db => TestDataSeeder.CreateTaskContextAsync(db));
@@ -97,6 +140,17 @@ public class TasksApiTests : IClassFixture<FlowCoreApiFactory>
         var body = new TaskCreateDto { BoardId = Guid.NewGuid(), TaskStatusDefinitionId = ctx.Status.Id, Title = "X" };
 
         var response = await client.PostAsJsonAsync("/api/tasks", body);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Move_Returns400_WhenPositionIsNegative()
+    {
+        var client = _factory.CreateAuthenticatedClient();
+        var body = new { statusId = Guid.NewGuid(), position = -1 };
+
+        var response = await client.PostAsJsonAsync($"/tasks/{Guid.NewGuid()}/move", body);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }

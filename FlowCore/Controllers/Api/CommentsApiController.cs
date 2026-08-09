@@ -2,6 +2,8 @@ using System.Security.Claims;
 using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.Dtos;
+using FlowCore.Validation;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,8 +14,18 @@ namespace FlowCore.Controllers.Api;
 public class CommentsApiController : ControllerBase
 {
     private readonly FlowCoreDbContext _db;
+    private readonly IValidator<CommentCreateDto> _createValidator;
+    private readonly IValidator<CommentUpdateDto> _updateValidator;
 
-    public CommentsApiController(FlowCoreDbContext db) => _db = db;
+    public CommentsApiController(
+        FlowCoreDbContext db,
+        IValidator<CommentCreateDto> createValidator,
+        IValidator<CommentUpdateDto> updateValidator)
+    {
+        _db = db;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
+    }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CommentDto>>> GetAll(
@@ -64,6 +76,9 @@ public class CommentsApiController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CommentDto>> Create([FromBody] CommentCreateDto model, CancellationToken ct)
     {
+        if (!await this.ValidateAndAddToModelStateAsync(_createValidator, model, ct))
+            return ValidationProblem(ModelState);
+
         if (CurrentUserId() is not { } userId)
             return Unauthorized();
 
@@ -94,6 +109,9 @@ public class CommentsApiController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<CommentDto>> Update(Guid id, [FromBody] CommentUpdateDto model, CancellationToken ct)
     {
+        if (!await this.ValidateAndAddToModelStateAsync(_updateValidator, model, ct))
+            return ValidationProblem(ModelState);
+
         var comment = await _db.Comments.Include(c => c.Author).FirstOrDefaultAsync(c => c.Id == id, ct);
         if (comment is null)
             return NotFound();

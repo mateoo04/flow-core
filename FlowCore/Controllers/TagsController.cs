@@ -3,6 +3,8 @@ using FlowCore.Models;
 using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
 using FlowCore.Services;
+using FlowCore.Validation;
+using FluentValidation;
 
 namespace FlowCore.Controllers;
 
@@ -10,11 +12,13 @@ public class TagsController : BaseController
 {
     private readonly ITagRepository _tags;
     private readonly IBreadcrumbTrailBuilder _breadcrumbs;
+    private readonly IValidator<TagFormVm> _validator;
 
-    public TagsController(ITagRepository tags, IBreadcrumbTrailBuilder breadcrumbs)
+    public TagsController(ITagRepository tags, IBreadcrumbTrailBuilder breadcrumbs, IValidator<TagFormVm> validator)
     {
         _tags = tags;
         _breadcrumbs = breadcrumbs;
+        _validator = validator;
     }
 
     public async Task<IActionResult> Index(CancellationToken ct)
@@ -43,6 +47,7 @@ public class TagsController : BaseController
     public async Task<IActionResult> Create(TagFormVm model, CancellationToken ct)
     {
         await ValidateUniqueNameAsync(model, excludeId: null, ct);
+        await this.ValidateAndAddToModelStateAsync(_validator, model, ct);
         if (!ModelState.IsValid)
             return View(model);
 
@@ -76,6 +81,7 @@ public class TagsController : BaseController
     {
         model.Id = id;
         await ValidateUniqueNameAsync(model, excludeId: id, ct);
+        await this.ValidateAndAddToModelStateAsync(_validator, model, ct);
         if (!ModelState.IsValid)
             return View(model);
 

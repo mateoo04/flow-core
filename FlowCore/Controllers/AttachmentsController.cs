@@ -4,6 +4,8 @@ using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
 using FlowCore.Services;
 using FlowCore.Services.Attachments;
+using FlowCore.Validation;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +16,7 @@ public class AttachmentsController : BaseController
 {
     private readonly FlowCoreDbContext _db;
     private readonly IAttachmentStorage _storage;
-    private readonly ImageUploadValidator _validator;
+    private readonly IValidator<ImageUpload> _validator;
     private readonly IWorkspaceRepository _workspaces;
     private readonly IAuthorizationService _authz;
     private readonly ICurrentUserAccessor _currentUser;
@@ -22,7 +24,7 @@ public class AttachmentsController : BaseController
     public AttachmentsController(
         FlowCoreDbContext db,
         IAttachmentStorage storage,
-        ImageUploadValidator validator,
+        IValidator<ImageUpload> validator,
         IWorkspaceRepository workspaces,
         IAuthorizationService authz,
         ICurrentUserAccessor currentUser)
@@ -48,9 +50,9 @@ public class AttachmentsController : BaseController
         if (file is null || file.Length == 0)
             return BadRequest(new { message = "File is empty." });
 
-        var validation = _validator.Validate(file.FileName, file.ContentType, file.Length);
+        var validation = _validator.Validate(new ImageUpload(file.FileName, file.ContentType, file.Length));
         if (!validation.IsValid)
-            return BadRequest(new { message = validation.Error });
+            return BadRequest(new { message = validation.Errors[0].ErrorMessage });
 
         var key = await _storage.SaveAsync(taskId, file, ct);
 

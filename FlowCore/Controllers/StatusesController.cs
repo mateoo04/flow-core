@@ -3,6 +3,7 @@ using FlowCore.Models;
 using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
 using FlowCore.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,19 +17,22 @@ public class StatusesController : BaseController
     private readonly ICurrentUserAccessor _currentUser;
     private readonly IWorkspaceRepository _workspaces;
     private readonly IAuthorizationService _authz;
+    private readonly IValidator<TaskStatusFormVm> _validator;
 
     public StatusesController(
         IStatusRepository repo,
         FlowCoreDbContext db,
         ICurrentUserAccessor currentUser,
         IWorkspaceRepository workspaces,
-        IAuthorizationService authz)
+        IAuthorizationService authz,
+        IValidator<TaskStatusFormVm> validator)
     {
         _repo = repo;
         _db = db;
         _currentUser = currentUser;
         _workspaces = workspaces;
         _authz = authz;
+        _validator = validator;
     }
 
     public async Task<IActionResult> Index(CancellationToken ct)
@@ -79,9 +83,10 @@ public class StatusesController : BaseController
     {
         if (await EnsureWorkspaceMemberAsync(workspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
-        if (!ModelState.IsValid || string.IsNullOrWhiteSpace(model.Name))
+        var validation = await _validator.ValidateAsync(model, ct);
+        if (!validation.IsValid)
         {
-            TempData["StatusSettingsError"] = "Status name is required.";
+            TempData["StatusSettingsError"] = validation.Errors[0].ErrorMessage;
             return RedirectToAction(nameof(Manage), new { workspaceId });
         }
 
@@ -99,7 +104,7 @@ public class StatusesController : BaseController
             Id = Guid.NewGuid(),
             WorkspaceId = ws.Id,
             Name = model.Name.Trim(),
-            ColorHex = string.IsNullOrWhiteSpace(model.ColorHex) ? "#94A3B8" : model.ColorHex.Trim(),
+            ColorHex = model.ColorHex.Trim(),
             Position = nextPos,
             IsDoneState = model.IsDoneState,
             CreatedAt = DateTime.UtcNow
@@ -114,9 +119,10 @@ public class StatusesController : BaseController
     {
         if (await EnsureWorkspaceMemberAsync(workspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
-        if (string.IsNullOrWhiteSpace(model.Name))
+        var validation = await _validator.ValidateAsync(model, ct);
+        if (!validation.IsValid)
         {
-            TempData["StatusSettingsError"] = "Status name is required.";
+            TempData["StatusSettingsError"] = validation.Errors[0].ErrorMessage;
             return RedirectToAction(nameof(Manage), new { workspaceId });
         }
 
@@ -125,7 +131,7 @@ public class StatusesController : BaseController
         if (s is null)
             return NotFound();
         s.Name = model.Name.Trim();
-        s.ColorHex = string.IsNullOrWhiteSpace(model.ColorHex) ? "#94A3B8" : model.ColorHex.Trim();
+        s.ColorHex = model.ColorHex.Trim();
         s.IsDoneState = model.IsDoneState;
         await _db.SaveChangesAsync(ct);
         return RedirectToAction(nameof(Manage), new { workspaceId });

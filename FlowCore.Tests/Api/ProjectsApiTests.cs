@@ -93,6 +93,24 @@ public class ProjectsApiTests : IClassFixture<FlowCoreApiFactory>
     }
 
     [Fact]
+    public async Task Post_Returns400_WhenStartDateIsAfterDueDate()
+    {
+        var workspace = await _factory.WithDbContextAsync(db => TestDataSeeder.CreateWorkspaceAsync(db));
+        var client = _factory.CreateAuthenticatedClient();
+        var body = new ProjectCreateDto
+        {
+            WorkspaceId = workspace.Id,
+            Name = "Invalid Dates",
+            StartDate = new DateTime(2026, 6, 2),
+            DueDate = new DateTime(2026, 6, 1)
+        };
+
+        var response = await client.PostAsJsonAsync("/api/projects", body);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Post_Returns400_WhenWorkspaceMissing()
     {
         var client = _factory.CreateAuthenticatedClient();

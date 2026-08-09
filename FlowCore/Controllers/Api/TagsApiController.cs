@@ -1,6 +1,8 @@
 using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.Dtos;
+using FlowCore.Validation;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,8 +13,18 @@ namespace FlowCore.Controllers.Api;
 public class TagsApiController : ControllerBase
 {
     private readonly FlowCoreDbContext _db;
+    private readonly IValidator<TagCreateDto> _createValidator;
+    private readonly IValidator<TagUpdateDto> _updateValidator;
 
-    public TagsApiController(FlowCoreDbContext db) => _db = db;
+    public TagsApiController(
+        FlowCoreDbContext db,
+        IValidator<TagCreateDto> createValidator,
+        IValidator<TagUpdateDto> updateValidator)
+    {
+        _db = db;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
+    }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TagDto>>> GetAll([FromQuery] string? query, CancellationToken ct)
@@ -42,6 +54,9 @@ public class TagsApiController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TagDto>> Create([FromBody] TagCreateDto model, CancellationToken ct)
     {
+        if (!await this.ValidateAndAddToModelStateAsync(_createValidator, model, ct))
+            return ValidationProblem(ModelState);
+
         var tag = new Tag
         {
             Id = Guid.NewGuid(),
@@ -58,6 +73,9 @@ public class TagsApiController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<TagDto>> Update(Guid id, [FromBody] TagUpdateDto model, CancellationToken ct)
     {
+        if (!await this.ValidateAndAddToModelStateAsync(_updateValidator, model, ct))
+            return ValidationProblem(ModelState);
+
         var tag = await _db.Tags.FirstOrDefaultAsync(t => t.Id == id, ct);
         if (tag is null)
             return NotFound();

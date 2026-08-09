@@ -5,6 +5,8 @@ using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
 using FlowCore.Services;
 using FlowCore.Services.Domain;
+using FlowCore.Validation;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +20,7 @@ public class HomeController : BaseController
     private readonly ICurrentUserAccessor _currentUser;
     private readonly IWorkspaceRepository _workspaces;
     private readonly IAuthorizationService _authz;
+    private readonly IValidator<MoveOnHomeRequest> _moveValidator;
 
     public HomeController(
         ITaskRepository tasks,
@@ -25,7 +28,8 @@ public class HomeController : BaseController
         ITaskService taskService,
         ICurrentUserAccessor currentUser,
         IWorkspaceRepository workspaces,
-        IAuthorizationService authz)
+        IAuthorizationService authz,
+        IValidator<MoveOnHomeRequest> moveValidator)
     {
         _tasks = tasks;
         _users = users;
@@ -33,6 +37,7 @@ public class HomeController : BaseController
         _currentUser = currentUser;
         _workspaces = workspaces;
         _authz = authz;
+        _moveValidator = moveValidator;
     }
 
     [AllowAnonymous]
@@ -104,6 +109,8 @@ public class HomeController : BaseController
         CancellationToken ct)
     {
         if (body is null) return BadRequest();
+        if (!await this.ValidateAndAddToModelStateAsync(_moveValidator, body, ct))
+            return ValidationProblem(ModelState);
 
         var task = await _tasks.GetByIdAsync(id, ct);
         if (task is null) return NotFound();

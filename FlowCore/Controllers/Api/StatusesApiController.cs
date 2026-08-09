@@ -1,6 +1,8 @@
 using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.Dtos;
+using FlowCore.Validation;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,8 +13,18 @@ namespace FlowCore.Controllers.Api;
 public class StatusesApiController : ControllerBase
 {
     private readonly FlowCoreDbContext _db;
+    private readonly IValidator<StatusCreateDto> _createValidator;
+    private readonly IValidator<StatusUpdateDto> _updateValidator;
 
-    public StatusesApiController(FlowCoreDbContext db) => _db = db;
+    public StatusesApiController(
+        FlowCoreDbContext db,
+        IValidator<StatusCreateDto> createValidator,
+        IValidator<StatusUpdateDto> updateValidator)
+    {
+        _db = db;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
+    }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<StatusDto>>> GetAll(
@@ -48,6 +60,9 @@ public class StatusesApiController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<StatusDto>> Create([FromBody] StatusCreateDto model, CancellationToken ct)
     {
+        if (!await this.ValidateAndAddToModelStateAsync(_createValidator, model, ct))
+            return ValidationProblem(ModelState);
+
         var workspaceExists = await _db.Workspaces.AnyAsync(w => w.Id == model.WorkspaceId, ct);
         if (!workspaceExists)
             return BadRequest(new { message = "Workspace does not exist." });
@@ -72,6 +87,9 @@ public class StatusesApiController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<StatusDto>> Update(Guid id, [FromBody] StatusUpdateDto model, CancellationToken ct)
     {
+        if (!await this.ValidateAndAddToModelStateAsync(_updateValidator, model, ct))
+            return ValidationProblem(ModelState);
+
         var status = await _db.TaskStatusDefinitions.FirstOrDefaultAsync(s => s.Id == id, ct);
         if (status is null)
             return NotFound();

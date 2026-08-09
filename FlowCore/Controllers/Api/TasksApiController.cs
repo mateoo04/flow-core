@@ -1,6 +1,8 @@
 using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.Dtos;
+using FlowCore.Validation;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,8 +13,18 @@ namespace FlowCore.Controllers.Api;
 public class TasksApiController : ControllerBase
 {
     private readonly FlowCoreDbContext _db;
+    private readonly IValidator<TaskCreateDto> _createValidator;
+    private readonly IValidator<TaskUpdateDto> _updateValidator;
 
-    public TasksApiController(FlowCoreDbContext db) => _db = db;
+    public TasksApiController(
+        FlowCoreDbContext db,
+        IValidator<TaskCreateDto> createValidator,
+        IValidator<TaskUpdateDto> updateValidator)
+    {
+        _db = db;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
+    }
 
     private IQueryable<TaskItem> WithRelations(IQueryable<TaskItem> source) =>
         source
@@ -54,6 +66,9 @@ public class TasksApiController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TaskItemDto>> Create([FromBody] TaskCreateDto model, CancellationToken ct)
     {
+        if (!await this.ValidateAndAddToModelStateAsync(_createValidator, model, ct))
+            return ValidationProblem(ModelState);
+
         if (!await _db.Boards.AnyAsync(b => b.Id == model.BoardId, ct))
             return BadRequest(new { message = "Board does not exist." });
 
@@ -89,6 +104,9 @@ public class TasksApiController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<TaskItemDto>> Update(Guid id, [FromBody] TaskUpdateDto model, CancellationToken ct)
     {
+        if (!await this.ValidateAndAddToModelStateAsync(_updateValidator, model, ct))
+            return ValidationProblem(ModelState);
+
         var task = await _db.TaskItems
             .Include(t => t.TaskAssignments)
             .Include(t => t.TaskTags)

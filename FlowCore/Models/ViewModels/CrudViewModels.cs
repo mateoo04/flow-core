@@ -3,15 +3,12 @@ using FlowCore.Models;
 
 namespace FlowCore.Models.ViewModels;
 
-public sealed class ProjectCreateFormVm
+public sealed class ProjectCreateFormVm : IProjectInput
 {
-    [Required]
     public Guid WorkspaceId { get; set; }
 
-    [Required]
     public string Name { get; set; } = "";
 
-    [StringLength(2000)]
     public string Description { get; set; } = "";
 
     public ProjectStatus Status { get; set; } = ProjectStatus.Planning;
@@ -23,14 +20,12 @@ public sealed class ProjectCreateFormVm
     public DateTime? DueDate { get; set; }
 }
 
-public sealed class ProjectEditFormVm
+public sealed class ProjectEditFormVm : IProjectInput
 {
     public Guid Id { get; set; }
 
-    [Required]
     public string Name { get; set; } = "";
 
-    [StringLength(2000)]
     public string Description { get; set; } = "";
 
     public ProjectStatus Status { get; set; } = ProjectStatus.Planning;
@@ -42,21 +37,16 @@ public sealed class ProjectEditFormVm
     public DateTime? DueDate { get; set; }
 }
 
-public sealed class TaskCreateFormVm
+public sealed class TaskCreateFormVm : ITaskInput
 {
-    [Required]
     public Guid ProjectId { get; set; }
 
-    [Required]
     public Guid BoardId { get; set; }
 
-    [Required]
     public Guid TaskStatusDefinitionId { get; set; }
 
-    [Required, StringLength(200, MinimumLength = 1)]
     public string Title { get; set; } = "";
 
-    [StringLength(2000)]
     public string? Description { get; set; }
 
     public TaskPriority Priority { get; set; } = TaskPriority.Medium;
@@ -70,18 +60,14 @@ public sealed class TaskCreateFormVm
     public List<Guid> AssigneeIds { get; set; } = new();
 }
 
-public sealed class TaskEditFormVm
+public sealed class TaskEditFormVm : ITaskInput
 {
-    [Required]
     public Guid Id { get; set; }
 
-    [Required]
     public Guid TaskStatusDefinitionId { get; set; }
 
-    [Required, StringLength(200, MinimumLength = 1)]
     public string Title { get; set; } = "";
 
-    [StringLength(2000)]
     public string? Description { get; set; }
 
     public TaskPriority Priority { get; set; } = TaskPriority.Medium;
@@ -97,7 +83,6 @@ public sealed class TaskEditFormVm
 
 public sealed class CommentFormVm
 {
-    [Required, StringLength(4000)]
     public string Body { get; set; } = "";
 }
 
@@ -140,23 +125,19 @@ public sealed class BoardFormVm
     public bool IsDefault { get; set; }
 }
 
-public sealed class TagFormVm
+public sealed class TagFormVm : ITagInput
 {
     public Guid? Id { get; set; }
 
-    [Required, StringLength(50, MinimumLength = 1)]
     public string Name { get; set; } = "";
 
-    [Required, RegularExpression(@"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", ErrorMessage = "Color must be a hex like #f00 or #ff0000.")]
     public string ColorHex { get; set; } = "#94A3B8";
 }
 
-public sealed class TaskStatusFormVm
+public sealed class TaskStatusFormVm : IStatusInput
 {
-    [Required]
     public string Name { get; set; } = "";
 
-    [Required, RegularExpression(@"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", ErrorMessage = "Color must be a hex like #f00 or #ff0000.")]
     public string ColorHex { get; set; } = "#94A3B8";
 
     public bool IsDoneState { get; set; }

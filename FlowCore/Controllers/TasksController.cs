@@ -3,6 +3,8 @@ using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
 using FlowCore.Services;
 using FlowCore.Services.Domain;
+using FlowCore.Validation;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,10 @@ public class TasksController : BaseController
     private readonly IWorkspaceRepository _workspaces;
     private readonly ICurrentUserAccessor _currentUser;
     private readonly IAuthorizationService _authz;
+    private readonly IValidator<TaskCreateFormVm> _createValidator;
+    private readonly IValidator<TaskEditFormVm> _editValidator;
+    private readonly IValidator<CommentFormVm> _commentValidator;
+    private readonly IValidator<MoveTaskRequest> _moveValidator;
 
     public TasksController(
         ITaskRepository tasks,
@@ -29,7 +35,11 @@ public class TasksController : BaseController
         IBreadcrumbTrailBuilder breadcrumbs,
         IWorkspaceRepository workspaces,
         ICurrentUserAccessor currentUser,
-        IAuthorizationService authz)
+        IAuthorizationService authz,
+        IValidator<TaskCreateFormVm> createValidator,
+        IValidator<TaskEditFormVm> editValidator,
+        IValidator<CommentFormVm> commentValidator,
+        IValidator<MoveTaskRequest> moveValidator)
     {
         _tasks = tasks;
         _projects = projects;
@@ -40,6 +50,10 @@ public class TasksController : BaseController
         _workspaces = workspaces;
         _currentUser = currentUser;
         _authz = authz;
+        _createValidator = createValidator;
+        _editValidator = editValidator;
+        _commentValidator = commentValidator;
+        _moveValidator = moveValidator;
     }
 
     public async Task<IActionResult> Index(CancellationToken ct)
@@ -105,6 +119,7 @@ public class TasksController : BaseController
         var statuses = workspace?.TaskStatusDefinitions.OrderBy(s => s.Position).ToList()
                        ?? new List<Models.TaskStatusDefinition>();
 
+        await this.ValidateAndAddToModelStateAsync(_createValidator, model, ct);
         if (!ModelState.IsValid)
             return RenderForm(project, model, statuses);
 
@@ -165,6 +180,7 @@ public class TasksController : BaseController
         if (projectForAuth is null) return NotFound();
         if (await EnsureWorkspaceMemberAsync(projectForAuth.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
+        await this.ValidateAndAddToModelStateAsync(_editValidator, model, ct);
         if (!ModelState.IsValid)
             return await RenderEditFormAsync(id, model, ct);
 
@@ -209,6 +225,7 @@ public class TasksController : BaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddComment(Guid id, CommentFormVm model, CancellationToken ct)
     {
+        await this.ValidateAndAddToModelStateAsync(_commentValidator, model, ct);
         if (!ModelState.IsValid)
             return RedirectToAction(nameof(Details), new { id });
 
@@ -259,6 +276,8 @@ public class TasksController : BaseController
         CancellationToken ct)
     {
         if (body is null) return BadRequest();
+        if (!await this.ValidateAndAddToModelStateAsync(_moveValidator, body, ct))
+            return ValidationProblem(ModelState);
 
         var task = await _tasks.GetByIdAsync(id, ct);
         if (task is null) return NotFound();

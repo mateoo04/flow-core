@@ -4,6 +4,8 @@ using FlowCore.Models.ViewModels;
 using FlowCore.Repositories;
 using FlowCore.Services;
 using FlowCore.Services.Domain;
+using FlowCore.Validation;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +19,8 @@ public class ProjectsController : BaseController
     private readonly IBreadcrumbTrailBuilder _breadcrumbs;
     private readonly ICurrentUserAccessor _currentUser;
     private readonly IAuthorizationService _authz;
+    private readonly IValidator<ProjectCreateFormVm> _createValidator;
+    private readonly IValidator<ProjectEditFormVm> _editValidator;
 
     public ProjectsController(
         IProjectRepository projects,
@@ -24,7 +28,9 @@ public class ProjectsController : BaseController
         IProjectService projectService,
         IBreadcrumbTrailBuilder breadcrumbs,
         ICurrentUserAccessor currentUser,
-        IAuthorizationService authz)
+        IAuthorizationService authz,
+        IValidator<ProjectCreateFormVm> createValidator,
+        IValidator<ProjectEditFormVm> editValidator)
     {
         _projects = projects;
         _workspaces = workspaces;
@@ -32,6 +38,8 @@ public class ProjectsController : BaseController
         _breadcrumbs = breadcrumbs;
         _currentUser = currentUser;
         _authz = authz;
+        _createValidator = createValidator;
+        _editValidator = editValidator;
     }
 
     public async Task<IActionResult> Index(Guid? workspaceId, CancellationToken ct)
@@ -76,6 +84,7 @@ public class ProjectsController : BaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ProjectCreateFormVm model, CancellationToken ct)
     {
+        await this.ValidateAndAddToModelStateAsync(_createValidator, model, ct);
         if (!ModelState.IsValid)
         {
             ViewBag.Workspaces = await _workspaces.GetForUserAsync(_currentUser.UserId, ct);
@@ -140,6 +149,7 @@ public class ProjectsController : BaseController
         if (await EnsureWorkspaceMemberAsync(entity.WorkspaceId, _workspaces, _authz, ct) is { } deny) return deny;
 
         model.Id = id;
+        await this.ValidateAndAddToModelStateAsync(_editValidator, model, ct);
         if (!ModelState.IsValid)
             return View(model);
 

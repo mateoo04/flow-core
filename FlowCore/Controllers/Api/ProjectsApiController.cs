@@ -1,6 +1,8 @@
 using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.Dtos;
+using FlowCore.Validation;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,8 +13,18 @@ namespace FlowCore.Controllers.Api;
 public class ProjectsApiController : ControllerBase
 {
     private readonly FlowCoreDbContext _db;
+    private readonly IValidator<ProjectCreateDto> _createValidator;
+    private readonly IValidator<ProjectUpdateDto> _updateValidator;
 
-    public ProjectsApiController(FlowCoreDbContext db) => _db = db;
+    public ProjectsApiController(
+        FlowCoreDbContext db,
+        IValidator<ProjectCreateDto> createValidator,
+        IValidator<ProjectUpdateDto> updateValidator)
+    {
+        _db = db;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
+    }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ProjectDto>>> GetAll(
@@ -50,6 +62,9 @@ public class ProjectsApiController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ProjectDto>> Create([FromBody] ProjectCreateDto model, CancellationToken ct)
     {
+        if (!await this.ValidateAndAddToModelStateAsync(_createValidator, model, ct))
+            return ValidationProblem(ModelState);
+
         var workspace = await _db.Workspaces.FirstOrDefaultAsync(w => w.Id == model.WorkspaceId, ct);
         if (workspace is null)
             return BadRequest(new { message = "Workspace does not exist." });
@@ -76,6 +91,9 @@ public class ProjectsApiController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<ProjectDto>> Update(Guid id, [FromBody] ProjectUpdateDto model, CancellationToken ct)
     {
+        if (!await this.ValidateAndAddToModelStateAsync(_updateValidator, model, ct))
+            return ValidationProblem(ModelState);
+
         var project = await _db.Projects.Include(p => p.Workspace).FirstOrDefaultAsync(p => p.Id == id, ct);
         if (project is null)
             return NotFound();
