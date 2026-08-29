@@ -11,7 +11,8 @@ public sealed record CreateTaskRequest(
     int StoryPoints,
     Guid? ParentTaskItemId,
     DateTime? DueDate,
-    IReadOnlyCollection<Guid> AssigneeIds);
+    IReadOnlyCollection<Guid> AssigneeIds,
+    IReadOnlyCollection<Guid>? TagIds);
 
 public sealed record UpdateTaskRequest(
     Guid Id,
@@ -21,4 +22,5 @@ public sealed record UpdateTaskRequest(
     TaskPriority Priority,
     int StoryPoints,
     DateTime? DueDate,
-    IReadOnlyCollection<Guid> AssigneeIds);
+    IReadOnlyCollection<Guid> AssigneeIds,
+    IReadOnlyCollection<Guid>? TagIds);

@@ -10,6 +10,8 @@ public interface ITaskService
 
     Task<Result<TaskItem>> UpdateAsync(UpdateTaskRequest request, CancellationToken ct = default);
 
+    Task<Result<bool>> DeleteAsync(Guid id, CancellationToken ct = default);
+
     Task<Result<bool>> MoveAsync(
         Guid taskId,
         Guid destinationStatusId,

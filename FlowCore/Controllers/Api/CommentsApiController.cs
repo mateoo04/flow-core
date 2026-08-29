@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.Dtos;
@@ -11,9 +10,8 @@ namespace FlowCore.Controllers.Api;
 
 [ApiController]
 [Route("api/comments")]
-public class CommentsApiController : ControllerBase
+public class CommentsApiController : WorkspaceApiControllerBase
 {
-    private readonly FlowCoreDbContext _db;
     private readonly IValidator<CommentCreateDto> _createValidator;
     private readonly IValidator<CommentUpdateDto> _updateValidator;
 
@@ -21,8 +19,8 @@ public class CommentsApiController : ControllerBase
         FlowCoreDbContext db,
         IValidator<CommentCreateDto> createValidator,
         IValidator<CommentUpdateDto> updateValidator)
+    : base(db)
     {
-        _db = db;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
     }
@@ -35,7 +33,7 @@ public class CommentsApiController : ControllerBase
         if (CurrentUserId() is not { } userId)
             return Unauthorized();
 
-        var comments = _db.Comments
+        var comments = Db.Comments
             .AsNoTracking()
             .Include(c => c.Author)
             .AsQueryable();
@@ -62,7 +60,7 @@ public class CommentsApiController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<CommentDto>> GetById(Guid id, CancellationToken ct)
     {
-        var comment = await _db.Comments.AsNoTracking()
+        var comment = await Db.Comments.AsNoTracking()
             .Include(c => c.Author)
             .FirstOrDefaultAsync(c => c.Id == id, ct);
         if (comment is null)
@@ -82,7 +80,7 @@ public class CommentsApiController : ControllerBase
         if (CurrentUserId() is not { } userId)
             return Unauthorized();
 
-        if (!await _db.TaskItems.AnyAsync(t => t.Id == model.TaskItemId, ct))
+        if (!await Db.TaskItems.AnyAsync(t => t.Id == model.TaskItemId, ct))
             return BadRequest(new { message = "Task does not exist." });
 
         if (!await CanAccessTaskAsync(model.TaskItemId, ct))
@@ -97,10 +95,10 @@ public class CommentsApiController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
-        _db.Comments.Add(comment);
-        await _db.SaveChangesAsync(ct);
+        Db.Comments.Add(comment);
+        await Db.SaveChangesAsync(ct);
 
-        var dto = (await _db.Comments.AsNoTracking()
+        var dto = (await Db.Comments.AsNoTracking()
             .Include(c => c.Author)
             .FirstAsync(c => c.Id == comment.Id, ct)).ToDto();
         return CreatedAtAction(nameof(GetById), new { id = comment.Id }, dto);
@@ -112,7 +110,7 @@ public class CommentsApiController : ControllerBase
         if (!await this.ValidateAndAddToModelStateAsync(_updateValidator, model, ct))
             return ValidationProblem(ModelState);
 
-        var comment = await _db.Comments.Include(c => c.Author).FirstOrDefaultAsync(c => c.Id == id, ct);
+        var comment = await Db.Comments.Include(c => c.Author).FirstOrDefaultAsync(c => c.Id == id, ct);
         if (comment is null)
             return NotFound();
         if (!CanModifyComment(comment) || !await CanAccessCommentAsync(comment.Id, ct))
@@ -120,7 +118,7 @@ public class CommentsApiController : ControllerBase
 
         comment.Body = model.Body;
         comment.EditedAt = DateTime.UtcNow;
-        await _db.SaveChangesAsync(ct);
+        await Db.SaveChangesAsync(ct);
 
         return Ok(comment.ToDto());
     }
@@ -128,27 +126,24 @@ public class CommentsApiController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        var comment = await _db.Comments.FirstOrDefaultAsync(c => c.Id == id, ct);
+        var comment = await Db.Comments.FirstOrDefaultAsync(c => c.Id == id, ct);
         if (comment is null)
             return NotFound();
         if (!CanModifyComment(comment) || !await CanAccessCommentAsync(comment.Id, ct))
             return Forbid();
 
-        _db.Comments.Remove(comment);
-        await _db.SaveChangesAsync(ct);
+        Db.Comments.Remove(comment);
+        await Db.SaveChangesAsync(ct);
 
         return NoContent();
     }
-
-    private Guid? CurrentUserId() =>
-        Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : null;
 
     private bool CanModifyComment(Comment comment) =>
         User.IsInRole(AppRoles.Admin) || comment.AuthorUserId == CurrentUserId();
 
     private async Task<bool> CanAccessCommentAsync(Guid commentId, CancellationToken ct)
     {
-        var taskId = await _db.Comments
+        var taskId = await Db.Comments
             .Where(c => c.Id == commentId)
             .Select(c => c.TaskItemId)
             .FirstOrDefaultAsync(ct);
@@ -158,16 +153,11 @@ public class CommentsApiController : ControllerBase
 
     private async Task<bool> CanAccessTaskAsync(Guid taskId, CancellationToken ct)
     {
-        if (User.IsInRole(AppRoles.Admin))
-            return true;
+        var workspaceId = await Db.TaskItems
+            .Where(task => task.Id == taskId)
+            .Select(task => (Guid?)task.Board!.Project!.WorkspaceId)
+            .FirstOrDefaultAsync(ct);
 
-        if (CurrentUserId() is not { } userId)
-            return false;
-
-        return await _db.TaskItems.AnyAsync(t =>
-            t.Id == taskId &&
-            t.Board != null &&
-            t.Board.Project != null &&
-            t.Board.Project.Workspace!.Members.Any(m => m.UserId == userId), ct);
+        return workspaceId is not null && await CanAccessWorkspaceAsync(workspaceId.Value, ct);
     }
 }

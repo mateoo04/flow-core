@@ -4,7 +4,6 @@
     ViewData["Title"] = T["crud.tasks.create_title"];
     var project = ViewBag.Project as Project;
     var board = ViewBag.Board as Board;
-    var statuses = ViewBag.Statuses as IReadOnlyList<TaskStatusDefinition> ?? Array.Empty<TaskStatusDefinition>();
     if (project is null || board is null)
     {
         throw new InvalidOperationException("Project and board are required.");
@@ -12,56 +11,16 @@
 }
 <h1 class="font-headline text-3xl font-extrabold tracking-tight text-fg">@T["crud.tasks.create_title"]</h1>
 <p class="mt-2 text-sm font-medium text-fg-secondary">@project.Name — @board.Name</p>
-@if (Model.ParentTaskItemId is { } pid)
+@if (Model.ParentTaskItemId is { } parentTaskId)
 {
-    <p class="mt-2 text-sm text-fg-muted">Parent task ID: <span class="font-mono">@pid</span></p>
+    <p class="mt-2 text-sm text-fg-muted">Parent task ID: <span class="font-mono">@parentTaskId</span></p>
 }
 <form method="post" action="/projects/@project.Id/tasks" class="mt-8 max-w-xl space-y-5">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="ProjectId"/>
     <input type="hidden" asp-for="BoardId"/>
     <input type="hidden" asp-for="ParentTaskItemId"/>
-    <div asp-validation-summary="ModelOnly" class="text-sm text-[var(--color-error)]"></div>
-    <div>
-        <label asp-for="Title" class="block text-sm font-medium text-fg-secondary">Title</label>
-        <input asp-for="Title" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"/>
-        <span asp-validation-for="Title" class="mt-1 block text-xs text-[var(--color-error)]"></span>
-    </div>
-    <div>
-        <label asp-for="Description" class="block text-sm font-medium text-fg-secondary">Description</label>
-        <textarea asp-for="Description" rows="4" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></textarea>
-        <span asp-validation-for="Description" class="mt-1 block text-xs text-[var(--color-error)]"></span>
-    </div>
-    <div>
-        <label asp-for="TaskStatusDefinitionId" class="block text-sm font-medium text-fg-secondary">Status</label>
-        <select asp-for="TaskStatusDefinitionId" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]">
-            @foreach (var s in statuses.OrderBy(x => x.Position))
-            {
-                <option value="@s.Id">@s.Name</option>
-            }
-        </select>
-        <span asp-validation-for="TaskStatusDefinitionId" class="mt-1 block text-xs text-[var(--color-error)]"></span>
-    </div>
-    <div>
-        <label asp-for="Priority" class="block text-sm font-medium text-fg-secondary">Priority</label>
-        <select asp-for="Priority" asp-items="Html.GetEnumSelectList<TaskPriority>()" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></select>
-    </div>
-    <div>
-        <label asp-for="StoryPoints" class="block text-sm font-medium text-fg-secondary">Story points</label>
-        <input asp-for="StoryPoints" type="number" min="0" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"/>
-    </div>
-    <div>
-        <label asp-for="DueDate" class="block text-sm font-medium text-fg-secondary">Due (optional)</label>
-        <div class="mt-1">
-            <partial name="_DateTimePicker" model="@(new DateTimePickerModel { FieldName = nameof(Model.DueDate), Value = Model.DueDate, Placeholder = "Pick a date and time" })"/>
-        </div>
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-fg-secondary">Assignees</label>
-        <div class="mt-1">
-            <partial name="_AutocompleteMulti" model="@(new AutocompleteMultiModel { FieldName = nameof(Model.AssigneeIds), SearchUrl = "/users/autocomplete", Placeholder = "Add assignees…", EmptyHint = "Search by name or email" })"/>
-        </div>
-    </div>
+    <partial name="_TaskFields" model="Model"/>
     <div class="flex gap-3">
         <button type="submit" class="flex items-center gap-2 rounded-full bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-on-secondary)] shadow-sm transition-opacity hover:opacity-95">
             <partial name="_Icon" model='new IconVm { Name = "plus", Size = 18 }'/>

@@ -1,30 +1,33 @@
 using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.Dtos;
+using FlowCore.Repositories;
+using FlowCore.Services.Domain;
 using FlowCore.Validation;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace FlowCore.Controllers.Api;
 
 [ApiController]
 [Route("api/tasks")]
-public class TasksApiController : ControllerBase
+public class TasksApiController : WorkspaceApiControllerBase
 {
-    private readonly FlowCoreDbContext _db;
     private readonly IValidator<TaskCreateDto> _createValidator;
     private readonly IValidator<TaskUpdateDto> _updateValidator;
+    private readonly ITaskService _taskService;
 
     public TasksApiController(
         FlowCoreDbContext db,
         IValidator<TaskCreateDto> createValidator,
-        IValidator<TaskUpdateDto> updateValidator)
+        IValidator<TaskUpdateDto> updateValidator,
+        ITaskService taskService)
+    : base(db)
     {
-        _db = db;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
+        _taskService = taskService;
     }
 
     private IQueryable<TaskItem> WithRelations(IQueryable<TaskItem> source) =>
@@ -39,7 +42,7 @@ public class TasksApiController : ControllerBase
         [FromQuery] Guid? boardId,
         CancellationToken ct)
     {
-        var tasks = WithRelations(_db.TaskItems.AsNoTracking());
+        var tasks = WithRelations(Db.TaskItems.AsNoTracking());
 
         if (CurrentUserId() is not { } userId)
             return Unauthorized();
@@ -66,7 +69,7 @@ public class TasksApiController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<TaskItemDto>> GetById(Guid id, CancellationToken ct)
     {
-        var task = await WithRelations(_db.TaskItems.AsNoTracking()).FirstOrDefaultAsync(t => t.Id == id, ct);
+        var task = await WithRelations(Db.TaskItems.AsNoTracking()).FirstOrDefaultAsync(t => t.Id == id, ct);
         if (task is null)
             return NotFound();
         if (!await CanAccessTaskAsync(id, ct))
@@ -87,32 +90,22 @@ public class TasksApiController : ControllerBase
         if (!await CanAccessWorkspaceAsync(workspaceId.Value, ct))
             return Forbid();
 
-        if (!await _db.TaskStatusDefinitions.AnyAsync(s => s.Id == model.TaskStatusDefinitionId, ct))
-            return BadRequest(new { message = "Status does not exist." });
+        var result = await _taskService.CreateAsync(new CreateTaskRequest(
+            model.BoardId,
+            model.TaskStatusDefinitionId,
+            model.Title,
+            model.Description,
+            model.Priority,
+            model.StoryPoints,
+            model.ParentTaskItemId,
+            model.DueDate,
+            model.AssigneeIds,
+            model.TagIds), ct);
+        if (!result.IsSuccess)
+            return ToFailureResult(result.Error!.Value);
 
-        var now = DateTime.UtcNow;
-        var task = new TaskItem
-        {
-            Id = Guid.NewGuid(),
-            BoardId = model.BoardId,
-            TaskStatusDefinitionId = model.TaskStatusDefinitionId,
-            Title = model.Title,
-            Description = model.Description ?? string.Empty,
-            Priority = model.Priority,
-            StoryPoints = model.StoryPoints,
-            ParentTaskItemId = model.ParentTaskItemId,
-            DueDate = model.DueDate,
-            CreatedAt = now,
-            UpdatedAt = now
-        };
-
-        AssignUsers(task, model.AssigneeIds, now);
-        LinkTags(task, model.TagIds, now);
-
-        _db.TaskItems.Add(task);
-        await _db.SaveChangesAsync(ct);
-
-        var dto = (await WithRelations(_db.TaskItems.AsNoTracking()).FirstAsync(t => t.Id == task.Id, ct)).ToDto();
+        var task = result.Value!;
+        var dto = (await WithRelations(Db.TaskItems.AsNoTracking()).FirstAsync(item => item.Id == task.Id, ct)).ToDto();
         return CreatedAtAction(nameof(GetById), new { id = task.Id }, dto);
     }
 
@@ -122,90 +115,65 @@ public class TasksApiController : ControllerBase
         if (!await this.ValidateAndAddToModelStateAsync(_updateValidator, model, ct))
             return ValidationProblem(ModelState);
 
-        var task = await _db.TaskItems
-            .Include(t => t.TaskAssignments)
-            .Include(t => t.TaskTags)
-            .FirstOrDefaultAsync(t => t.Id == id, ct);
+        var task = await Db.TaskItems.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id, ct);
         if (task is null)
             return NotFound();
         if (!await CanAccessTaskAsync(id, ct))
             return Forbid();
 
-        if (!await _db.TaskStatusDefinitions.AnyAsync(s => s.Id == model.TaskStatusDefinitionId, ct))
-            return BadRequest(new { message = "Status does not exist." });
+        var result = await _taskService.UpdateAsync(new UpdateTaskRequest(
+            id,
+            model.TaskStatusDefinitionId,
+            model.Title,
+            model.Description,
+            model.Priority,
+            model.StoryPoints,
+            model.DueDate,
+            model.AssigneeIds,
+            model.TagIds), ct);
+        if (!result.IsSuccess)
+            return ToFailureResult(result.Error!.Value);
 
-        var now = DateTime.UtcNow;
-        task.TaskStatusDefinitionId = model.TaskStatusDefinitionId;
-        task.Title = model.Title;
-        task.Description = model.Description ?? string.Empty;
-        task.Priority = model.Priority;
-        task.StoryPoints = model.StoryPoints;
-        task.DueDate = model.DueDate;
-        task.UpdatedAt = now;
-
-        task.TaskAssignments.Clear();
-        AssignUsers(task, model.AssigneeIds, now);
-        task.TaskTags.Clear();
-        LinkTags(task, model.TagIds, now);
-
-        await _db.SaveChangesAsync(ct);
-
-        var dto = (await WithRelations(_db.TaskItems.AsNoTracking()).FirstAsync(t => t.Id == task.Id, ct)).ToDto();
+        var dto = (await WithRelations(Db.TaskItems.AsNoTracking()).FirstAsync(item => item.Id == id, ct)).ToDto();
         return Ok(dto);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        var task = await _db.TaskItems.FirstOrDefaultAsync(t => t.Id == id, ct);
+        var task = await Db.TaskItems.FirstOrDefaultAsync(t => t.Id == id, ct);
         if (task is null)
             return NotFound();
         if (!await CanAccessTaskAsync(id, ct))
             return Forbid();
 
-        _db.TaskItems.Remove(task);
-        await _db.SaveChangesAsync(ct);
+        var result = await _taskService.DeleteAsync(id, ct);
+        if (!result.IsSuccess)
+            return ToFailureResult(result.Error!.Value);
 
         return NoContent();
     }
 
-    private static void AssignUsers(TaskItem task, IEnumerable<Guid> userIds, DateTime at)
-    {
-        foreach (var userId in userIds.Distinct())
-            task.TaskAssignments.Add(new TaskAssignment { TaskItemId = task.Id, UserId = userId, AssignedAt = at });
-    }
-
-    private static void LinkTags(TaskItem task, IEnumerable<Guid> tagIds, DateTime at)
-    {
-        foreach (var tagId in tagIds.Distinct())
-            task.TaskTags.Add(new TaskTag { TaskItemId = task.Id, TagId = tagId, LinkedAt = at });
-    }
-
-    private Guid? CurrentUserId() =>
-        Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : null;
-
     private async Task<Guid?> WorkspaceIdForBoardAsync(Guid boardId, CancellationToken ct) =>
-        await _db.Boards
+        await Db.Boards
             .Where(b => b.Id == boardId)
             .Select(b => (Guid?)b.Project!.WorkspaceId)
             .FirstOrDefaultAsync(ct);
 
     private async Task<bool> CanAccessTaskAsync(Guid taskId, CancellationToken ct)
     {
-        var workspaceId = await _db.TaskItems
+        var workspaceId = await Db.TaskItems
             .Where(t => t.Id == taskId)
             .Select(t => (Guid?)t.Board!.Project!.WorkspaceId)
             .FirstOrDefaultAsync(ct);
         return workspaceId is not null && await CanAccessWorkspaceAsync(workspaceId.Value, ct);
     }
 
-    private async Task<bool> CanAccessWorkspaceAsync(Guid workspaceId, CancellationToken ct)
+    private ActionResult ToFailureResult(Common.ResultError error) => error.Kind switch
     {
-        if (User.IsInRole(AppRoles.Admin))
-            return true;
-        if (CurrentUserId() is not { } userId)
-            return false;
+        Common.ErrorKind.NotFound => NotFound(new { message = error.Message }),
+        Common.ErrorKind.Conflict => Conflict(new { message = error.Message }),
+        _ => BadRequest(new { message = error.Message })
+    };
 
-        return await _db.WorkspaceMembers.AnyAsync(m => m.WorkspaceId == workspaceId && m.UserId == userId, ct);
-    }
 }

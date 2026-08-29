@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Models.Dtos;
@@ -9,11 +8,9 @@ namespace FlowCore.Controllers.Api;
 
 [ApiController]
 [Route("api/boards")]
-public class BoardsApiController : ControllerBase
+public class BoardsApiController : WorkspaceApiControllerBase
 {
-    private readonly FlowCoreDbContext _db;
-
-    public BoardsApiController(FlowCoreDbContext db) => _db = db;
+    public BoardsApiController(FlowCoreDbContext db) : base(db) { }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BoardDto>>> GetAll(
@@ -24,7 +21,7 @@ public class BoardsApiController : ControllerBase
         if (CurrentUserId() is not { } userId)
             return Unauthorized();
 
-        var boards = _db.Boards.AsNoTracking().AsQueryable();
+        var boards = Db.Boards.AsNoTracking().AsQueryable();
 
         if (!User.IsInRole(AppRoles.Admin))
         {
@@ -49,7 +46,7 @@ public class BoardsApiController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<BoardDto>> GetById(Guid id, CancellationToken ct)
     {
-        var board = await _db.Boards.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id, ct);
+        var board = await Db.Boards.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id, ct);
         if (board is null)
             return NotFound();
         if (!await CanAccessBoardAsync(id, ct))
@@ -79,8 +76,8 @@ public class BoardsApiController : ControllerBase
             UpdatedAt = now
         };
 
-        _db.Boards.Add(board);
-        await _db.SaveChangesAsync(ct);
+        Db.Boards.Add(board);
+        await Db.SaveChangesAsync(ct);
 
         return CreatedAtAction(nameof(GetById), new { id = board.Id }, board.ToDto());
     }
@@ -88,7 +85,7 @@ public class BoardsApiController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<BoardDto>> Update(Guid id, [FromBody] BoardUpdateDto model, CancellationToken ct)
     {
-        var board = await _db.Boards.FirstOrDefaultAsync(b => b.Id == id, ct);
+        var board = await Db.Boards.FirstOrDefaultAsync(b => b.Id == id, ct);
         if (board is null)
             return NotFound();
         if (!await CanAccessBoardAsync(id, ct))
@@ -98,7 +95,7 @@ public class BoardsApiController : ControllerBase
         board.Position = model.Position;
         board.IsDefault = model.IsDefault;
         board.UpdatedAt = DateTime.UtcNow;
-        await _db.SaveChangesAsync(ct);
+        await Db.SaveChangesAsync(ct);
 
         return Ok(board.ToDto());
     }
@@ -106,29 +103,26 @@ public class BoardsApiController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        var board = await _db.Boards.FirstOrDefaultAsync(b => b.Id == id, ct);
+        var board = await Db.Boards.FirstOrDefaultAsync(b => b.Id == id, ct);
         if (board is null)
             return NotFound();
         if (!await CanAccessBoardAsync(id, ct))
             return Forbid();
 
-        _db.Boards.Remove(board);
-        await _db.SaveChangesAsync(ct);
+        Db.Boards.Remove(board);
+        await Db.SaveChangesAsync(ct);
 
         return NoContent();
     }
 
-    private Guid? CurrentUserId() =>
-        Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : null;
-
     private async Task<Guid?> WorkspaceIdForProjectAsync(Guid projectId, CancellationToken ct) =>
-        await _db.Projects
+        await Db.Projects
             .Where(p => p.Id == projectId)
             .Select(p => (Guid?)p.WorkspaceId)
             .FirstOrDefaultAsync(ct);
 
     private async Task<Guid?> WorkspaceIdForBoardAsync(Guid boardId, CancellationToken ct) =>
-        await _db.Boards
+        await Db.Boards
             .Where(b => b.Id == boardId)
             .Select(b => (Guid?)b.Project!.WorkspaceId)
             .FirstOrDefaultAsync(ct);
@@ -139,15 +133,4 @@ public class BoardsApiController : ControllerBase
         return workspaceId is not null && await CanAccessWorkspaceAsync(workspaceId.Value, ct);
     }
 
-    private async Task<bool> CanAccessWorkspaceAsync(Guid workspaceId, CancellationToken ct)
-    {
-        if (User.IsInRole(AppRoles.Admin))
-            return true;
-
-        if (CurrentUserId() is not { } userId)
-            return false;
-
-        return await _db.WorkspaceMembers.AnyAsync(m =>
-            m.WorkspaceId == workspaceId && m.UserId == userId, ct);
-    }
 }

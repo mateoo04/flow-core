@@ -1,0 +1,28 @@
+@model ProjectFormVm
+<div asp-validation-summary="ModelOnly" class="text-sm text-[var(--color-error)]"></div>
+<div>
+    <label asp-for="Name" class="block text-sm font-medium text-fg-secondary">Name</label>
+    <input asp-for="Name" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"/>
+    <span asp-validation-for="Name" class="mt-1 block text-xs text-[var(--color-error)]"></span>
+</div>
+<div>
+    <label asp-for="Description" class="block text-sm font-medium text-fg-secondary">Description</label>
+    <textarea asp-for="Description" rows="4" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></textarea>
+    <span asp-validation-for="Description" class="mt-1 block text-xs text-[var(--color-error)]"></span>
+</div>
+<div>
+    <label asp-for="Status" class="block text-sm font-medium text-fg-secondary">Status</label>
+    <select asp-for="Status" asp-items="Html.GetEnumSelectList<ProjectStatus>()" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></select>
+</div>
+<div>
+    <label asp-for="Priority" class="block text-sm font-medium text-fg-secondary">Priority</label>
+    <select asp-for="Priority" asp-items="Html.GetEnumSelectList<ProjectPriority>()" class="mt-1 w-full rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2 text-fg focus:border-[var(--color-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-secondary)]"></select>
+</div>
+<div>
+    <label asp-for="StartDate" class="block text-sm font-medium text-fg-secondary">@(ViewData["StartDateLabel"] ?? "Start date")</label>
+    <div class="mt-1"><partial name="_DateTimePicker" model="@(new DateTimePickerModel { FieldName = nameof(Model.StartDate), Value = Model.StartDate, Placeholder = "Pick a date", IncludeTime = false })"/></div>
+</div>
+<div>
+    <label asp-for="DueDate" class="block text-sm font-medium text-fg-secondary">Due (optional)</label>
+    <div class="mt-1"><partial name="_DateTimePicker" model="@(new DateTimePickerModel { FieldName = nameof(Model.DueDate), Value = Model.DueDate, Placeholder = "Pick a date", IncludeTime = false })"/></div>
+</div>

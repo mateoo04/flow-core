@@ -49,6 +49,7 @@ public sealed class TaskService : ITaskService
         }
 
         var validAssigneeIds = await ResolveValidAssigneeIdsAsync(request.AssigneeIds, ct);
+        var validTagIds = await ResolveValidTagIdsAsync(request.TagIds ?? Array.Empty<Guid>(), ct);
 
         var now = DateTime.UtcNow;
         var task = new TaskItem
@@ -76,6 +77,16 @@ public sealed class TaskService : ITaskService
             });
         }
 
+        foreach (var tagId in validTagIds)
+        {
+            task.TaskTags.Add(new TaskTag
+            {
+                TaskItemId = task.Id,
+                TagId = tagId,
+                LinkedAt = now
+            });
+        }
+
         var created = await _tasks.AddAsync(task, ct);
         _logger.LogInformation("Task created. {TaskId} {BoardId} {StatusId} {AssigneeCount}", created.Id, created.BoardId, created.TaskStatusDefinitionId, created.TaskAssignments.Count);
         return Result.Ok(created);
@@ -88,6 +99,7 @@ public sealed class TaskService : ITaskService
 
         var task = await _db.TaskItems
             .Include(t => t.TaskAssignments)
+            .Include(t => t.TaskTags)
             .FirstOrDefaultAsync(t => t.Id == request.Id, ct);
         if (task is null)
             return Result.NotFound<TaskItem>("Task not found.");
@@ -121,9 +133,38 @@ public sealed class TaskService : ITaskService
             });
         }
 
+        if (request.TagIds is not null)
+        {
+            var validTagIds = (await ResolveValidTagIdsAsync(request.TagIds, ct)).ToHashSet();
+            var tagsToRemove = task.TaskTags.Where(tag => !validTagIds.Contains(tag.TagId)).ToList();
+            foreach (var tag in tagsToRemove)
+                _db.Remove(tag);
+
+            var existingTags = task.TaskTags.Select(tag => tag.TagId).ToHashSet();
+            foreach (var tagId in validTagIds)
+            {
+                if (existingTags.Contains(tagId)) continue;
+                task.TaskTags.Add(new TaskTag
+                {
+                    TaskItemId = task.Id,
+                    TagId = tagId,
+                    LinkedAt = DateTime.UtcNow
+                });
+            }
+        }
+
         await _db.SaveChangesAsync(ct);
         _logger.LogInformation("Task updated. {TaskId} {StatusId} {AssigneeCount}", task.Id, task.TaskStatusDefinitionId, task.TaskAssignments.Count);
         return Result.Ok(task);
+    }
+
+    public async Task<Result<bool>> DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        if (!await _tasks.TryDeleteAsync(id, ct))
+            return Result.NotFound<bool>("Task not found.");
+
+        _logger.LogInformation("Task deleted. {TaskId}", id);
+        return Result.Ok(true);
     }
 
     private static DateTime? NormalizeUtc(DateTime? value) => value switch
@@ -140,6 +181,16 @@ public sealed class TaskService : ITaskService
         return await _db.Users
             .Where(u => u.IsActive && distinct.Contains(u.Id))
             .Select(u => u.Id)
+            .ToListAsync(ct);
+    }
+
+    private async Task<List<Guid>> ResolveValidTagIdsAsync(IReadOnlyCollection<Guid> requested, CancellationToken ct)
+    {
+        if (requested.Count == 0) return new List<Guid>();
+        var distinct = requested.Distinct().ToList();
+        return await _db.Tags
+            .Where(tag => distinct.Contains(tag.Id))
+            .Select(tag => tag.Id)
             .ToListAsync(ct);
     }
 

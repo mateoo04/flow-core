@@ -59,14 +59,15 @@ public class TasksApiTests : IClassFixture<FlowCoreApiFactory>
     }
 
     [Fact]
-    public async Task Post_CreatesTaskWithAssignee_Returns201()
+    public async Task Post_CreatesTaskWithAssigneeAndTag_Returns201()
     {
-        var (ctx, userId) = await _factory.WithDbContextAsync(async db =>
+        var (ctx, userId, tagId) = await _factory.WithDbContextAsync(async db =>
         {
             var context = await TestDataSeeder.CreateTaskContextAsync(db);
             var user = await TestDataSeeder.EnsureTestUserAsync(db);
+            var tag = await TestDataSeeder.CreateTagAsync(db);
             await TestDataSeeder.AddMemberAsync(db, context.Workspace, user.Id);
-            return (context, user.Id);
+            return (context, user.Id, tag.Id);
         });
         var client = _factory.CreateAuthenticatedClient();
         var body = new TaskCreateDto
@@ -75,7 +76,8 @@ public class TasksApiTests : IClassFixture<FlowCoreApiFactory>
             TaskStatusDefinitionId = ctx.Status.Id,
             Title = "New Task",
             Description = "d",
-            AssigneeIds = new List<Guid> { userId }
+            AssigneeIds = new List<Guid> { userId },
+            TagIds = new List<Guid> { tagId }
         };
 
         var response = await client.PostAsJsonAsync("/api/tasks", body);
@@ -85,6 +87,7 @@ public class TasksApiTests : IClassFixture<FlowCoreApiFactory>
         Assert.Equal("New Task", dto!.Title);
         Assert.EndsWith($"/api/tasks/{dto.Id}", response.Headers.Location!.ToString());
         Assert.Contains(dto.Assignees, a => a.Id == userId);
+        Assert.Contains(dto.Tags, tag => tag.Id == tagId);
         Assert.True(await _factory.WithDbContextAsync(db => DbAssert.TaskExistsAsync(db, dto.Id)));
     }
 

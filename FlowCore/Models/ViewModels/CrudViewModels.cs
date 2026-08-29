@@ -3,46 +3,33 @@ using FlowCore.Models;
 
 namespace FlowCore.Models.ViewModels;
 
-public sealed class ProjectCreateFormVm : IProjectInput
+public abstract class ProjectFormVm : IProjectInput
+{
+    public string Name { get; set; } = "";
+
+    public string Description { get; set; } = "";
+
+    public ProjectStatus Status { get; set; } = ProjectStatus.Planning;
+
+    public ProjectPriority Priority { get; set; } = ProjectPriority.Medium;
+
+    public DateTime? StartDate { get; set; }
+
+    public DateTime? DueDate { get; set; }
+}
+
+public sealed class ProjectCreateFormVm : ProjectFormVm
 {
     public Guid WorkspaceId { get; set; }
-
-    public string Name { get; set; } = "";
-
-    public string Description { get; set; } = "";
-
-    public ProjectStatus Status { get; set; } = ProjectStatus.Planning;
-
-    public ProjectPriority Priority { get; set; } = ProjectPriority.Medium;
-
-    public DateTime? StartDate { get; set; }
-
-    public DateTime? DueDate { get; set; }
 }
 
-public sealed class ProjectEditFormVm : IProjectInput
+public sealed class ProjectEditFormVm : ProjectFormVm
 {
     public Guid Id { get; set; }
-
-    public string Name { get; set; } = "";
-
-    public string Description { get; set; } = "";
-
-    public ProjectStatus Status { get; set; } = ProjectStatus.Planning;
-
-    public ProjectPriority Priority { get; set; } = ProjectPriority.Medium;
-
-    public DateTime? StartDate { get; set; }
-
-    public DateTime? DueDate { get; set; }
 }
 
-public sealed class TaskCreateFormVm : ITaskInput
+public abstract class TaskFormVm : ITaskInput
 {
-    public Guid ProjectId { get; set; }
-
-    public Guid BoardId { get; set; }
-
     public Guid TaskStatusDefinitionId { get; set; }
 
     public string Title { get; set; } = "";
@@ -58,27 +45,20 @@ public sealed class TaskCreateFormVm : ITaskInput
     public DateTime? DueDate { get; set; }
 
     public List<Guid> AssigneeIds { get; set; } = new();
-}
-
-public sealed class TaskEditFormVm : ITaskInput
-{
-    public Guid Id { get; set; }
-
-    public Guid TaskStatusDefinitionId { get; set; }
-
-    public string Title { get; set; } = "";
-
-    public string? Description { get; set; }
-
-    public TaskPriority Priority { get; set; } = TaskPriority.Medium;
-
-    public int StoryPoints { get; set; }
-
-    public DateTime? DueDate { get; set; }
-
-    public List<Guid> AssigneeIds { get; set; } = new();
 
     public IReadOnlyList<AutocompleteItem> SelectedAssignees { get; set; } = Array.Empty<AutocompleteItem>();
+}
+
+public sealed class TaskCreateFormVm : TaskFormVm
+{
+    public Guid ProjectId { get; set; }
+
+    public Guid BoardId { get; set; }
+}
+
+public sealed class TaskEditFormVm : TaskFormVm
+{
+    public Guid Id { get; set; }
 }
 
 public sealed class CommentFormVm

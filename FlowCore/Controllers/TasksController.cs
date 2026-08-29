@@ -132,7 +132,8 @@ public class TasksController : BaseController
             model.StoryPoints,
             model.ParentTaskItemId,
             model.DueDate,
-            model.AssigneeIds);
+            model.AssigneeIds,
+            null);
 
         var result = await _taskService.CreateAsync(req, ct);
         if (result.IsSuccess)
@@ -192,7 +193,8 @@ public class TasksController : BaseController
             model.Priority,
             model.StoryPoints,
             model.DueDate,
-            model.AssigneeIds);
+            model.AssigneeIds,
+            null);
 
         var result = await _taskService.UpdateAsync(req, ct);
         if (result.IsSuccess)
@@ -259,7 +261,7 @@ public class TasksController : BaseController
         }
 
         var projectId = entity.Board?.ProjectId;
-        if (!await _tasks.TryDeleteAsync(id, ct))
+        if (!(await _taskService.DeleteAsync(id, ct)).IsSuccess)
             return NotFound();
 
         if (projectId is { } pid)
