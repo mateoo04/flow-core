@@ -64,6 +64,7 @@ public class TagsApiTests : IClassFixture<FlowCoreApiFactory>
         Assert.NotNull(dto);
         Assert.NotEqual(Guid.Empty, dto!.Id);
         Assert.Equal("API Tag", dto.Name);
+        Assert.EndsWith($"/api/tags/{dto.Id}", response.Headers.Location!.ToString());
 
         var persisted = await _factory.WithDbContextAsync(db =>
             FlowCore.Tests.Infrastructure.DbAssert.TagExistsAsync(db, dto.Id));

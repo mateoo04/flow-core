@@ -5,6 +5,7 @@ using FlowCore.Validation;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace FlowCore.Controllers.Api;
 
@@ -40,6 +41,15 @@ public class TasksApiController : ControllerBase
     {
         var tasks = WithRelations(_db.TaskItems.AsNoTracking());
 
+        if (CurrentUserId() is not { } userId)
+            return Unauthorized();
+
+        if (!User.IsInRole(AppRoles.Admin))
+        {
+            tasks = tasks.Where(t => t.Board != null && t.Board.Project != null &&
+                t.Board.Project.Workspace!.Members.Any(m => m.UserId == userId));
+        }
+
         if (boardId is { } bid)
             tasks = tasks.Where(t => t.BoardId == bid);
 
@@ -59,6 +69,8 @@ public class TasksApiController : ControllerBase
         var task = await WithRelations(_db.TaskItems.AsNoTracking()).FirstOrDefaultAsync(t => t.Id == id, ct);
         if (task is null)
             return NotFound();
+        if (!await CanAccessTaskAsync(id, ct))
+            return Forbid();
 
         return Ok(task.ToDto());
     }
@@ -69,8 +81,11 @@ public class TasksApiController : ControllerBase
         if (!await this.ValidateAndAddToModelStateAsync(_createValidator, model, ct))
             return ValidationProblem(ModelState);
 
-        if (!await _db.Boards.AnyAsync(b => b.Id == model.BoardId, ct))
+        var workspaceId = await WorkspaceIdForBoardAsync(model.BoardId, ct);
+        if (workspaceId is null)
             return BadRequest(new { message = "Board does not exist." });
+        if (!await CanAccessWorkspaceAsync(workspaceId.Value, ct))
+            return Forbid();
 
         if (!await _db.TaskStatusDefinitions.AnyAsync(s => s.Id == model.TaskStatusDefinitionId, ct))
             return BadRequest(new { message = "Status does not exist." });
@@ -113,6 +128,8 @@ public class TasksApiController : ControllerBase
             .FirstOrDefaultAsync(t => t.Id == id, ct);
         if (task is null)
             return NotFound();
+        if (!await CanAccessTaskAsync(id, ct))
+            return Forbid();
 
         if (!await _db.TaskStatusDefinitions.AnyAsync(s => s.Id == model.TaskStatusDefinitionId, ct))
             return BadRequest(new { message = "Status does not exist." });
@@ -143,6 +160,8 @@ public class TasksApiController : ControllerBase
         var task = await _db.TaskItems.FirstOrDefaultAsync(t => t.Id == id, ct);
         if (task is null)
             return NotFound();
+        if (!await CanAccessTaskAsync(id, ct))
+            return Forbid();
 
         _db.TaskItems.Remove(task);
         await _db.SaveChangesAsync(ct);
@@ -160,5 +179,33 @@ public class TasksApiController : ControllerBase
     {
         foreach (var tagId in tagIds.Distinct())
             task.TaskTags.Add(new TaskTag { TaskItemId = task.Id, TagId = tagId, LinkedAt = at });
+    }
+
+    private Guid? CurrentUserId() =>
+        Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : null;
+
+    private async Task<Guid?> WorkspaceIdForBoardAsync(Guid boardId, CancellationToken ct) =>
+        await _db.Boards
+            .Where(b => b.Id == boardId)
+            .Select(b => (Guid?)b.Project!.WorkspaceId)
+            .FirstOrDefaultAsync(ct);
+
+    private async Task<bool> CanAccessTaskAsync(Guid taskId, CancellationToken ct)
+    {
+        var workspaceId = await _db.TaskItems
+            .Where(t => t.Id == taskId)
+            .Select(t => (Guid?)t.Board!.Project!.WorkspaceId)
+            .FirstOrDefaultAsync(ct);
+        return workspaceId is not null && await CanAccessWorkspaceAsync(workspaceId.Value, ct);
+    }
+
+    private async Task<bool> CanAccessWorkspaceAsync(Guid workspaceId, CancellationToken ct)
+    {
+        if (User.IsInRole(AppRoles.Admin))
+            return true;
+        if (CurrentUserId() is not { } userId)
+            return false;
+
+        return await _db.WorkspaceMembers.AnyAsync(m => m.WorkspaceId == workspaceId && m.UserId == userId, ct);
     }
 }

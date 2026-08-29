@@ -77,6 +77,7 @@ public class ProjectsApiTests : IClassFixture<FlowCoreApiFactory>
         var dto = await response.Content.ReadFromJsonAsync<ProjectDto>();
         Assert.NotNull(dto);
         Assert.Equal("New Project", dto!.Name);
+        Assert.EndsWith($"/api/projects/{dto.Id}", response.Headers.Location!.ToString());
         Assert.True(await _factory.WithDbContextAsync(db => DbAssert.ProjectExistsAsync(db, dto.Id)));
     }
 
@@ -173,5 +174,24 @@ public class ProjectsApiTests : IClassFixture<FlowCoreApiFactory>
         var client = _factory.CreateAnonymousClient();
         var response = await client.GetAsync("/api/projects");
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetAll_FiltersByWorkspaceId()
+    {
+        var (requested, other) = await _factory.WithDbContextAsync(async db =>
+        {
+            var first = await TestDataSeeder.CreateProjectAsync(db, await TestDataSeeder.CreateWorkspaceAsync(db));
+            var second = await TestDataSeeder.CreateProjectAsync(db, await TestDataSeeder.CreateWorkspaceAsync(db));
+            return (first, second);
+        });
+        var client = _factory.CreateAuthenticatedClient();
+
+        var response = await client.GetAsync($"/api/projects?workspaceId={requested.WorkspaceId}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var items = await response.Content.ReadFromJsonAsync<List<ProjectDto>>();
+        Assert.Contains(items!, item => item.Id == requested.Id);
+        Assert.DoesNotContain(items!, item => item.Id == other.Id);
     }
 }

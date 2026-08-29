@@ -59,6 +59,29 @@ dotnet run --project FlowCore
 
 Open the local URL printed by Kestrel.
 
+## Tests
+
+The regular xUnit suite in `FlowCore.Tests/Api` covers every API endpoint. See
+[`docs/api-test-coverage.md`](docs/api-test-coverage.md) for the endpoint matrix.
+
+The Playwright suite is a separate browser-based UI scenario with eleven visible
+user steps: demo sign-in, workspace and project navigation, task creation,
+assignment via autocomplete, comment creation, editing, and deletion. It uses
+browser clicks and form interactions only; it does not call API endpoints directly.
+
+With PostgreSQL running, execute:
+
+```bash
+npm install
+npm run test:api
+npm run test:e2e
+```
+
+By default, Playwright starts FlowCore at `http://127.0.0.1:5055`. To run against
+an already running instance, set `PLAYWRIGHT_BASE_URL` to its URL before executing
+the command. The suite uses the development-only **Explore demo workspace** login,
+so do not point it at a production environment.
+
 ## Demo accounts (seeded)
 
 On first run in `Development`, the app seeds demo users/projects/tasks.

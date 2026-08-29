@@ -61,6 +61,7 @@ public class WorkspacesApiTests : IClassFixture<FlowCoreApiFactory>
         var dto = await response.Content.ReadFromJsonAsync<WorkspaceDto>();
         Assert.NotNull(dto);
         Assert.Equal("New WS", dto!.Name);
+        Assert.EndsWith($"/api/workspaces/{dto.Id}", response.Headers.Location!.ToString());
         Assert.True(await _factory.WithDbContextAsync(db => DbAssert.WorkspaceExistsAsync(db, dto.Id)));
     }
 

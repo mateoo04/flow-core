@@ -105,12 +105,17 @@ public static class TestDataSeeder
 
     public sealed record TaskContext(Workspace Workspace, Project Project, Board Board, TaskStatusDefinition Status);
 
-    public static async Task<TaskContext> CreateTaskContextAsync(FlowCoreDbContext db)
+    public static async Task<TaskContext> CreateTaskContextAsync(FlowCoreDbContext db, bool addCurrentUserAsMember = false)
     {
         var workspace = await CreateWorkspaceAsync(db);
         var project = await CreateProjectAsync(db, workspace);
         var board = await CreateBoardAsync(db, project);
         var status = await CreateStatusAsync(db, workspace);
+        if (addCurrentUserAsMember)
+        {
+            var user = await EnsureTestUserAsync(db);
+            await AddMemberAsync(db, workspace, user.Id);
+        }
         return new TaskContext(workspace, project, board, status);
     }
 
@@ -138,6 +143,9 @@ public static class TestDataSeeder
 
     public static async Task AddMemberAsync(FlowCoreDbContext db, Workspace workspace, Guid userId, WorkspaceRole role = WorkspaceRole.Member)
     {
+        if (await db.WorkspaceMembers.AnyAsync(m => m.WorkspaceId == workspace.Id && m.UserId == userId))
+            return;
+
         db.WorkspaceMembers.Add(new WorkspaceMember
         {
             WorkspaceId = workspace.Id,

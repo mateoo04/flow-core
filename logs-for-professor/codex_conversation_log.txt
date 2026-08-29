@@ -6045,3 +6045,51 @@ U Codex sidebaru:
 
 Ako tu opciju ne vidi┼í: `Ctrl+Shift+P` ÔåÆ **Developer: Reload Window**. Nakon toga ponovno otvori Codex sidebar.
 ----
+
+[2026-08-09 18:28:13 +02:00] TURN 019fe75a-6d35-7780-9122-614c145cc816
+USER:
+Kreiranje testova za sve API endpointe (Playwright scenarij 10 koraka
++3 extra boda) ned to handle this task, need plan
+
+ASSISTANT:
+Plan je spreman. Projekt ima 35 API endpointa: 7 CRUD kontrolera ├ù 5 ruta (workspaces, projects, boards, statuses, tags, tasks, comments).
+
+Predla┼¥em:
+
+1. Dodati Playwright konfiguraciju, npm skripte i pokretanje aplikacije za testove.
+2. Napisati CRUD API testove za svih 35 ruta.
+3. Napraviti 10-kora─ìni E2E scenarij:
+   workspace ÔåÆ project ÔåÆ board ÔåÆ status ÔåÆ tag ÔåÆ task ÔåÆ komentar ÔåÆ izmjena taska ÔåÆ dohvat/filter ÔåÆ brisanje i provjera.
+4. Pokriti o─ìekivane gre┼íke: 401, 403, 404 i validacijski 400.
+5. Osigurati izolirane testne podatke i cleanup nakon testa.
+6. Pokrenuti testove te dokumentirati naredbe i rezultat u README-u/CI-u.
+
+Napomena: postoje─çi xUnit integracijski testovi ve─ç pokrivaju velik dio API-ja (ukupno 79 API testova), ali Playwright jo┼í nije instaliran ni konfiguriran.
+----
+
+[2026-08-09 18:29:18 +02:00] TURN 019fe75b-710d-7a03-b840-fc9ee32540d3
+USER:
+go
+
+ASSISTANT:
+Gotovo.
+
+- Dodan je Playwright API scenario od to─ìno 10 koraka u [api.spec.ts](C:\Users\mateo\OneDrive\Documents\GitHub\flow-core\e2e\api.spec.ts).
+- Pokriva svih 35 CRUD endpointa za 7 API resursa.
+- Uklju─ìene su provjere 401, 400, filtera, dohvat├ó, izmjena, brisanja i 404 nakon brisanja.
+- Test se prijavljuje kroz stvarni demo login i nakon sebe bri┼íe podatke.
+- Dodani su Playwright konfiguracija i npm skripte u [package.json](C:\Users\mateo\OneDrive\Documents\GitHub\flow-core\package.json) te upute u [README.md](C:\Users\mateo\OneDrive\Documents\GitHub\flow-core\README.md).
+- Ispravljen je API 401 odgovor u [Program.cs](C:\Users\mateo\OneDrive\Documents\GitHub\flow-core\FlowCore\Program.cs): API vi┼íe ne pretvara 401 u HTML login stranicu sa statusom 200.
+
+Provjera uspje┼ína:
+
+```text
+1 passed (8.3s)
+```
+
+Pokretanje:
+
+```bash
+npm run test:api
+```
+----

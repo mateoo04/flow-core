@@ -69,6 +69,7 @@ public class BoardsApiTests : IClassFixture<FlowCoreApiFactory>
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var dto = await response.Content.ReadFromJsonAsync<BoardDto>();
         Assert.Equal("New Board", dto!.Name);
+        Assert.EndsWith($"/api/boards/{dto.Id}", response.Headers.Location!.ToString());
         Assert.True(await _factory.WithDbContextAsync(db => DbAssert.BoardExistsAsync(db, dto.Id)));
     }
 
@@ -145,5 +146,21 @@ public class BoardsApiTests : IClassFixture<FlowCoreApiFactory>
         var client = _factory.CreateAnonymousClient();
         var response = await client.GetAsync("/api/boards");
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetById_Returns403_WhenUserIsNotWorkspaceMember()
+    {
+        var board = await _factory.WithDbContextAsync(async db =>
+        {
+            var workspace = await TestDataSeeder.CreateWorkspaceAsync(db);
+            var project = await TestDataSeeder.CreateProjectAsync(db, workspace);
+            return await TestDataSeeder.CreateBoardAsync(db, project);
+        });
+        var client = _factory.CreateAuthenticatedClient();
+
+        var response = await client.GetAsync($"/api/boards/{board.Id}");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 }

@@ -13,6 +13,7 @@ using FlowCore.Validation;
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -25,6 +26,16 @@ using Microsoft.EntityFrameworkCore;
 LoadDotEnv();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// The Playwright process runs outside the interactive Windows profile that owns
+// local DPAPI keys. Keep its cookie encryption keys in a writable temporary
+// location, without changing the application's normal Development/Production setup.
+if (string.Equals(Environment.GetEnvironmentVariable("FLOWCORE_E2E"), "true", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Path.GetTempPath(), "flowcore-playwright-keys")))
+        .SetApplicationName("FlowCore.Playwright");
+}
 
 // Keep the .env names simple; IConfiguration uses double underscores for nesting,
 // so read these flat environment variables directly.
@@ -211,7 +222,11 @@ if (!app.Environment.IsDevelopment())
 
 if (!app.Environment.IsEnvironment("Testing"))
 {
-    app.UseStatusCodePagesWithReExecute("/Home/StatusCodePage", "?code={0}");
+    // API clients must retain their actual HTTP error response (for example 401),
+    // rather than receiving the MVC status page as an HTML 200 response.
+    app.UseWhen(
+        context => !context.Request.Path.StartsWithSegments("/api"),
+        branch => branch.UseStatusCodePagesWithReExecute("/Home/StatusCodePage", "?code={0}"));
 }
 
 app.UseForwardedHeaders();

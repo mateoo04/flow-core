@@ -68,6 +68,7 @@ public class CommentsApiTests : IClassFixture<FlowCoreApiFactory>
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var dto = await response.Content.ReadFromJsonAsync<CommentDto>();
         Assert.Equal("Hello", dto!.Body);
+        Assert.EndsWith($"/api/comments/{dto.Id}", response.Headers.Location!.ToString());
         Assert.True(await _factory.WithDbContextAsync(db => DbAssert.CommentExistsAsync(db, dto.Id)));
     }
 
@@ -152,5 +153,47 @@ public class CommentsApiTests : IClassFixture<FlowCoreApiFactory>
         var client = _factory.CreateAnonymousClient();
         var response = await client.GetAsync("/api/comments");
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetAll_FiltersByTaskItemId()
+    {
+        var (requested, other) = await _factory.WithDbContextAsync(async db =>
+        {
+            var first = await TestDataSeeder.CreateCommentAsync(db);
+            var second = await TestDataSeeder.CreateCommentAsync(db);
+            return (first, second);
+        });
+        var client = _factory.CreateAuthenticatedClient();
+
+        var response = await client.GetAsync($"/api/comments?taskItemId={requested.TaskItemId}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var items = await response.Content.ReadFromJsonAsync<List<CommentDto>>();
+        Assert.Contains(items!, item => item.Id == requested.Id);
+        Assert.DoesNotContain(items!, item => item.Id == other.Id);
+    }
+
+    [Fact]
+    public async Task GetById_Returns403_WhenUserIsNotWorkspaceMember()
+    {
+        var comment = await _factory.WithDbContextAsync(async db =>
+        {
+            var user = await TestDataSeeder.EnsureTestUserAsync(db);
+            var context = await TestDataSeeder.CreateTaskContextAsync(db, addCurrentUserAsMember: false);
+            var task = await TestDataSeeder.CreateTaskAsync(db, context);
+            var entity = new FlowCore.Models.Comment
+            {
+                Id = Guid.NewGuid(), TaskItemId = task.Id, AuthorUserId = user.Id, Body = "Private", CreatedAt = DateTime.UtcNow
+            };
+            db.Comments.Add(entity);
+            await db.SaveChangesAsync();
+            return entity;
+        });
+        var client = _factory.CreateAuthenticatedClient();
+
+        var response = await client.GetAsync($"/api/comments/{comment.Id}");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 }

@@ -36,6 +36,9 @@ riderModule.iml
 
 ## Node
 node_modules/
+playwright-report/
+test-results/
+blob-report/
 
 ## Local Codex/runtime files
 .codex/

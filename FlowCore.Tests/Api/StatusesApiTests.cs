@@ -63,6 +63,7 @@ public class StatusesApiTests : IClassFixture<FlowCoreApiFactory>
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var dto = await response.Content.ReadFromJsonAsync<StatusDto>();
         Assert.Equal("Doing", dto!.Name);
+        Assert.EndsWith($"/api/statuses/{dto.Id}", response.Headers.Location!.ToString());
         Assert.True(await _factory.WithDbContextAsync(db => DbAssert.StatusExistsAsync(db, dto.Id)));
     }
 
