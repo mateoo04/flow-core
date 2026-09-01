@@ -17,6 +17,8 @@
     var control = root.querySelector("[data-ac-control]");
 
     var highlight = -1;
+    var searchController = null;
+    var searchVersion = 0;
 
     function showResults() { results.classList.remove("hidden"); }
     function hideResults() { results.classList.add("hidden"); highlight = -1; }
@@ -43,22 +45,36 @@
 
     var doSearch = debounce(function () {
       var q = input.value.trim();
+      searchVersion++;
+      var version = searchVersion;
+
+      if (searchController) searchController.abort();
+
       if (q.length === 0) { results.innerHTML = ""; hideResults(); return; }
+
+      searchController = new AbortController();
       var url = searchUrl
         + "?q=" + encodeURIComponent(q)
         + "&fieldName=" + encodeURIComponent(fieldName);
       var taken = selectedIds(root);
       for (var i = 0; i < taken.length; i++) url += "&exclude=" + encodeURIComponent(taken[i]);
 
-      fetch(url, { headers: { "Accept": "text/html" } })
+      fetch(url, {
+        headers: { "Accept": "text/html" },
+        signal: searchController.signal
+      })
         .then(function (r) { return r.ok ? r.text() : ""; })
         .then(function (html) {
+          if (version !== searchVersion) return;
           results.innerHTML = html;
           highlight = rows().length > 0 ? 0 : -1;
           applyHighlight();
           showResults();
         })
-        .catch(function () { hideResults(); });
+        .catch(function (error) {
+          if (error.name === "AbortError" || version !== searchVersion) return;
+          hideResults();
+        });
     }, 250);
 
     input.addEventListener("input", doSearch);
