@@ -17,14 +17,21 @@ public static class IdentityRoleSeeder
                 await roleManager.CreateAsync(new IdentityRole<Guid>(role));
         }
 
-        foreach (var user in userManager.Users.ToList())
+        var users = userManager.Users.ToList();
+        foreach (var user in users)
         {
             if (!await userManager.IsInRoleAsync(user, AppRoles.User))
                 await userManager.AddToRoleAsync(user, AppRoles.User);
+
+            if (user.Id != DemoSeedIds.UserAlex
+                && await userManager.IsInRoleAsync(user, AppRoles.Admin))
+            {
+                await userManager.RemoveFromRoleAsync(user, AppRoles.Admin);
+            }
         }
 
-        var demo = await userManager.FindByEmailAsync(DemoSeedIds.UserDemoEmail);
-        if (demo is not null && !await userManager.IsInRoleAsync(demo, AppRoles.Admin))
-            await userManager.AddToRoleAsync(demo, AppRoles.Admin);
+        var alex = await userManager.FindByIdAsync(DemoSeedIds.UserAlex.ToString());
+        if (alex is not null && !await userManager.IsInRoleAsync(alex, AppRoles.Admin))
+            await userManager.AddToRoleAsync(alex, AppRoles.Admin);
     }
 }

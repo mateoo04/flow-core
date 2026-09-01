@@ -133,8 +133,6 @@ public static class DemoDataBuilder
             Name = "Acme Corporation",
             Description = "Your company's workspace: projects group work by product, platform, or internal function.",
             CreatedAt = now.AddDays(-90),
-            ArchivedAt = null,
-            Visibility = WorkspaceVisibility.Team,
         };
 
         var statuses = ProjectBlueprint.CreateWorkspaceStatuses(organization.Id, now, Ng);

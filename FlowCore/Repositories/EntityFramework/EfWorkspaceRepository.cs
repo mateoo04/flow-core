@@ -57,7 +57,6 @@ public sealed class EfWorkspaceRepository : IWorkspaceRepository
         Guid id,
         string name,
         string description,
-        WorkspaceVisibility visibility,
         CancellationToken ct = default)
     {
         var ws = await _db.Workspaces.FirstOrDefaultAsync(w => w.Id == id, ct);
@@ -65,7 +64,6 @@ public sealed class EfWorkspaceRepository : IWorkspaceRepository
 
         ws.Name = name;
         ws.Description = description;
-        ws.Visibility = visibility;
         await _db.SaveChangesAsync(ct);
         return ws;
     }

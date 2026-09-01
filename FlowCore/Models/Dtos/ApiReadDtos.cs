@@ -12,9 +12,7 @@ public sealed record WorkspaceDto(
     Guid Id,
     string Name,
     string Description,
-    DateTime CreatedAt,
-    DateTime? ArchivedAt,
-    WorkspaceVisibility Visibility);
+    DateTime CreatedAt);
 
 public sealed record ProjectDto(
     Guid Id,

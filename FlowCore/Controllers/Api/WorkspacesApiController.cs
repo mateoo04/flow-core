@@ -47,7 +47,6 @@ public class WorkspacesApiController : ControllerBase
             Id = Guid.NewGuid(),
             Name = model.Name,
             Description = model.Description,
-            Visibility = model.Visibility,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -66,7 +65,6 @@ public class WorkspacesApiController : ControllerBase
 
         workspace.Name = model.Name;
         workspace.Description = model.Description;
-        workspace.Visibility = model.Visibility;
         await _db.SaveChangesAsync(ct);
 
         return Ok(workspace.ToDto());

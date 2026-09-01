@@ -9,8 +9,6 @@ public sealed class WorkspaceCreateDto
 
     [StringLength(2000)]
     public string Description { get; set; } = "";
-
-    public WorkspaceVisibility Visibility { get; set; } = WorkspaceVisibility.Private;
 }
 
 public sealed class WorkspaceUpdateDto
@@ -20,8 +18,6 @@ public sealed class WorkspaceUpdateDto
 
     [StringLength(2000)]
     public string Description { get; set; } = "";
-
-    public WorkspaceVisibility Visibility { get; set; } = WorkspaceVisibility.Private;
 }
 
 public sealed class ProjectCreateDto : IProjectInput

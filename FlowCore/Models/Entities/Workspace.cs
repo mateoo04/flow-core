@@ -9,8 +9,6 @@ public class Workspace
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public DateTime? ArchivedAt { get; set; }
-    public WorkspaceVisibility Visibility { get; set; }
 
     public virtual ICollection<WorkspaceMember> Members { get; set; } = new List<WorkspaceMember>();
     public virtual ICollection<Project> Projects { get; set; } = new List<Project>();

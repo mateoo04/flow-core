@@ -19,9 +19,7 @@ public static class ApiMappingExtensions
             workspace.Id,
             workspace.Name,
             workspace.Description,
-            workspace.CreatedAt,
-            workspace.ArchivedAt,
-            workspace.Visibility);
+            workspace.CreatedAt);
 
     public static ProjectDto ToDto(this Project project) =>
         new(

@@ -14,7 +14,6 @@ public interface IWorkspaceRepository
         Guid id,
         string name,
         string description,
-        WorkspaceVisibility visibility,
         CancellationToken ct = default);
 
     Task<bool> TryDeleteAsync(Guid id, CancellationToken ct = default);

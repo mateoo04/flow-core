@@ -1,24 +1,20 @@
 using System.Security.Claims;
-using System.Threading.RateLimiting;
 using FlowCore.Data;
 using FlowCore.Models;
 using FlowCore.Repositories;
 using FlowCore.Repositories.EntityFramework;
 using FlowCore.Services;
 using FlowCore.Services.Attachments;
+using FlowCore.Services.Ai;
 using FlowCore.Services.Authorization;
 using FlowCore.Services.Domain;
-using FlowCore.Validation;
 using FluentValidation;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace FlowCore.Configuration;
 
@@ -67,6 +63,11 @@ public static class FlowCoreServiceCollectionExtensions
         });
 
         services.AddHttpContextAccessor();
+        services.AddHttpClient<IAiTaskExtractionService, OpenAiTaskExtractionService>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.openai.com/v1/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
         services.AddScoped<IWorkspaceRepository, EfWorkspaceRepository>();
         services.AddScoped<IProjectRepository, EfProjectRepository>();
         services.AddScoped<ITaskRepository, EfTaskRepository>();

@@ -36,7 +36,7 @@ public class AdminController : Controller
             .AsNoTracking()
             .OrderBy(w => w.Name)
             .Select(w => new AdminWorkspaceRow(
-                w.Id, w.Name, w.Visibility, w.Members.Count, w.Projects.Count))
+                w.Id, w.Name, w.Members.Count, w.Projects.Count))
             .ToListAsync(ct);
 
         return View(new AdminDashboardViewModel(userRows, workspaceRows));

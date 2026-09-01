@@ -33,7 +33,7 @@ public class WorkspacesController : BaseController
     {
         var workspaces = await _workspaces.GetForUserAsync(_currentUser.UserId, ct);
         var rows = workspaces
-            .Select(w => new WorkspaceListRow(w.Id, w.Name, w.Visibility, w.Projects.Count))
+            .Select(w => new WorkspaceListRow(w.Id, w.Name, w.Projects.Count))
             .ToList();
         return View(rows);
     }
@@ -74,7 +74,6 @@ public class WorkspacesController : BaseController
             Id = Guid.NewGuid(),
             Name = model.Name.Trim(),
             Description = model.Description?.Trim() ?? "",
-            Visibility = model.Visibility,
             CreatedAt = DateTime.UtcNow
         }, creatorId, ct);
 
@@ -94,8 +93,7 @@ public class WorkspacesController : BaseController
         {
             Id = entity.Id,
             Name = entity.Name,
-            Description = entity.Description,
-            Visibility = entity.Visibility
+            Description = entity.Description
         });
     }
 
@@ -113,7 +111,6 @@ public class WorkspacesController : BaseController
             id,
             model.Name.Trim(),
             model.Description?.Trim() ?? "",
-            model.Visibility,
             ct);
         if (updated is null) return NotFound();
 

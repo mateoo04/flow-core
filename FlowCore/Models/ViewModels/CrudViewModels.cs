@@ -88,8 +88,6 @@ public sealed class WorkspaceFormVm
 
     [StringLength(2000)]
     public string Description { get; set; } = "";
-
-    public WorkspaceVisibility Visibility { get; set; } = WorkspaceVisibility.Private;
 }
 
 public sealed class BoardFormVm

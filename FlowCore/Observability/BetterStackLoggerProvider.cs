@@ -3,10 +3,6 @@ using System.Threading.Channels;
 
 namespace FlowCore.Observability;
 
-/// <summary>
-/// Best-effort Better Stack sink. It never delays or fails an application request.
-/// Configure with BetterStack:SourceToken and BetterStack:IngestingHost.
-/// </summary>
 public sealed class BetterStackLoggerProvider : ILoggerProvider
 {
     private readonly Channel<Dictionary<string, object?>> _events = Channel.CreateBounded<Dictionary<string, object?>>(

@@ -399,9 +399,6 @@ namespace FlowCore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("ArchivedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -412,9 +409,6 @@ namespace FlowCore.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Visibility")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
