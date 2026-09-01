@@ -83,7 +83,7 @@ public class FlowCoreDbContext : IdentityDbContext<User, IdentityRole<Guid>, Gui
         {
             b.HasIndex(t => t.BoardId);
             b.HasIndex(t => t.ParentTaskItemId);
-            b.HasIndex(t => new { t.TaskStatusDefinitionId, t.Position });
+            b.HasIndex(t => new { t.BoardId, t.TaskStatusDefinitionId, t.Position });
 
             b.HasOne(t => t.Board)
                 .WithMany(brd => brd.Tasks)

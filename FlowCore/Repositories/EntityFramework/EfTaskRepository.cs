@@ -154,7 +154,8 @@ public sealed class EfTaskRepository : ITaskRepository
             var crossColumn = sourceStatusId != destinationStatusId;
 
             var destSiblings = await _db.TaskItems
-                .Where(t => t.TaskStatusDefinitionId == destinationStatusId && t.Id != taskId)
+                .Where(t => t.BoardId == task.BoardId &&
+                    t.TaskStatusDefinitionId == destinationStatusId && t.Id != taskId)
                 .OrderBy(t => t.Position)
                 .ToListAsync(ct);
 
@@ -163,7 +164,8 @@ public sealed class EfTaskRepository : ITaskRepository
             if (crossColumn)
             {
                 var sourceSiblings = await _db.TaskItems
-                    .Where(t => t.TaskStatusDefinitionId == sourceStatusId && t.Id != taskId)
+                    .Where(t => t.BoardId == task.BoardId &&
+                        t.TaskStatusDefinitionId == sourceStatusId && t.Id != taskId)
                     .OrderBy(t => t.Position)
                     .ToListAsync(ct);
 
@@ -220,14 +222,16 @@ public sealed class EfTaskRepository : ITaskRepository
                 var sourceStatusId = task.TaskStatusDefinitionId;
 
                 var sourceSiblings = await _db.TaskItems
-                    .Where(t => t.TaskStatusDefinitionId == sourceStatusId && t.Id != taskId)
+                    .Where(t => t.BoardId == task.BoardId &&
+                        t.TaskStatusDefinitionId == sourceStatusId && t.Id != taskId)
                     .OrderBy(t => t.Position)
                     .ToListAsync(ct);
                 for (var i = 0; i < sourceSiblings.Count; i++)
                     sourceSiblings[i].Position = i;
 
                 var destSiblings = await _db.TaskItems
-                    .Where(t => t.TaskStatusDefinitionId == destStatus.Id && t.Id != taskId)
+                    .Where(t => t.BoardId == task.BoardId &&
+                        t.TaskStatusDefinitionId == destStatus.Id && t.Id != taskId)
                     .OrderBy(t => t.Position)
                     .ToListAsync(ct);
                 destSiblings.Add(task);
@@ -239,9 +243,8 @@ public sealed class EfTaskRepository : ITaskRepository
             }
 
             var siblings = await _db.TaskItems
-                .Where(t =>
-                    t.TaskAssignments.Any(a => a.UserId == currentUserId) &&
-                    t.TaskStatusDefinition!.Name == destinationStatusName &&
+                .Where(TaskHierarchyVisibility.MyTasksRootCard(currentUserId))
+                .Where(t => t.TaskStatusDefinition!.Name == destinationStatusName &&
                     t.Id != taskId)
                 .Select(t => new { t.Id, t.Title })
                 .ToListAsync(ct);

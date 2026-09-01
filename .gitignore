@@ -42,6 +42,7 @@ blob-report/
 
 ## Local Codex/runtime files
 .codex/
+logs-for-professor/codex_conversation_log.txt
 
 ## Uploaded files from local development
 FlowCore/wwwroot/uploads/
