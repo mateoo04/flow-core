@@ -8470,3 +8470,92 @@ Changed files:
 
 Now commit and push these two changes to `main`. Once GitHub CI goes green, Azure Portal ÔåÆ **App Service ÔåÆ Deployment Center** ÔåÆ connect your GitHub repository and `main` branch. Azure will create a separate deployment workflow and deploy on push.
 ----
+
+[2026-09-03 19:29:12 +02:00] TURN 01a06851-3ffa-71c0-8bc1-c292ecafd086
+USER:
+how to connect to github azure project
+
+ASSISTANT:
+1. First commit and push the CI fix from VS Code:
+
+```powershell
+git add FlowCore.Tests/Api/WorkspacesApiTests.cs FlowCore.Tests/Infrastructure/TestDataSeeder.cs
+git commit -m "Fix workspace tests after visibility removal"
+git push origin main
+```
+
+2. In Azure Portal, open your **App Service** (`flow-core-pm-app`).
+
+3. Open **Deployment Center** ÔåÆ **Settings**.
+
+4. Set:
+
+```text
+Source: GitHub
+Organization: mateoo04
+Repository: flow-core
+Branch: main
+```
+
+5. Click **Authorize** when Azure asks to access GitHub, then **Save**.
+
+Azure creates a GitHub Actions deployment workflow in your repo. Go to GitHub ÔåÆ **Actions** to watch it deploy.
+
+Before opening the app, ensure these Azure App Service environment variables are set:
+
+```text
+ConnectionStrings__FlowCoreDbContext = <your Neon .NET connection string>
+Seed__Enabled = true
+Seed__SharedPassword = <your chosen demo password>
+```
+
+If the newly created Azure deployment workflow fails, send its error; your project has the app inside `FlowCore/`, so it may need a small path adjustment.
+----
+
+[2026-09-03 19:31:07 +02:00] TURN 01a06853-03d3-7542-932f-1ee95ffd0a72
+USER:
+add workflow or use available
+
+ASSISTANT:
+Use the **available Azure Deployment Center GitHub setup**ÔÇödonÔÇÖt manually add a workflow yet.
+
+It will create the deployment workflow and configure Azure authentication for you. Then youÔÇÖll have:
+
+- Existing `ci.yml`: build + tests.
+- New Azure-generated workflow: deployment to App Service.
+
+After Azure creates it, check GitHub Actions. If its first run fails because the app project is in `FlowCore/`, send me that error and IÔÇÖll adjust only the generated deployment workflow.
+----
+
+[2026-09-03 19:32:29 +02:00] TURN 01a06854-4246-7f80-adb9-8a757e5d68e1
+USER:
+
+
+ASSISTANT:
+I added a manual Azure deployment workflow at [.github/workflows/deploy-azure.yml](C:\Users\mateo\OneDrive\Documents\GitHub\flow-core\.github\workflows\deploy-azure.yml). It bypasses the broken portal OIDC setup and correctly publishes the nested `FlowCore/` project.
+
+The CI fix is already committed and pushed (`bf09b0f`). Do this now:
+
+1. Azure Portal ÔåÆ App Service ÔåÆ **Overview** ÔåÆ **Get publish profile**. Download the XML.
+
+   If unavailable, enable **SCM Basic Auth Publishing Credentials** first.
+
+2. GitHub repository ÔåÆ **Settings ÔåÆ Secrets and variables ÔåÆ Actions ÔåÆ New repository secret**.
+
+```text
+Name: AZURE_WEBAPP_PUBLISH_PROFILE
+Secret: paste the complete downloaded XML file contents
+```
+
+3. Commit and push only the new workflow:
+
+```powershell
+git add .github/workflows/deploy-azure.yml
+git commit -m "Add Azure App Service deployment workflow"
+git push origin main
+```
+
+Do not add the publish-profile XML to Git.
+
+That push triggers **Deploy to Azure App Service** in GitHub Actions. Before it runs, make sure the Neon connection string and `Seed__...` settings are set under Azure App Service ÔåÆ Environment variables.
+----
