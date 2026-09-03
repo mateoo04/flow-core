@@ -8575,3 +8575,66 @@ Just add that GitHub secret, commit/push the workflow, then watch:
 GitHub ÔåÆ Actions ÔåÆ Deploy to Azure App Service
 ```
 ----
+
+[2026-09-03 19:40:50 +02:00] TURN 01a0685b-e988-7fb1-9a15-81bc6a1106e4
+USER:
+i pushed how to see if anythinh happened
+
+ASSISTANT:
+Open your repository on GitHub ÔåÆ click the **Actions** tab.
+
+You should see a workflow named:
+
+```text
+Deploy to Azure App Service
+```
+
+Open the newest run:
+
+- Yellow = still running
+- Green = deployed successfully
+- Red = failed; open the failed step and paste its error here
+
+After a green run, open Azure Portal ÔåÆ App Service ÔåÆ **Overview** ÔåÆ click the **Default domain** URL.
+----
+
+[2026-09-03 19:44:09 +02:00] TURN 01a0685e-f177-7883-8d1e-3d7750fcb33e
+USER:
+&#x20;app-name: flow-core-pm-app&#x20;
+&#x20; publish-profile: \*\*\*&#x20;
+&#x20; package: ./artifacts/azure-publish&#x20;
+&#x20; slot-name: production&#x20;
+env:&#x20;
+&#x20; AZURE\_WEBAPP\_NAME: flow-core-pm-app&#x20;
+&#x20; PUBLISH\_DIRECTORY: ./artifacts/azure-publish&#x20;
+&#x20; DOTNET\_ROOT: /usr/share/dotnet&#x20;
+(node:2536) [DEP0040] DeprecationWarning: The \`punycode\` module is deprecated. Please use a userland alternative instead.&#x20;
+(Use \`node --trace-deprecation ...\` to show where the warning was created)&#x20;
+(node:2536) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.&#x20;
+(node:2536) [DEP0169] DeprecationWarning: \`url.parse()\` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for \`url.parse()\` vulnerabilities.&#x20;
+Predeployment Step Started&#x20;
+Deployment Step Started&#x20;
+Starting deployment for web app...&#x20;
+Package deployment using OneDeploy initiated.&#x20;
+**Error:&#x20;**&#x46;ailed to deploy web package to App Service.&#x20;
+**Error:&#x20;**&#x44;eployment Failed, Error: Failed to deploy web package using OneDeploy to App Service.&#x20;
+Internal Server Error (CODE: 500)&#x20;
+App Service Application URL: [https://flow-core-pm-app-eucvfhbkc2acenh2.germanywestcentral-01.azurewebsites.net](https://flow-core-pm-app-eucvfhbkc2acenh2.germanywestcentral-01.azurewebsites.net) jesam trebao oznacit da azure napravi svoj i gitovo
+
+ASSISTANT:
+NoÔÇöchoosing AzureÔÇÖs automatic workflow would not fix this; your GitHub workflow is correctly reaching Azure.
+
+I updated it to deploy with `clean: true`, which clears the partial files left by the failed 168 MB upload before installing the real published app. Safe here, since the app hasnÔÇÖt deployed successfully yet.
+
+Commit and push this update:
+
+```powershell
+git add .github/workflows/deploy-azure.yml
+git commit -m "Clean App Service before deployment"
+git push origin main
+```
+
+Then open GitHub ÔåÆ **Actions** ÔåÆ newest **Deploy to Azure App Service** run.
+
+If it still returns 500, weÔÇÖll inspect the App Service deployment log; donÔÇÖt reconfigure Deployment Center.
+----
