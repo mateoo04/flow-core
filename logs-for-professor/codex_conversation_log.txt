@@ -8559,3 +8559,19 @@ Do not add the publish-profile XML to Git.
 
 That push triggers **Deploy to Azure App Service** in GitHub Actions. Before it runs, make sure the Neon connection string and `Seed__...` settings are set under Azure App Service ÔåÆ Environment variables.
 ----
+
+[2026-09-03 19:39:41 +02:00] TURN 01a0685a-d906-7903-9aee-fc5881dc9bab
+USER:
+do i configure git in deploy center again bc its empty
+
+ASSISTANT:
+No. Leave **Deployment Center** empty.
+
+The workflow I added deploys directly from GitHub Actions using the `AZURE_WEBAPP_PUBLISH_PROFILE` secret, so it does not need Azure Deployment CenterÔÇÖs GitHub/OIDC connection.
+
+Just add that GitHub secret, commit/push the workflow, then watch:
+
+```text
+GitHub ÔåÆ Actions ÔåÆ Deploy to Azure App Service
+```
+----
