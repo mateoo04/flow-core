@@ -53,7 +53,7 @@ public class WorkspacesApiTests : IClassFixture<FlowCoreApiFactory>
     public async Task Post_CreatesWorkspace_Returns201()
     {
         var client = _factory.CreateAuthenticatedClient();
-        var body = new WorkspaceCreateDto { Name = "New WS", Description = "d", Visibility = WorkspaceVisibility.Team };
+        var body = new WorkspaceCreateDto { Name = "New WS", Description = "d" };
 
         var response = await client.PostAsJsonAsync("/api/workspaces", body);
 
@@ -81,7 +81,7 @@ public class WorkspacesApiTests : IClassFixture<FlowCoreApiFactory>
     {
         var workspace = await _factory.WithDbContextAsync(db => TestDataSeeder.CreateWorkspaceAsync(db));
         var client = _factory.CreateAuthenticatedClient();
-        var body = new WorkspaceUpdateDto { Name = "Renamed", Description = "x", Visibility = WorkspaceVisibility.Public };
+        var body = new WorkspaceUpdateDto { Name = "Renamed", Description = "x" };
 
         var response = await client.PutAsJsonAsync($"/api/workspaces/{workspace.Id}", body);
 

@@ -21,8 +21,7 @@ public static class TestDataSeeder
             Id = Guid.NewGuid(),
             Name = name ?? $"ws-{Guid.NewGuid():N}",
             Description = "seeded",
-            CreatedAt = DateTime.UtcNow,
-            Visibility = WorkspaceVisibility.Private
+            CreatedAt = DateTime.UtcNow
         };
         db.Workspaces.Add(workspace);
         await db.SaveChangesAsync();
