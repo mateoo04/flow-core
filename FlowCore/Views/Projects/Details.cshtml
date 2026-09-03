@@ -89,17 +89,6 @@ else
     }
 }
 
-@section Fab {
-    @if (activeBoard is not null)
-    {
-        <a class="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-2xl shadow-primary/30 transition-transform hover:scale-110 active:scale-95"
-           asp-controller="Tasks" asp-action="Create" asp-route-projectId="@project.Id" asp-route-boardId="@activeBoard.Id" title="New task">
-            <partial name="_Icon" model='new IconVm { Name = "plus", Size = 24 }'/>
-            <span class="sr-only">New task</span>
-        </a>
-    }
-}
-
 @section Scripts {
     <script src="~/lib/sortablejs/Sortable.min.js" asp-append-version="true"></script>
     <script src="~/js/board-dnd.js" asp-append-version="true"></script>

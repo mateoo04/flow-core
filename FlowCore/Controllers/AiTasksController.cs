@@ -1,5 +1,6 @@
 using System.Globalization;
 using FlowCore.Models;
+using FlowCore.Models.Ai;
 using FlowCore.Repositories;
 using FlowCore.Services.Ai;
 using FlowCore.Services.Domain;
@@ -12,28 +13,65 @@ namespace FlowCore.Controllers;
 public sealed class AiTasksController : BaseController
 {
     private readonly IAiTaskExtractionService _extractor;
+    private readonly IAiProjectExtractionService _projectExtractor;
     private readonly IProjectRepository _projects;
     private readonly IWorkspaceRepository _workspaces;
     private readonly IAuthorizationService _authorization;
     private readonly ITaskService _tasks;
+    private readonly IProjectService _projectService;
 
     public AiTasksController(
         IAiTaskExtractionService extractor,
+        IAiProjectExtractionService projectExtractor,
         IProjectRepository projects,
         IWorkspaceRepository workspaces,
         IAuthorizationService authorization,
-        ITaskService tasks)
+        ITaskService tasks,
+        IProjectService projectService)
     {
         _extractor = extractor;
+        _projectExtractor = projectExtractor;
         _projects = projects;
         _workspaces = workspaces;
         _authorization = authorization;
         _tasks = tasks;
+        _projectService = projectService;
+    }
+
+    [HttpPost("/ai/projects/extract")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ExtractProject([FromForm] AiProjectPromptRequest request, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.Prompt) || request.Prompt.Length > 2_000)
+            return BadRequest(new { message = "Enter a project description up to 2,000 characters." });
+        if (await EnsureWorkspaceMemberAsync(request.WorkspaceId, _workspaces, _authorization, ct) is { } denied) return denied;
+
+        try
+        {
+            var draft = await _projectExtractor.ExtractAsync(request.Prompt.Trim(), ct);
+            return Json(new
+            {
+                draft.Name,
+                draft.Description,
+                Status = draft.Status.ToString().ToLowerInvariant(),
+                Priority = draft.Priority.ToString().ToLowerInvariant(),
+                StartDate = draft.StartDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                DueDate = draft.DueDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+            });
+        }
+        catch (AiProjectExtractionConfigurationException)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "AI is not configured yet. Add OPENAI_API_KEY to your local .env file and restart the app." });
+        }
+        catch (AiProjectExtractionException)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway, new { message = "AI could not create a project suggestion. Please try again." });
+        }
     }
 
     [HttpPost("/ai/tasks/extract")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Extract([FromForm] AiPromptRequest request, CancellationToken ct)
+    public async Task<IActionResult> Extract([FromForm] AiTaskPromptRequest request, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(request.Prompt) || request.Prompt.Length > 2_000)
             return BadRequest(new { message = "Enter a task description up to 2,000 characters." });
@@ -93,6 +131,43 @@ public sealed class AiTasksController : BaseController
         return Json(new { redirectUrl = Url.Action("Details", "Tasks", new { id = result.Value!.Id }) });
     }
 
+    [HttpPost("/ai/projects/create")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateProject([FromForm] AiCreateProjectRequest request, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Trim().Length > 200)
+            return BadRequest(new { message = "The generated project name is invalid." });
+        if (request.Description?.Length > 2_000)
+            return BadRequest(new { message = "The generated project description is too long." });
+        if (await EnsureWorkspaceMemberAsync(request.WorkspaceId, _workspaces, _authorization, ct) is { } denied) return denied;
+
+        if (!TryParseDate(request.StartDate, out var startDate) || !TryParseDate(request.DueDate, out var dueDate))
+            return BadRequest(new { message = "The generated project date is invalid." });
+        if (startDate is not null && dueDate is not null && startDate > dueDate)
+            return BadRequest(new { message = "The project start date must be on or before its due date." });
+
+        var status = request.Status?.ToLowerInvariant() switch
+        {
+            "active" => ProjectStatus.Active,
+            "onhold" => ProjectStatus.OnHold,
+            "completed" => ProjectStatus.Completed,
+            "archived" => ProjectStatus.Archived,
+            _ => ProjectStatus.Planning
+        };
+        var priority = request.Priority?.ToLowerInvariant() switch
+        {
+            "low" => ProjectPriority.Low,
+            "high" => ProjectPriority.High,
+            "critical" => ProjectPriority.Critical,
+            _ => ProjectPriority.Medium
+        };
+        var result = await _projectService.CreateInWorkspaceAsync(request.WorkspaceId, request.Name.Trim(), request.Description?.Trim() ?? "", status, priority, startDate, dueDate, ct);
+        if (!result.IsSuccess)
+            return BadRequest(new { message = result.Error?.Message ?? "Could not create the project." });
+
+        return Json(new { redirectUrl = Url.Action("Details", "Projects", new { id = result.Value!.Id }) });
+    }
+
     private async Task<IActionResult?> AuthorizeProjectAsync(Guid projectId, CancellationToken ct)
     {
         var project = await _projects.GetByIdAsync(projectId, ct);
@@ -100,18 +175,12 @@ public sealed class AiTasksController : BaseController
         return await EnsureWorkspaceMemberAsync(project.WorkspaceId, _workspaces, _authorization, ct);
     }
 
-    public sealed class AiPromptRequest
+    private static bool TryParseDate(string? value, out DateTime? result)
     {
-        public Guid ProjectId { get; init; }
-        public string Prompt { get; init; } = "";
-    }
-
-    public sealed class AiCreateTaskRequest
-    {
-        public Guid ProjectId { get; init; }
-        public string Title { get; init; } = "";
-        public string? Description { get; init; }
-        public string? Priority { get; init; }
-        public string? DueDate { get; init; }
+        result = null;
+        if (string.IsNullOrWhiteSpace(value)) return true;
+        if (!DateOnly.TryParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate)) return false;
+        result = parsedDate.ToDateTime(TimeOnly.MinValue);
+        return true;
     }
 }

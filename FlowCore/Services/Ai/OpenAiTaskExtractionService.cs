@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using FlowCore.Models;
+using FlowCore.Models.Ai;
 
 namespace FlowCore.Services.Ai;
 
@@ -74,7 +75,7 @@ public sealed class OpenAiTaskExtractionService : IAiTaskExtractionService
         try
         {
             using var document = JsonDocument.Parse(responseBody);
-            var json = document.RootElement.GetProperty("output_text").GetString();
+            var json = ExtractOutputText(document.RootElement);
             if (string.IsNullOrWhiteSpace(json)) throw new JsonException();
             using var task = JsonDocument.Parse(json);
             var root = task.RootElement;
@@ -96,11 +97,40 @@ public sealed class OpenAiTaskExtractionService : IAiTaskExtractionService
 
             return new AiTaskDraft(title, description, priority, dueDate);
         }
-        catch (JsonException exception)
+        catch (Exception exception) when (exception is JsonException or KeyNotFoundException or InvalidOperationException)
         {
             _logger.LogWarning(exception, "OpenAI returned an unusable task draft.");
             throw new AiTaskExtractionException();
         }
+    }
+
+    private static string? ExtractOutputText(JsonElement response)
+    {
+        if (response.TryGetProperty("output_text", out var outputText)
+            && outputText.ValueKind == JsonValueKind.String)
+            return outputText.GetString();
+
+        if (!response.TryGetProperty("output", out var output)
+            || output.ValueKind != JsonValueKind.Array)
+            throw new JsonException("OpenAI response did not contain output.");
+
+        foreach (var item in output.EnumerateArray())
+        {
+            if (!item.TryGetProperty("content", out var content)
+                || content.ValueKind != JsonValueKind.Array)
+                continue;
+
+            foreach (var part in content.EnumerateArray())
+            {
+                if (part.TryGetProperty("type", out var type)
+                    && type.GetString() == "output_text"
+                    && part.TryGetProperty("text", out var text)
+                    && text.ValueKind == JsonValueKind.String)
+                    return text.GetString();
+            }
+        }
+
+        throw new JsonException("OpenAI response did not contain output text.");
     }
 }
 

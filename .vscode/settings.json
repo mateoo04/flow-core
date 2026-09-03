@@ -4,5 +4,7 @@
       "extensionId": "ms-dotnettools.csharp",
       "path": "/usr/local/share/dotnet/dotnet"
     }
-  ]
+  ],
+  "appService.defaultWebAppToDeploy": "/subscriptions/a910d1b0-ec5d-4691-8007-3edf9eab68c3/resourceGroups/flow-core-pm-app_group/providers/Microsoft.Web/sites/flow-core-pm-app",
+  "appService.deploySubpath": "."
 }

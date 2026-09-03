@@ -242,7 +242,11 @@
 </div>
 @if (User.Identity?.IsAuthenticated == true)
 {
-    <partial name="_AiAssistant" model="@(new AiAssistantVm(allProjects.Select(p => new AiProjectOptionVm(p.Id, p.Name)).ToList(), activeProject))" />
+    <partial name="_AiAssistant" model="@(new AiAssistantVm(
+        allProjects.Select(p => new AiProjectOptionVm(p.Id, p.Name)).ToList(),
+        workspaces.Select(w => new AiWorkspaceOptionVm(w.Id, w.Name)).ToList(),
+        activeProject,
+        activeWs))" />
 }
 @if (IsSectionDefined("Fab"))
 {

@@ -68,6 +68,11 @@ public static class FlowCoreServiceCollectionExtensions
             client.BaseAddress = new Uri("https://api.openai.com/v1/");
             client.Timeout = TimeSpan.FromSeconds(30);
         });
+        services.AddHttpClient<IAiProjectExtractionService, OpenAiProjectExtractionService>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.openai.com/v1/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
         services.AddScoped<IWorkspaceRepository, EfWorkspaceRepository>();
         services.AddScoped<IProjectRepository, EfProjectRepository>();
         services.AddScoped<ITaskRepository, EfTaskRepository>();
