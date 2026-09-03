@@ -8638,3 +8638,35 @@ Then open GitHub ÔåÆ **Actions** ÔåÆ newest **Deploy to Azure App Service*
 
 If it still returns 500, weÔÇÖll inspect the App Service deployment log; donÔÇÖt reconfigure Deployment Center.
 ----
+
+[2026-09-03 19:48:30 +02:00] TURN 01a06862-eadd-7ac2-9965-fbf47661d4cb
+USER:
+Run azure/webapps-deploy\@v3&#x20;
+(node:2660) [DEP0040] DeprecationWarning: The \`punycode\` module is deprecated. Please use a userland alternative instead.&#x20;
+(Use \`node --trace-deprecation ...\` to show where the warning was created)&#x20;
+(node:2660) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.&#x20;
+(node:2660) [DEP0169] DeprecationWarning: \`url.parse()\` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for \`url.parse()\` vulnerabilities.&#x20;
+Predeployment Step Started&#x20;
+Deployment Step Started&#x20;
+Starting deployment for web app...&#x20;
+Package deployment using OneDeploy initiated.&#x20;
+**Error:&#x20;**&#x46;ailed to deploy web package to App Service.&#x20;
+**Error:&#x20;**&#x44;eployment Failed, Error: Failed to deploy web package using OneDeploy to App Service.&#x20;
+Internal Server Error (CODE: 500)&#x20;
+App Service Application URL: [https://flow-core-pm-app-eucvfhbkc2acenh2.germanywestcentral-01.azurewebsites.net](https://flow-core-pm-app-eucvfhbkc2acenh2.germanywestcentral-01.azurewebsites.net)
+
+ASSISTANT:
+Those warnings are harmless. The real issue is AzureÔÇÖs **OneDeploy** endpoint returning 500 before your app is processed.
+
+I changed the workflow to use `azure/webapps-deploy@v2`, which uses the older ZIP deployment path instead of OneDeploy.
+
+Commit and push:
+
+```powershell
+git add .github/workflows/deploy-azure.yml
+git commit -m "Use ZIP deployment for Azure App Service"
+git push origin main
+```
+
+Then watch the next GitHub Actions run. If it still fails, send the new errorÔÇöthe next step will be checking AzureÔÇÖs Kudu deployment log, not changing your code.
+----
