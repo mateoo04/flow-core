@@ -3,7 +3,6 @@ namespace FlowCore.Models.ViewModels;
 public enum TaskCardLayout
 {
     MyTasksActive,
-    MyTasksDone,
     Board
 }
 

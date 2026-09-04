@@ -1,26 +1,6 @@
 @model TaskCardVm
 
-@if (Model.Layout == TaskCardLayout.MyTasksDone)
-{
-    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@Model.TaskId"
-       class="fc-card group flex items-start gap-3 rounded-lg border border-border bg-card p-3 hover:border-fg-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tertiary)]"
-       data-task-id="@Model.TaskId">
-        <span class="mt-0.5 shrink-0 text-[var(--color-tertiary)]">
-            <partial name="_Icon" model='new IconVm { Name = "check-circle", Size = 18 }'/>
-        </span>
-        <div class="min-w-0">
-            <h3 class="mb-1 truncate text-sm font-semibold text-fg-secondary line-through decoration-fg-muted/40">@Model.Title</h3>
-            <div class="flex items-center justify-between gap-2">
-                <span class="truncate text-[9px] font-bold uppercase tracking-wider text-fg-muted">@Model.ProjectName</span>
-                @if (Model.Assignees.Shown.Count > 0 || Model.Assignees.ExtraCount > 0)
-                {
-                    <partial name="_AssigneeAvatarStack" model="Model.Assignees"/>
-                }
-            </div>
-        </div>
-    </a>
-}
-else if (Model.Layout == TaskCardLayout.Board)
+@if (Model.Layout == TaskCardLayout.Board)
 {
     <a asp-controller="Tasks" asp-action="Details" asp-route-id="@Model.TaskId"
        class="fc-card fc-task-avatar-ring fc-task-avatar-ring--card group block cursor-pointer rounded-xl border-l-4 bg-card p-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-secondary)]"
